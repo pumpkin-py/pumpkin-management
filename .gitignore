@@ -1,0 +1,8 @@
+# Development
+.venv
+.env
+.idea
+.vscode
+# Python
+__pycache__
+.cache
