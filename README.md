@@ -1,6 +1,6 @@
 # Management
 
-`mgmt`, management modules for the [discord.py bot framework](https://github.com/discord-py).
+`mgmt`, management modules for the [pumpkin.py bot framework](https://github.com/pumpkin-py).
 
 ## Modules
 
