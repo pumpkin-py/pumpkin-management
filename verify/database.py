@@ -80,7 +80,7 @@ class VerifyGroup(database.base):
         :param guild_id: Guild ID.
         :return: List of guild groups.
         """
-        query = session.query(VerifyGroup).all()
+        query = session.query(VerifyGroup).filter_by(guild_id=guild_id).all()
         return query
 
     @staticmethod
@@ -132,7 +132,7 @@ class VerifyMember(database.base):
     """Verify member.
 
     :param guild_id: Member's guild ID.
-    :param member_id: Member ID.
+    :param user_id: Member ID.
     :param address: E-mail address.
     :param code: Verification code.
     :param status: Numeric representation of :class:`VerifyStatus`.
@@ -143,7 +143,7 @@ class VerifyMember(database.base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
-    member_id = Column(BigInteger)
+    user_id = Column(BigInteger)
     address = Column(String)
     code = Column(String)
     status = Column(Integer)
@@ -152,20 +152,20 @@ class VerifyMember(database.base):
     @staticmethod
     def add(
         guild_id: int,
-        member_id: int,
+        user_id: int,
         address: Optional[str],
         code: Optional[str],
         status: VerifyStatus,
     ) -> Optional[VerifyMember]:
         """Add new member."""
-        if VerifyMember.get_by_member(guild_id, member_id) is not None:
+        if VerifyMember.get_by_member(guild_id, user_id) is not None:
             return None
         if VerifyMember.get_by_address(guild_id, address) is not None:
             return None
 
         member = VerifyMember(
             guild_id=guild_id,
-            member_id=member_id,
+            user_id=user_id,
             address=address,
             code=code,
             status=status.value,
@@ -178,13 +178,13 @@ class VerifyMember(database.base):
         return member
 
     @staticmethod
-    def get_by_member(guild_id: int, member_id: int) -> Optional[VerifyMember]:
+    def get_by_member(guild_id: int, user_id: int) -> Optional[VerifyMember]:
         """Get member."""
         query = (
             session.query(VerifyMember)
             .filter_by(
                 guild_id=guild_id,
-                member_id=member_id,
+                user_id=user_id,
             )
             .one_or_none()
         )
@@ -204,13 +204,13 @@ class VerifyMember(database.base):
         return query
 
     @staticmethod
-    def remove(guild_id: int, member_id: int) -> int:
+    def remove(guild_id: int, user_id: int) -> int:
         """Remove member from database."""
         query = (
             session.query(VerifyMember)
             .filter_by(
                 guild_id=guild_id,
-                member_id=member_id,
+                user_id=user_id,
             )
             .delete()
         )
@@ -222,14 +222,14 @@ class VerifyMember(database.base):
     def __repr__(self) -> str:
         return (
             f'<VerifyMember id="{self.id}" '
-            f'guild_id="{self.guild_id}" member_id="{self.member_id}" '
+            f'guild_id="{self.guild_id}" user_id="{self.user_id}" '
             f'code="{self.code}" status="{VerifyStatus(self.status)}">'
         )
 
     def dump(self) -> dict:
         return {
             "guild_id": self.guild_id,
-            "member_id": self.member_id,
+            "user_id": self.user_id,
             "code": self.code,
             "status": VerifyStatus(self.status),
         }
