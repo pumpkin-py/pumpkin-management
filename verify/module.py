@@ -447,14 +447,14 @@ class Verify(commands.Cog):
         query: List[VerifyGroup] = list()
 
         for group in VerifyGroup.get_all(guild_id):
+            if group.regex == "" and include_wildcard:
+                query.append(group)
+
             if re.fullmatch(group.regex, address) is None:
                 continue
 
             if group.role_id == -1:
                 return list()
-
-            if group.regex == ".*" and not include_wildcard:
-                continue
 
             query.append(group)
 
