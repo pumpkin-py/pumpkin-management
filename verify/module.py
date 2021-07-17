@@ -112,7 +112,7 @@ class Verify(commands.Cog):
         code: str = self._generate_code()
         VerifyMember.add(
             guild_id=ctx.guild.id,
-            member_id=ctx.author.id,
+            user_id=ctx.author.id,
             address=address,
             code=code,
             status=VerifyStatus.PENDING,
@@ -148,7 +148,7 @@ class Verify(commands.Cog):
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Verification e-mail sent with code `{code}.`",
+            f"Verification e-mail sent with code `{code}`.",
         )
 
         await ctx.send(
@@ -403,7 +403,7 @@ class Verify(commands.Cog):
 
         VerifyMember.add(
             guild_id=guild.id,
-            member_id=member.id,
+            user_id=member.id,
             address=None,
             group=None,
             code=None,
