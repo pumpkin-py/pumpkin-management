@@ -23,7 +23,7 @@ class VerifyGroup(database.base):
 
     __tablename__ = "mgmt_verify_groups"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
     name = Column(String)
     role_id = Column(BigInteger)
@@ -115,8 +115,8 @@ class VerifyGroup(database.base):
 
     def __repr__(self) -> str:
         return (
-            f'<VerifyGroup guild_id="{self.guild_id}" name="{self.name}" '
-            f'role_id="{self.role_id}" regex="{self.regex}">'
+            f'<VerifyGroup idx="{self.idx}" guild_id="{self.guild_id}" '
+            f'name="{self.name}" role_id="{self.role_id}" regex="{self.regex}">'
         )
 
     def dump(self) -> dict:
@@ -141,7 +141,7 @@ class VerifyMember(database.base):
 
     __tablename__ = "mgmt_verify_members"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
     user_id = Column(BigInteger)
     address = Column(String)
@@ -221,7 +221,7 @@ class VerifyMember(database.base):
 
     def __repr__(self) -> str:
         return (
-            f'<VerifyMember id="{self.id}" '
+            f'<VerifyMember idx="{self.idx}" '
             f'guild_id="{self.guild_id}" user_id="{self.user_id}" '
             f'code="{self.code}" status="{VerifyStatus(self.status)}">'
         )
