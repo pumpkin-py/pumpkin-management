@@ -296,9 +296,13 @@ class Verify(commands.Cog):
                 "role_id": -1,
                 "regex": ".*@evilcorp\\.com",
             },
-            "add to all allowed": {
+            "add to everyone else": {
                 "role_id": 3,
                 "regex": ".*",
+            },
+            "add to every allowed": {
+                "role_id": 4,
+                "regex": "",
             },
         }
 
@@ -434,14 +438,27 @@ class Verify(commands.Cog):
         If a group with ``role_id`` of ``-1`` is found it means that the address
         shouldn't be accepted. In this case an empty list is returned.
 
-        All groups with matching regex will be returned otherwise.
+        If the :attr:`VerifyGroup.regex` is empty string (``""``), it will not be
+        included if ``include_wildcard`` is :class:`False`. This is useful when you want
+        to check if there are also other, more strict matches.
+
+        .. warning::
+
+            Only the first group with non-empty regex is returned, and unlimited number
+            of groups with empty regex. This allows you to implement fallback groups:
+            if the e-mail explicitly doesn't match groups A nor B, it will be assigned
+            to the group C.
+
+        .. warning::
+
+            Groups with empty regex MUST be included at the end. Otherwise other groups
+            may never be matched.
 
         :param guild_id: Guild ID.
         :param user_id: User ID.
         :param address: User-submitted e-mail address.
-        :param include_wildcard: If ``False``, don't include groups with ``regex=.*``.
-            This ensures that even if there is a role that should be added to everyone,
-            there is one more requirement for this function to return anything.
+        :param include_wildcard: If :class:`True`, even groups with empty regex will be
+            matched.
         :return: List of matching verify groups.
         """
         query: List[VerifyGroup] = list()
@@ -449,12 +466,17 @@ class Verify(commands.Cog):
         for group in VerifyGroup.get_all(guild_id):
             if group.regex == "" and include_wildcard:
                 query.append(group)
+                continue
 
             if re.fullmatch(group.regex, address) is None:
                 continue
 
             if group.role_id == -1:
                 return list()
+
+            if len(query) > 0:
+                # do not add another matching group
+                continue
 
             query.append(group)
 
