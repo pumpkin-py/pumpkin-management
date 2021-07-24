@@ -1,3 +1,4 @@
+import contextlib
 import datetime
 import json
 import os
@@ -6,7 +7,7 @@ import re
 import smtplib
 import string
 import tempfile
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -60,9 +61,15 @@ class Verify(commands.Cog):
     @commands.guild_only()
     @commands.check(acl.check)
     @commands.command()
-    async def verify(self, ctx, address: str):
+    async def verify(self, ctx, address: Optional[str] = None):
         """Ask for a verification code."""
         await utils.Discord.delete_message(ctx.message)
+        if not address:
+            await ctx.reply(
+                tr("verify", "no address", ctx, mention=ctx.author.mention),
+                delete_after=120,
+            )
+            return
 
         groups: List[VerifyGroup] = self._map_address_to_groups(
             ctx.guild.id, ctx.author.id, address, include_wildcard=False
@@ -148,7 +155,7 @@ class Verify(commands.Cog):
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Verification e-mail sent with code `{code}`.",
+            f"Verification e-mail sent with code '{code}'.",
         )
 
         await ctx.send(
@@ -159,9 +166,15 @@ class Verify(commands.Cog):
     @commands.guild_only()
     @commands.check(acl.check)
     @commands.command()
-    async def submit(self, ctx, code: str):
+    async def submit(self, ctx, code: Optional[str] = None):
         """Submit verification code."""
         await utils.Discord.delete_message(ctx.message)
+        if not code:
+            await ctx.reply(
+                tr("submit", "no code", ctx, mention=ctx.author.mention),
+                delete_after=120,
+            )
+            return
 
         db_member = VerifyMember.get_by_member(ctx.guild.id, ctx.author.id)
         if db_member is None or db_member.code is None:
@@ -238,9 +251,16 @@ class Verify(commands.Cog):
             )
             return
 
-        await ctx.author.remove_roles(ctx.author.roles, reason="strip")
+        roles: List[discord.Role] = [
+            role for role in ctx.author.roles if role.name != "@everyone"
+        ]
+
+        with contextlib.suppress(discord.Forbidden):
+            await ctx.author.remove_roles(*roles, reason="strip")
         VerifyMember.remove(ctx.guild.id, ctx.author.id)
-        await guild_log(ctx.author, ctx.channel, "Stripped and removed from database.")
+        await guild_log.info(
+            ctx.author, ctx.channel, "Stripped and removed from database."
+        )
 
         await ctx.author.send(tr("strip", "reply"))
 
@@ -251,14 +271,18 @@ class Verify(commands.Cog):
         from multiple users. Users are not notified about this."""
         removed_db: int = 0
         removed_dc: int = 0
-        for member in members:
-            db_member = VerifyMember.get_by_member(ctx.guild.id, member.id)
-            if db_member:
-                VerifyMember.remove(ctx.guild.id, member.id)
-                removed_db += 1
-            if member.roles:
-                await member.remove_roles(member.roles, reason="groupstrip")
-                removed_dc += 1
+
+        async with ctx.typing():
+            for member in members:
+                db_member = VerifyMember.get_by_member(ctx.guild.id, member.id)
+                if db_member:
+                    VerifyMember.remove(ctx.guild.id, member.id)
+                    removed_db += 1
+                if len(member.roles) > 1:
+                    roles = [role for role in member.roles if role.name != "@everyone"]
+                    with contextlib.suppress(discord.Forbidden):
+                        await member.remove_roles(*roles, reason="groupstrip")
+                    removed_dc += 1
 
         await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
 
