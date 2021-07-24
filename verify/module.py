@@ -266,23 +266,28 @@ class Verify(commands.Cog):
 
     @commands.check(acl.check)
     @commands.command()
-    async def groupstrip(self, ctx, members: commands.Greedy[discord.Member]):
+    async def groupstrip(self, ctx, member_ids: commands.Greedy[int]):
         """Remove all roles and reset verification status to None
         from multiple users. Users are not notified about this."""
         removed_db: int = 0
         removed_dc: int = 0
 
         async with ctx.typing():
-            for member in members:
-                db_member = VerifyMember.get_by_member(ctx.guild.id, member.id)
+            for member_id in member_ids:
+                member = ctx.guild.get_member(member_id)
+                db_member = VerifyMember.get_by_member(ctx.guild.id, member_id)
                 if db_member:
                     VerifyMember.remove(ctx.guild.id, member.id)
                     removed_db += 1
-                if len(member.roles) > 1:
+                if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.name != "@everyone"]
                     with contextlib.suppress(discord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
+                else:
+                    await ctx.send(
+                        tr("groupstrip", "no member", ctx, member_id=member_id)
+                    )
 
         await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
 
