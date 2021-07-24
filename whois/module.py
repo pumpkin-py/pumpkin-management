@@ -3,13 +3,14 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-from core import acl, text, utils
+from core import acl, logging, text, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enum import VerifyStatus
 
 
 tr = text.Translator(__file__).translate
+guild_log = logging.Guild.logger()
 
 
 class Whois(commands.Cog):
@@ -149,6 +150,8 @@ class Whois(commands.Cog):
             )
 
         await ctx.reply(embed=embed)
+
+        await guild_log.info(ctx.author, ctx.channel, f"Whois lookup for {member}.")
 
 
 def setup(bot) -> None:
