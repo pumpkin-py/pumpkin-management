@@ -140,6 +140,8 @@ class Whois(commands.Cog):
                 inline=False,
             )
         if dc_member is not None:
+            embed.set_thumbnail(url=dc_member.avatar_url_as(size=256))
+
             roles: str = ", ".join(list(r.name for r in dc_member.roles[::-1][:-1]))
             embed.add_field(
                 name=tr("whois", "roles", ctx),
