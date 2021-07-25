@@ -227,7 +227,8 @@ class Verify(commands.Cog):
                 "submit",
                 "reply public",
                 name=utils.Text.sanitise(ctx.author.name),
-            )
+            ),
+            delete_after=120,
         )
 
     @commands.guild_only()
@@ -246,9 +247,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 f"Strip attempt blocked, has status {VerifyStatus(db_member.status).value}.",
             )
-            raise commands.CheckFailure(
-                "Strip is disallowed for members with status < 0."
-            )
+            await ctx.reply("strip", "disallowed", ctx)
             return
 
         roles: List[discord.Role] = [
@@ -263,6 +262,7 @@ class Verify(commands.Cog):
         )
 
         await ctx.author.send(tr("strip", "reply"))
+        await utils.Discord.delete_message(ctx.message)
 
     @commands.check(acl.check)
     @commands.command()
