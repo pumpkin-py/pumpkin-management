@@ -50,7 +50,7 @@ class Whois(commands.Cog):
     @commands.command()
     async def channelinfo(self, ctx, channel: discord.TextChannel):
         if ctx.author not in channel.members:
-            ctx.reply("channelinfo", "not permitted", ctx)
+            ctx.reply(tr("channelinfo", "not permitted", ctx))
             return
 
         webhook_count = len(await channel.webhooks())
