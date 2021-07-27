@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional, List, Tuple
+from typing import Optional, List
 
 import discord
 from discord.ext import commands
@@ -22,6 +22,70 @@ class Sync(commands.Cog):
     @commands.group(name="sync")
     async def sync(self, ctx):
         await utils.Discord.send_help(ctx)
+
+    @commands.check(acl.check)
+    @sync.command(name="me")
+    async def sync_me(self, ctx):
+        link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
+        if not link:
+            await ctx.send(
+                tr("sync me", "not satellite", ctx, mention=ctx.author.mention)
+            )
+            return
+        satellite: Optional[Satellite] = Satellite.get(ctx.guild.id)
+        if not satellite:
+            await ctx.send(
+                tr("sync me", "not satellite", ctx, mention=ctx.author.mention)
+            )
+            return
+        main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
+        if not main_guild:
+            await guild_log.error(
+                ctx.author,
+                ctx.channel,
+                f"Cannot sync, main guild '{link.guild_id}' not found.",
+            )
+            await ctx.send(
+                tr("sync me", "no main guild", ctx, mention=ctx.author.mention)
+            )
+            return
+        main_member: Optional[discord.Member] = main_guild.get_member(ctx.author.id)
+        if not main_member:
+            await ctx.send(
+                tr("sync me", "not in main guild", ctx, mention=ctx.author.mention)
+            )
+            return
+
+        roles: List[discord.Role] = []
+        for role in main_member.roles:
+            for role_from, role_to in satellite.data.items():
+                if str(role.id) != role_from:
+                    continue
+                role = ctx.guild.get_role(role_to)
+                if not role:
+                    await guild_log.error(
+                        ctx.author,
+                        ctx.channel,
+                        f"Could not find sync role '{role_to}' "
+                        f"on server '{main_guild.name}'.",
+                    )
+                    continue
+                roles.append(role)
+        if not roles:
+            await ctx.send(
+                tr("sync me", "no sync roles", ctx, mention=ctx.author.mention)
+            )
+            return
+
+        await guild_log.info(
+            ctx.author,
+            ctx.channel,
+            f"Sync: Adding roles {', '.join(r.name for r in roles)}.",
+        )
+        await ctx.author.add_roles(*roles)
+        await ctx.send(
+            tr("sync me", "reply", ctx, mention=ctx.author.mention, count=len(roles))
+        )
 
     @commands.check(acl.check)
     @sync.command(name="list")
@@ -124,6 +188,50 @@ class Sync(commands.Cog):
         await ctx.reply(text)
 
     @commands.check(acl.check)
+    @satellite_.command(name="get")
+    async def satellite_get(self, ctx):
+        embed = utils.Discord.create_embed(
+            author=ctx.author, title=tr("satellite get", "title", ctx)
+        )
+
+        link = Link.get_by_satellite(satellite_id=ctx.guild.id)
+        if link:
+            main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
+            embed.add_field(
+                name=tr("satellite get", "main guild", ctx),
+                value=getattr(main_guild, "name", f"{link.guild_id}"),
+                inline=False,
+            )
+        else:
+            embed.add_field(
+                name=tr("satellite get", "nothing", ctx),
+                value=tr("satellite get", "not satellite", ctx),
+                inline=False,
+            )
+        satellite: Optional[Satellite] = Satellite.get(ctx.guild.id)
+        if satellite and satellite.data.keys():
+            result: str = ""
+            for role_from_id, role_to_id in satellite.data.items():
+                role_from = main_guild.get_role(int(role_from_id))
+                role_to = ctx.guild.get_role(role_to_id)
+                role_from_str = getattr(role_from, "name", f"`{role_from_id}`")
+                role_to_str = getattr(role_to, "name", f"`{role_to_id}`")
+                result += f"{role_from_str} → {role_to_str}\n"
+            embed.add_field(
+                name=tr("satellite get", "mapping", ctx),
+                value=result[:512],
+                inline=False,
+            )
+        else:
+            embed.add_field(
+                name=tr("satellite get", "mapping", ctx),
+                value=tr("satellite get", "no mapping", ctx),
+                inline=False,
+            )
+
+        await ctx.reply(embed=embed)
+
+    @commands.check(acl.check)
     @satellite_.command(name="set")
     async def satellite_set(self, ctx, *, data: str):
         try:
@@ -134,20 +242,21 @@ class Sync(commands.Cog):
             await ctx.reply(tr("satellite set", "no json", ctx))
             return
 
-        if "mapping" not in satellite_data.keys():
+        if "mapping" not in satellite_data:
             await ctx.reply(tr("satellite set", "bad json", ctx))
             return
 
         try:
-            for key, value in satellite_data["mapping"]:
+            for key, value in satellite_data["mapping"].items():
                 _, _ = int(key), int(value)
-        except ValueError:
-            await ctx.reply(tr("satellite set", "bad json", ctx))
+        except ValueError as exc:
+            await ctx.reply(tr("satellite set", "broken json", ctx, error=str(exc)))
             return
 
-        satellite = Satellite.add(ctx.guild.id, satellite_data)
+        Satellite.add(ctx.guild.id, satellite_data["mapping"])
 
         await guild_log.info(ctx.author, ctx.channel, "Satellite enabled.")
+        await ctx.reply(tr("satellite set", "reply", ctx))
 
     @commands.check(acl.check)
     @satellite_.command(name="unset")
@@ -156,94 +265,9 @@ class Sync(commands.Cog):
         if not deleted:
             await ctx.reply(tr("satellite unset", "nothing", ctx))
             return
-        await ctx.reply(tr("satellite unset", "reply", ctx))
 
         await guild_log.info(ctx.author, ctx.channel, "Satellite disabled.")
-
-    #
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
-        """This is run on the satellite side."""
-        link: Optional[Link] = Link.get_by_satellite(member.guild.id)
-        if link is None:
-            # This is not a satellite server
-            return
-        satellite: Optional[Satellite] = Satellite.get(link.satellite_id)
-        if satellite is None:
-            # This server is not active satellite
-            return
-
-        main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
-        if main_guild is None:
-            # Main guild got deleted?
-            await guild_log.warning(
-                member, None, f"Main guild {link.guild_id} could not be found."
-            )
-            return
-
-        main_member: Optional[discord.Member] = main_guild.get_member(member.id)
-        if main_member is None:
-            # Member not in main guild
-            return
-
-        satellite_role_ids: List[int] = []
-        for role in main_member.roles:
-            for role_from, role_to in satellite.data.items():
-                if str(role.id) == role_from:
-                    satellite_role_ids.append(role_to)
-
-        satellite_roles: List[discord.Role] = []
-        for role_id in satellite_role_ids:
-            role = member.guild.get_role(role_id)
-            if role is None:
-                await guild_log.warning(
-                    member, None, f"Sync role {role_id} could not be found."
-                )
-                continue
-            satellite_roles.append(role)
-
-        await member.add_roles(*satellite_roles)
-        await guild_log.debug(
-            member,
-            None,
-            f"Added satellite roles: {', '.join(r.name for r in satellite_roles)}.",
-        )
-
-    @commands.Cog.listener()
-    async def on_member_update(self, before: discord.Member, after: discord.Member):
-        """This is run on the main side."""
-        links: List[Link] = Link.get_all(after.guild.id)
-        if not links:
-            # This server does not have any satellites
-            return
-
-        satellites: List[Satellite] = [Satellite.get(l.satellite_id) for l in links]
-        satellites = [s for s in satellites if s is not None]
-        if not satellites:
-            # None of the links is active satellite
-            return
-
-        guilds: List[Optional[discord.Guild]] = [
-            self.bot.get_guild(s.guild_id) for s in satellites
-        ]
-        for satellite, guild in zip(satellites, guilds):
-            if guild is None:
-                await guild_log.warning(
-                    after, None, f"Could not find satellite {satellite.guild_id}."
-                )
-                continue
-
-            member = guild.get_member(after.id)
-            if member is None:
-                # Member not in satellite guild
-                continue
-
-            roles_add: List[discord.Role] = []
-            roles_remove: List[discord.Role] = []
-            for role in after.roles:
-                for role_from, role_to in satellite.data.items():
-                    pass
+        await ctx.reply(tr("satellite unset", "reply", ctx))
 
 
 def setup(bot) -> None:
