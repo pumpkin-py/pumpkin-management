@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 import discord
 from discord.ext import commands
@@ -138,8 +138,16 @@ class Sync(commands.Cog):
             await ctx.reply(tr("satellite set", "bad json", ctx))
             return
 
-        # TODO Add to private variable
-        # TODO Add on_member_update & on_member_join listeners
+        try:
+            for key, value in satellite_data["mapping"]:
+                _, _ = int(key), int(value)
+        except ValueError:
+            await ctx.reply(tr("satellite set", "bad json", ctx))
+            return
+
+        satellite = Satellite.add(ctx.guild.id, satellite_data)
+
+        await guild_log.info(ctx.author, ctx.channel, "Satellite enabled.")
 
     @commands.check(acl.check)
     @satellite_.command(name="unset")
@@ -149,6 +157,93 @@ class Sync(commands.Cog):
             await ctx.reply(tr("satellite unset", "nothing", ctx))
             return
         await ctx.reply(tr("satellite unset", "reply", ctx))
+
+        await guild_log.info(ctx.author, ctx.channel, "Satellite disabled.")
+
+    #
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        """This is run on the satellite side."""
+        link: Optional[Link] = Link.get_by_satellite(member.guild.id)
+        if link is None:
+            # This is not a satellite server
+            return
+        satellite: Optional[Satellite] = Satellite.get(link.satellite_id)
+        if satellite is None:
+            # This server is not active satellite
+            return
+
+        main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
+        if main_guild is None:
+            # Main guild got deleted?
+            await guild_log.warning(
+                member, None, f"Main guild {link.guild_id} could not be found."
+            )
+            return
+
+        main_member: Optional[discord.Member] = main_guild.get_member(member.id)
+        if main_member is None:
+            # Member not in main guild
+            return
+
+        satellite_role_ids: List[int] = []
+        for role in main_member.roles:
+            for role_from, role_to in satellite.data.items():
+                if str(role.id) == role_from:
+                    satellite_role_ids.append(role_to)
+
+        satellite_roles: List[discord.Role] = []
+        for role_id in satellite_role_ids:
+            role = member.guild.get_role(role_id)
+            if role is None:
+                await guild_log.warning(
+                    member, None, f"Sync role {role_id} could not be found."
+                )
+                continue
+            satellite_roles.append(role)
+
+        await member.add_roles(*satellite_roles)
+        await guild_log.debug(
+            member,
+            None,
+            f"Added satellite roles: {', '.join(r.name for r in satellite_roles)}.",
+        )
+
+    @commands.Cog.listener()
+    async def on_member_update(self, before: discord.Member, after: discord.Member):
+        """This is run on the main side."""
+        links: List[Link] = Link.get_all(after.guild.id)
+        if not links:
+            # This server does not have any satellites
+            return
+
+        satellites: List[Satellite] = [Satellite.get(l.satellite_id) for l in links]
+        satellites = [s for s in satellites if s is not None]
+        if not satellites:
+            # None of the links is active satellite
+            return
+
+        guilds: List[Optional[discord.Guild]] = [
+            self.bot.get_guild(s.guild_id) for s in satellites
+        ]
+        for satellite, guild in zip(satellites, guilds):
+            if guild is None:
+                await guild_log.warning(
+                    after, None, f"Could not find satellite {satellite.guild_id}."
+                )
+                continue
+
+            member = guild.get_member(after.id)
+            if member is None:
+                # Member not in satellite guild
+                continue
+
+            roles_add: List[discord.Role] = []
+            roles_remove: List[discord.Role] = []
+            for role in after.roles:
+                for role_from, role_to in satellite.data.items():
+                    pass
 
 
 def setup(bot) -> None:
