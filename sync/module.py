@@ -56,7 +56,7 @@ class Sync(commands.Cog):
             )
             return
 
-        roles = await self._get_satellite_roles(ctx, main_guild, satellite.data)
+        roles = await self._get_satellite_roles(ctx, main_member, satellite.data)
         if not roles:
             await ctx.send(
                 tr("sync me", "no sync roles", ctx, mention=ctx.author.mention)
@@ -75,7 +75,7 @@ class Sync(commands.Cog):
 
     async def _get_satellite_roles(
         self,
-        ctx: discord.Guild,
+        ctx: commands.Context,
         main_member: discord.Member,
         mapping: Dict[str, int],
     ) -> List[discord.Role]:
