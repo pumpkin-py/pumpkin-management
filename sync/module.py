@@ -1,6 +1,6 @@
 import json
 import re
-from typing import Optional, List
+from typing import Dict, Optional, List
 
 import discord
 from discord.ext import commands
@@ -56,21 +56,7 @@ class Sync(commands.Cog):
             )
             return
 
-        roles: List[discord.Role] = []
-        for role in main_member.roles:
-            for role_from, role_to in satellite.data.items():
-                if str(role.id) != role_from:
-                    continue
-                role = ctx.guild.get_role(role_to)
-                if not role:
-                    await guild_log.error(
-                        ctx.author,
-                        ctx.channel,
-                        f"Could not find sync role '{role_to}' "
-                        f"on server '{main_guild.name}'.",
-                    )
-                    continue
-                roles.append(role)
+        roles = await self._get_satellite_roles(ctx, main_guild, satellite.data)
         if not roles:
             await ctx.send(
                 tr("sync me", "no sync roles", ctx, mention=ctx.author.mention)
@@ -86,6 +72,29 @@ class Sync(commands.Cog):
         await ctx.send(
             tr("sync me", "reply", ctx, mention=ctx.author.mention, count=len(roles))
         )
+
+    async def _get_satellite_roles(
+        self,
+        ctx: discord.Guild,
+        main_member: discord.Member,
+        mapping: Dict[str, int],
+    ) -> List[discord.Role]:
+        roles: List[discord.Role] = []
+        for role in main_member.roles:
+            for role_from, role_to in mapping.items():
+                if str(role.id) != role_from:
+                    continue
+                satellite_role = ctx.guild.get_role(role_to)
+                if not satellite_role:
+                    await guild_log.error(
+                        ctx.author,
+                        ctx.channel,
+                        f"Could not find sync role '{role_to}' "
+                        f"on server '{main_member.guild.name}'.",
+                    )
+                    continue
+                roles.append(satellite_role)
+        return roles
 
     @commands.check(acl.check)
     @sync.command(name="list")
