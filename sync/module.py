@@ -26,6 +26,8 @@ class Sync(commands.Cog):
     @commands.check(acl.check)
     @sync.command(name="me")
     async def sync_me(self, ctx):
+        await utils.Discord.delete_message(ctx.message)
+
         link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
         if not link:
             await ctx.send(
