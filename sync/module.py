@@ -29,13 +29,15 @@ class Sync(commands.Cog):
         link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
         if not link:
             await ctx.send(
-                tr("sync me", "not satellite", ctx, mention=ctx.author.mention)
+                tr("sync me", "not satellite", ctx, mention=ctx.author.mention),
+                delete_after=120,
             )
             return
         satellite: Optional[Satellite] = Satellite.get(ctx.guild.id)
         if not satellite:
             await ctx.send(
-                tr("sync me", "not satellite", ctx, mention=ctx.author.mention)
+                tr("sync me", "not satellite", ctx, mention=ctx.author.mention),
+                delete_after=120,
             )
             return
         main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
@@ -46,20 +48,23 @@ class Sync(commands.Cog):
                 f"Cannot sync, main guild '{link.guild_id}' not found.",
             )
             await ctx.send(
-                tr("sync me", "no main guild", ctx, mention=ctx.author.mention)
+                tr("sync me", "no main guild", ctx, mention=ctx.author.mention),
+                delete_after=120,
             )
             return
         main_member: Optional[discord.Member] = main_guild.get_member(ctx.author.id)
         if not main_member:
             await ctx.send(
-                tr("sync me", "not in main guild", ctx, mention=ctx.author.mention)
+                tr("sync me", "not in main guild", ctx, mention=ctx.author.mention),
+                delete_after=120,
             )
             return
 
         roles = await self._get_satellite_roles(ctx, main_member, satellite.data)
         if not roles:
             await ctx.send(
-                tr("sync me", "no sync roles", ctx, mention=ctx.author.mention)
+                tr("sync me", "no sync roles", ctx, mention=ctx.author.mention),
+                delete_after=120,
             )
             return
 
@@ -70,7 +75,8 @@ class Sync(commands.Cog):
         )
         await ctx.author.add_roles(*roles)
         await ctx.send(
-            tr("sync me", "reply", ctx, mention=ctx.author.mention, count=len(roles))
+            tr("sync me", "reply", ctx, mention=ctx.author.mention, count=len(roles)),
+            delete_after=120,
         )
 
     async def _get_satellite_roles(
