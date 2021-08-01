@@ -221,7 +221,9 @@ class Verify(commands.Cog):
 
         await self._add_roles(ctx.author, db_member)
 
-        await ctx.author.send(tr("submit", "reply dm"))
+        with contextlib.suppress(discord.Forbidden):
+            await ctx.author.send(tr("submit", "reply dm"))
+
         await ctx.send(
             tr(
                 "submit",
