@@ -587,6 +587,7 @@ class Verify(commands.Cog):
 
         message["X-pumpkin.py-url"] = BOT_URL
         message["X-pumpkin.py-bot"] = f"{self.bot.user.id}"
+        message["X-pumpkin.py-guild"] = f"{member.guild.id}"
         message["X-pumpkin.py-user"] = f"{member.id}"
 
         message.attach(MIMEText(clear, "plain"))
