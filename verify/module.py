@@ -255,6 +255,8 @@ class Verify(commands.Cog):
         roles: List[discord.Role] = [
             role for role in ctx.author.roles if role.name != "@everyone"
         ]
+        if discord.version_info.major == 2:
+            roles = [role for role in roles if role.is_assignable()]
 
         with contextlib.suppress(discord.Forbidden):
             await ctx.author.remove_roles(*roles, reason="strip")
