@@ -5,7 +5,7 @@ from typing import Dict, Optional, List
 import discord
 from discord.ext import commands
 
-from core import acl, logging, text, utils
+from core import check, logging, text, utils
 
 from .database import Link, Satellite
 
@@ -18,12 +18,12 @@ class Sync(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.group(name="sync")
     async def sync(self, ctx):
         await utils.Discord.send_help(ctx)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @sync.command(name="me")
     async def sync_me(self, ctx):
         await utils.Discord.delete_message(ctx.message)
@@ -104,7 +104,7 @@ class Sync(commands.Cog):
                 roles.append(satellite_role)
         return roles
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @sync.command(name="list")
     async def sync_list(self, ctx):
         satellite: Optional[Link] = Link.get_by_satellite(satellite_id=ctx.guild.id)
@@ -140,7 +140,7 @@ class Sync(commands.Cog):
 
         await ctx.reply(embed=embed)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @sync.command(name="add")
     async def sync_add(self, ctx, guild_id: int):
         satellite: Optional[discord.Guild] = None
@@ -165,7 +165,7 @@ class Sync(commands.Cog):
             f"Added sync satellite '{satellite.name}' ({guild_id}).",
         )
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @sync.command(name="remove")
     async def sync_remove(self, ctx, guild_id: int):
         link = Link.get_by_satellite(satellite_id=guild_id)
@@ -183,12 +183,12 @@ class Sync(commands.Cog):
             f"Removed sync satellite '{guild_name}' ({guild_id}).",
         )
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.group(name="satellite")
     async def satellite_(self, ctx):
         await utils.Discord.send_help(ctx)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @satellite_.command(name="template")
     async def satellite_template(self, ctx):
         template = {
@@ -204,7 +204,7 @@ class Sync(commands.Cog):
 
         await ctx.reply(text)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @satellite_.command(name="get")
     async def satellite_get(self, ctx):
         embed = utils.Discord.create_embed(
@@ -248,7 +248,7 @@ class Sync(commands.Cog):
 
         await ctx.reply(embed=embed)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @satellite_.command(name="set")
     async def satellite_set(self, ctx, *, data: str):
         try:
@@ -275,7 +275,7 @@ class Sync(commands.Cog):
         await guild_log.info(ctx.author, ctx.channel, "Satellite enabled.")
         await ctx.reply(tr("satellite set", "reply", ctx))
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @satellite_.command(name="unset")
     async def satellite_unset(self, ctx):
         deleted: int = Satellite.remove(ctx.guild.id)

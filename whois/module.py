@@ -3,7 +3,7 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-from core import acl, logging, text, utils
+from core import check, logging, text, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enum import VerifyStatus
@@ -18,7 +18,7 @@ class Whois(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def roleinfo(self, ctx, role: discord.Role):
         acl_group: Optional[ACL_group] = ACL_group.get_by_role(
@@ -46,7 +46,7 @@ class Whois(commands.Cog):
         await ctx.reply(embed=embed)
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def channelinfo(self, ctx, channel: discord.TextChannel):
         if ctx.author not in channel.members:
@@ -87,7 +87,7 @@ class Whois(commands.Cog):
         await ctx.reply(embed=embed)
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def whois(self, ctx, member: Union[discord.Member, int]):
         dc_member: Optional[discord.Member] = None

@@ -16,7 +16,7 @@ import discord
 from discord.ext import commands
 
 import database.config
-from core import acl, exceptions, text, logging, utils
+from core import check, exceptions, text, logging, utils
 
 from .enum import VerifyStatus
 from .database import VerifyGroup, VerifyMember
@@ -59,7 +59,7 @@ class Verify(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def verify(self, ctx, address: Optional[str] = None):
         """Ask for a verification code."""
@@ -164,7 +164,7 @@ class Verify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def submit(self, ctx, code: Optional[str] = None):
         """Submit verification code."""
@@ -234,7 +234,7 @@ class Verify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command(name="strip")
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
@@ -268,7 +268,7 @@ class Verify(commands.Cog):
         await ctx.author.send(tr("strip", "reply"))
         await utils.Discord.delete_message(ctx.message)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.command()
     async def groupstrip(self, ctx, member_ids: commands.Greedy[int]):
         """Remove all roles and reset verification status to None
@@ -285,6 +285,8 @@ class Verify(commands.Cog):
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.name != "@everyone"]
+                    if discord.version_info.major == 2:
+                        roles = [role for role in roles if role.is_assignable()]
                     with contextlib.suppress(discord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
@@ -296,23 +298,23 @@ class Verify(commands.Cog):
         await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
 
     @commands.guild_only()
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @commands.group(name="verification")
     async def verification(self, ctx):
         await utils.Discord.send_help(ctx)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification.command(name="statistics", aliases=["stats"])
     async def verification_statistics(self, ctx):
         """Filter the data by verify status."""
         pass
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification.group(name="groups")
     async def verification_groups(self, ctx):
         await utils.Discord.send_help(ctx)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification_groups.command(name="list")
     async def verification_groups_list(self, ctx):
         """Display list of all verification groups."""
@@ -328,7 +330,7 @@ class Verify(commands.Cog):
             )
         await ctx.reply(embed=embed)
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification_groups.command(name="template")
     async def verification_groups_template(self, ctx):
         """Export template for verification groups."""
@@ -367,7 +369,7 @@ class Verify(commands.Cog):
         )
         file.close()
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification_groups.command(name="export")
     async def verification_groups_export(self, ctx):
         """Export current verification groups."""
@@ -394,7 +396,7 @@ class Verify(commands.Cog):
         file.close()
         await guild_log.info(ctx.author, ctx.channel, "Verification groups exported.")
 
-    @commands.check(acl.check)
+    @commands.check(check.acl)
     @verification_groups.command(name="import")
     async def verification_groups_import(self, ctx):
         """Import new verification groups. This fully replaces old data."""
