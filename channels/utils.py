@@ -12,16 +12,16 @@ def get_digit_emoji(number: int) -> str:
     if number < 0 or number > 9:
         raise ValueError("Number must be between 0 and 9.")
     numbers = (
-        ":zero:",
-        ":one:",
-        ":two:",
-        ":three:",
-        ":four:",
-        ":five:",
-        ":six:",
-        ":seven:",
-        ":eight:",
-        ":nine:",
+        "0️⃣",
+        "1️⃣",
+        "2️⃣",
+        "3️⃣",
+        "4️⃣",
+        "5️⃣",
+        "6️⃣",
+        "7️⃣",
+        "8️⃣",
+        "9️⃣",
     )
     return numbers[number]
 
