@@ -596,6 +596,16 @@ class Verify(commands.Cog):
         """Generate the verification e-mail."""
         BOT_URL = "https://github.com/pumpkin-py/pumpkin.py"
 
+        # Because we were considered spam by Google and our SMTP provider,
+        # these paddings are attempt to fight that.
+        letters: str = string.ascii_letters + string.digits
+
+        def _generate_padding():
+            padding: str = "".join(
+                random.choices(letters, k=random.randint(50, 200))  # nosec
+            )
+            return "<!-- " + padding + "-->"
+
         clear = tr(
             "_get_email",
             "plain",
@@ -616,6 +626,9 @@ class Verify(commands.Cog):
             code=code,
             prefix=config.prefix,
             bot_url=BOT_URL,
+            padding1=_generate_padding(),
+            padding2=_generate_padding(),
+            padding3=_generate_padding(),
         )
 
         message = MIMEMultipart("alternative")
