@@ -613,6 +613,7 @@ class Verify(commands.Cog):
             code=code,
             # TODO Update when we have guild-dependent prefix
             prefix=config.prefix,
+            bot_name=self.bot.user.name,
         )
         rich = tr(
             "_get_email",
@@ -650,7 +651,7 @@ class Verify(commands.Cog):
         message[MAIL_HEADER_PREFIX + "url"] = BOT_URL
 
         message.attach(MIMEText(clear, "plain"))
-        message.attach(MIMEText(rich, "html"))
+        # message.attach(MIMEText(rich, "html"))
 
         return message
 
