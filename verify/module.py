@@ -1,3 +1,4 @@
+import asyncio
 import contextlib
 import datetime
 import json
@@ -12,13 +13,15 @@ from typing import Dict, List, Union, Optional
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
+import imap_tools
+
 import discord
 from discord.ext import commands
 
 import database.config
 from core import check, exceptions, text, logging, utils
 
-from .enum import VerifyStatus
+from .enums import VerifyStatus
 from .database import VerifyGroup, VerifyMember
 
 
@@ -29,6 +32,7 @@ config = database.config.Config.get()
 
 
 SMTP_SERVER: str = os.getenv("SMTP_SERVER")
+IMAP_SERVER: str = os.getenv("IMAP_SERVER")
 SMTP_PORT: int = os.getenv("SMTP_PORT")
 SMTP_ADDRESS: str = os.getenv("SMTP_ADDRESS")
 SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
@@ -49,14 +53,21 @@ def test_dotenv() -> None:
         raise exceptions.DotEnvException("SMTP_ADDRESS is not set.")
     if type(SMTP_PASSWORD) != str:
         raise exceptions.DotEnvException("SMTP_PASSWORD is not set.")
+    if type(IMAP_SERVER) != str:
+        raise exceptions.DotEnvException("IMAP_SERVER is not set.")
 
 
 test_dotenv()
 
 
+MAIL_HEADER_PREFIX = "X-pumpkin.py-"
+
+
 class Verify(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    #
 
     @commands.guild_only()
     @commands.check(check.acl)
@@ -125,7 +136,9 @@ class Verify(commands.Cog):
             status=VerifyStatus.PENDING,
         )
 
-        message: MIMEMultipart = self._get_message(ctx.author, address, code)
+        message: MIMEMultipart = self._get_message(
+            ctx.author, ctx.channel, address, code
+        )
 
         try:
             self._send_email(message)
@@ -162,6 +175,30 @@ class Verify(commands.Cog):
             tr("verify", "reply", mention=ctx.author.mention),
             delete_after=120,
         )
+
+        await self.post_verify(ctx)
+
+    async def post_verify(self, ctx):
+        """Wait some time after the user requested verification code.
+
+        Then connect to IMAP server and check for possilibity that they used
+        wrong, invalid e-mail. If such e-mails are found, they will be logged.
+        """
+        # TODO Use embeds when we support them.
+        await asyncio.sleep(20)
+        unread_messages = self._check_inbox_for_errors()
+        for message in unread_messages:
+            guild: discord.Guild = self.bot.get_guild(int(message["guild"]))
+            user: discord.Member = self.bot.get_user(int(message["user"]))
+            channel: discord.TextChannel = guild.get_channel(int(message["channel"]))
+            await guild_log.warning(
+                user,
+                channel,
+                (
+                    "Could not deliver verification code: "
+                    f"{message['subject']} (User ID {message['user']})",
+                ),
+            )
 
     @commands.guild_only()
     @commands.check(check.acl)
@@ -550,7 +587,11 @@ class Verify(commands.Cog):
         return code.upper().replace("I", "1").replace("O", "0")
 
     def _get_message(
-        self, member: discord.Member, address: str, code: str
+        self,
+        member: discord.Member,
+        channel: discord.TextChannel,
+        address: str,
+        code: str,
     ) -> MIMEMultipart:
         """Generate the verification e-mail."""
         BOT_URL = "https://github.com/pumpkin-py/pumpkin.py"
@@ -589,10 +630,11 @@ class Verify(commands.Cog):
         message["To"] = f"{member.name} <{address}>"
         message["Bcc"] = f"{self.bot.user.name} <{SMTP_ADDRESS}>"
 
-        message["X-pumpkin.py-url"] = BOT_URL
-        message["X-pumpkin.py-bot"] = f"{self.bot.user.id}"
-        message["X-pumpkin.py-guild"] = f"{member.guild.id}"
-        message["X-pumpkin.py-user"] = f"{member.id}"
+        message[MAIL_HEADER_PREFIX + "user"] = f"{member.id}"
+        message[MAIL_HEADER_PREFIX + "bot"] = f"{self.bot.user.id}"
+        message[MAIL_HEADER_PREFIX + "channel"] = f"{channel.id}"
+        message[MAIL_HEADER_PREFIX + "guild"] = f"{member.guild.id}"
+        message[MAIL_HEADER_PREFIX + "url"] = BOT_URL
 
         message.attach(MIMEText(clear, "plain"))
         message.attach(MIMEText(rich, "html"))
@@ -637,6 +679,49 @@ class Verify(commands.Cog):
             groups.append(group)
 
         return groups
+
+    def _check_inbox_for_errors(self):
+        """Connect to the IMAP server and fetch unread e-mails.
+
+        If the message contains verification headers, it will be returned as
+        dictionary containing those headers.
+        """
+        unread_messages = []
+
+        with imap_tools.MailBox(IMAP_SERVER).login(
+            SMTP_ADDRESS, SMTP_PASSWORD
+        ) as mailbox:
+            messages = [
+                m for m in mailbox.fetch(imap_tools.AND(seen=False), mark_seen=False)
+            ]
+            mark_as_read: List = []
+
+            for m in messages:
+                # TODO Can we count on this?
+                if "Undelivered" not in m.subject:
+                    continue
+
+                rfc_message = m.obj.as_string()
+                info: dict = {}
+
+                for line in rfc_message.split("\n"):
+                    if line.startswith(MAIL_HEADER_PREFIX):
+                        key, value = line.split(":", 1)
+                        info[key.replace(MAIL_HEADER_PREFIX, "")] = value.strip()
+                if not info:
+                    continue
+
+                mark_as_read.append(m)
+                info["subject"] = m.subject
+                unread_messages.append(info)
+
+            mailbox.flag(
+                [m.uid for m in mark_as_read],
+                (imap_tools.MailMessageFlags.SEEN,),
+                True,
+            )
+
+        return unread_messages
 
 
 def setup(bot) -> None:

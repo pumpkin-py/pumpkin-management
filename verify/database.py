@@ -7,7 +7,7 @@ from sqlalchemy import BigInteger, Column, DateTime, Integer, String
 
 from database import database, session
 
-from .enum import VerifyStatus
+from .enums import VerifyStatus
 
 
 class VerifyGroup(database.base):

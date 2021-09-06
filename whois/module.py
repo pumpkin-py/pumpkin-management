@@ -6,7 +6,7 @@ from discord.ext import commands
 from core import check, logging, text, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
-from ..verify.enum import VerifyStatus
+from ..verify.enums import VerifyStatus
 
 
 tr = text.Translator(__file__).translate
