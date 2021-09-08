@@ -141,9 +141,9 @@ class Whois(commands.Cog):
                 inline=False,
             )
         if dc_member is not None:
-            avatar_url: str = ""
+            avatar_url: str
             if discord.version_info.major == 2:
-                avatar_url = dc_member.avatar.replace(size=256).url
+                avatar_url = dc_member.display_avatar.replace(size=256).url
             else:
                 avatar_url = dc_member.avatar_url_as(size=256)
             embed.set_thumbnail(url=avatar_url)
