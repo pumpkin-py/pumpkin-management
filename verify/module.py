@@ -276,11 +276,7 @@ class Verify(commands.Cog):
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
         db_member = VerifyMember.get_by_member(ctx.guild.id, ctx.author.id)
-        if db_member is None:
-            await ctx.reply(tr("strip", "not in database"))
-            return
-
-        if db_member.status < 0:
+        if db_member is not None and db_member.status < 0:
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
@@ -297,10 +293,13 @@ class Verify(commands.Cog):
 
         with contextlib.suppress(discord.Forbidden):
             await ctx.author.remove_roles(*roles, reason="strip")
-        VerifyMember.remove(ctx.guild.id, ctx.author.id)
-        await guild_log.info(
-            ctx.author, ctx.channel, "Stripped and removed from database."
-        )
+        removed: int = VerifyMember.remove(ctx.guild.id, ctx.author.id)
+
+        message: str = "Stripped"
+        if removed:
+            message += " and removed from database"
+        message += "."
+        await guild_log.info(ctx.author, ctx.channel, message)
 
         await ctx.author.send(tr("strip", "reply"))
         await utils.Discord.delete_message(ctx.message)
