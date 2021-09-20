@@ -320,9 +320,7 @@ class Verify(commands.Cog):
                     VerifyMember.remove(ctx.guild.id, member.id)
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
-                    roles = [role for role in member.roles if role.name != "@everyone"]
-                    if discord.version_info.major == 2:
-                        roles = [role for role in roles if role.is_assignable()]
+                    roles = [role for role in roles if role.is_assignable()]
                     with contextlib.suppress(discord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
@@ -332,6 +330,44 @@ class Verify(commands.Cog):
                     )
 
         await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
+        await guild_log.warning(
+            ctx.author,
+            ctx.channel,
+            f"Removed {removed_db} users from database and "
+            f"stripped {removed_dc} members with groupstrip.",
+        )
+
+    @commands.check(check.acl)
+    @commands.command()
+    async def grouprolestrip(self, ctx, role: discord.Role):
+        """Remove all roles and reset verification status to None
+        from all the users that have given role. Users are not notified
+        about this.
+        """
+        removed_db: int = 0
+        removed_dc: int = 0
+
+        async with ctx.typing():
+            for member in role.members:
+                db_member = VerifyMember.get_by_member(ctx.guild.id, member.id)
+                if db_member:
+                    VerifyMember.remove(ctx.guild.id, member.id)
+                    removed_db += 1
+                if len(getattr(member, "roles", [])) > 1:
+                    roles = [r for r in member.roles if r.is_assignable()]
+                    with contextlib.suppress(discord.Forbidden):
+                        await member.remove_roles(*roles, reason="grouprolestrip")
+                    removed_dc += 1
+
+        await ctx.reply(
+            tr("grouprolestrip", "reply", ctx, db=removed_db, dc=removed_dc)
+        )
+        await guild_log.warning(
+            ctx.author,
+            ctx.channel,
+            f"Removed {removed_db} database entries and "
+            f"stripped {removed_dc} members with group role strip on {role.name}.",
+        )
 
     @commands.guild_only()
     @commands.check(check.acl)
