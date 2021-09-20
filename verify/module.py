@@ -320,7 +320,7 @@ class Verify(commands.Cog):
                     VerifyMember.remove(ctx.guild.id, member.id)
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
-                    roles = [role for role in roles if role.is_assignable()]
+                    roles = [role for role in member.roles if role.is_assignable()]
                     with contextlib.suppress(discord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
@@ -359,9 +359,7 @@ class Verify(commands.Cog):
                         await member.remove_roles(*roles, reason="grouprolestrip")
                     removed_dc += 1
 
-        await ctx.reply(
-            tr("grouprolestrip", "reply", ctx, db=removed_db, dc=removed_dc)
-        )
+        await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
         await guild_log.warning(
             ctx.author,
             ctx.channel,
