@@ -176,13 +176,15 @@ class Verify(commands.Cog):
             delete_after=120,
         )
 
-        await self.post_verify(ctx)
+        await self.post_verify(ctx, address)
 
-    async def post_verify(self, ctx):
+    async def post_verify(self, ctx, address: str):
         """Wait some time after the user requested verification code.
 
         Then connect to IMAP server and check for possilibity that they used
         wrong, invalid e-mail. If such e-mails are found, they will be logged.
+
+        :param address: User's e-mail address.
         """
         # TODO Use embeds when we support them.
         await asyncio.sleep(20)
@@ -194,11 +196,19 @@ class Verify(commands.Cog):
             await guild_log.warning(
                 user,
                 channel,
-                (
-                    "Could not deliver verification code: "
-                    f"{message['subject']} (User ID {message['user']})",
-                ),
+                "Could not deliver verification code: "
+                f"{message['subject']} (User ID {message['user']})",
             )
+            with contextlib.suppress(discord.Forbidden):
+                await ctx.author.send(
+                    tr(
+                        "_post_verify",
+                        "error",
+                        ctx,
+                        address=address,
+                        prefix=config.prefix,
+                    )
+                )
 
     @commands.guild_only()
     @commands.check(check.acl)
