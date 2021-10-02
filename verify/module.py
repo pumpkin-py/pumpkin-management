@@ -8,6 +8,7 @@ import re
 import smtplib
 import string
 import tempfile
+import unidecode
 from typing import Dict, List, Union, Optional
 
 from email.mime.text import MIMEText
@@ -683,9 +684,15 @@ class Verify(commands.Cog):
             guild_name=member.guild.name,
             user_name=member.name,
         )
-        message["From"] = f"{self.bot.user.name} <{SMTP_ADDRESS}>"
-        message["To"] = f"{member.name} <{address}>"
-        message["Bcc"] = f"{self.bot.user.name} <{SMTP_ADDRESS}>"
+        # TODO Instead of normalization to ASCII we should do encoding
+        # so the accents are kept.
+        # '=?utf-8?b?<base64 with plus instead of equals>?=' should work,
+        # but it needs more testing.
+        ascii_bot_name: str = unidecode.unidecode(self.bot.user.name)
+        ascii_member_name: str = unidecode.unidecode(member.name)
+        message["From"] = f"{ascii_bot_name} <{SMTP_ADDRESS}>"
+        message["To"] = f"{ascii_member_name} <{address}>"
+        message["Bcc"] = f"{ascii_bot_name} <{SMTP_ADDRESS}>"
 
         message[MAIL_HEADER_PREFIX + "user"] = f"{member.id}"
         message[MAIL_HEADER_PREFIX + "bot"] = f"{self.bot.user.id}"
