@@ -200,15 +200,13 @@ class Verify(commands.Cog):
                 "Could not deliver verification code: "
                 f"{message['subject']} (User ID {message['user']})",
             )
-            with contextlib.suppress(discord.Forbidden):
-                await ctx.author.send(
-                    tr(
-                        "_post_verify",
-                        "error",
-                        ctx,
-                        address=address,
-                        prefix=config.prefix,
-                    )
+            if not await utils.Discord.send_dm(
+                ctx.author,
+                tr("_post_verify", "error", ctx, address=address, prefix=config.prefix),
+            ):
+                await ctx.send(
+                    tr("_post_verify", "dm_error", ctx, prefix=config.prefix),
+                    delete_after=120,
                 )
 
     @commands.guild_only()
@@ -269,8 +267,7 @@ class Verify(commands.Cog):
 
         await self._add_roles(ctx.author, db_member)
 
-        with contextlib.suppress(discord.Forbidden):
-            await ctx.author.send(tr("submit", "reply dm"))
+        await utils.Discord.send_dm(ctx.author, tr("submit", "reply dm"))
 
         await ctx.send(
             tr(
@@ -312,7 +309,7 @@ class Verify(commands.Cog):
         message += "."
         await guild_log.info(ctx.author, ctx.channel, message)
 
-        await ctx.author.send(tr("strip", "reply"))
+        await utils.Discord.send_dm(ctx.author, tr("strip", "reply"))
         await utils.Discord.delete_message(ctx.message)
 
     @commands.check(check.acl)
