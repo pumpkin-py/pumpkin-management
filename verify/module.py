@@ -517,10 +517,16 @@ class Verify(commands.Cog):
         db_member = VerifyMember.get_by_member(member.guild.id, member.id)
         if db_member is None:
             return
+        if db_member.status != VerifyStatus.VERIFIED.value:
+            return
 
         await self._add_roles(member, db_member)
+        # We need a channel to log the event in the guild log channel.
+        # We are just picking the first one.
         await guild_log.info(
-            member, None, "New member already in database, skipping verification."
+            member,
+            member.guild.text_channels[0],
+            "New member already in database, skipping verification.",
         )
 
     @commands.Cog.listener()
@@ -532,7 +538,9 @@ class Verify(commands.Cog):
             db_member.status = VerifyStatus.BANNED.value
             db_member.save()
             await guild_log.info(
-                member, None, "Member has been banned, updating database status."
+                member,
+                member.guild.text_channels[0],
+                "Member has been banned, database status updated.",
             )
             return
 
@@ -545,7 +553,9 @@ class Verify(commands.Cog):
             status=VerifyStatus.BANNED,
         )
         await guild_log.info(
-            member, None, "Member has been banned, adding to database."
+            member,
+            member.guild.text_channels[0],
+            "Member has been banned, adding to database.",
         )
 
     #
