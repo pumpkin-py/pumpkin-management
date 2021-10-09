@@ -141,18 +141,15 @@ class Whois(commands.Cog):
                 inline=False,
             )
         if dc_member is not None:
-            avatar_url: str
-            if discord.version_info.major == 2:
-                avatar_url = dc_member.display_avatar.replace(size=256).url
-            else:
-                avatar_url = dc_member.avatar_url_as(size=256)
+            avatar_url: str = dc_member.display_avatar.replace(size=256).url
             embed.set_thumbnail(url=avatar_url)
 
-            roles: str = ", ".join(list(r.name for r in dc_member.roles[::-1][:-1]))
-            embed.add_field(
-                name=tr("whois", "roles", ctx),
-                value=roles if roles else tr("whois", "no roles"),
-            )
+            if dc_member.roles:
+                roles: str = ", ".join(list(r.name for r in dc_member.roles[::-1][:-1]))
+                embed.add_field(
+                    name=tr("whois", "roles", ctx),
+                    value=roles if roles else tr("whois", "no roles"),
+                )
 
         await ctx.reply(embed=embed)
 
