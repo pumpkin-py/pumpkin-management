@@ -5,12 +5,12 @@ from typing import Dict, Optional, List
 import discord
 from discord.ext import commands
 
-from core import check, logging, text, utils
+from core import check, logger, text, utils
 
 from .database import Link, Satellite
 
 tr = text.Translator(__file__).translate
-guild_log = logging.Guild.logger()
+guild_log = logger.Guild.logger()
 
 
 class Sync(commands.Cog):

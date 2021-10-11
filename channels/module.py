@@ -5,13 +5,13 @@ import tempfile
 import discord
 from discord.ext import commands
 
-from core import check, logging, text, utils
+from core import check, logger, text, utils
 
 from . import utils as helper_utils
 
 
 tr = text.Translator(__file__).translate
-guild_log = logging.Guild.logger()
+guild_log = logger.Guild.logger()
 
 
 class Channels(commands.Cog):

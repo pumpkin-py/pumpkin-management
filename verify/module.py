@@ -20,15 +20,15 @@ import discord
 from discord.ext import commands
 
 import database.config
-from core import check, exceptions, text, logging, utils
+from core import check, exceptions, text, logger, utils
 
 from .enums import VerifyStatus
 from .database import VerifyGroup, VerifyMember
 
 
 tr = text.Translator(__file__).translate
-bot_log = logging.Bot.logger()
-guild_log = logging.Guild.logger()
+bot_log = logger.Bot.logger()
+guild_log = logger.Guild.logger()
 config = database.config.Config.get()
 
 

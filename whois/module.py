@@ -3,14 +3,14 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-from core import check, logging, text, utils
+from core import check, logger, text, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enums import VerifyStatus
 
 
 tr = text.Translator(__file__).translate
-guild_log = logging.Guild.logger()
+guild_log = logger.Guild.logger()
 
 
 class Whois(commands.Cog):
