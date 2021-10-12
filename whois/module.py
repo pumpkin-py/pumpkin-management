@@ -103,7 +103,7 @@ class Whois(commands.Cog):
         db_member = VerifyMember.get_by_member(ctx.guild.id, user_id)
 
         if db_member is not None and dc_member is None:
-            dc_member: Optional[discord.User] = self.bot.get_user(db_member.user_id)
+            dc_member = ctx.guild.get_member(db_member.user_id)
 
         if db_member is None and dc_member is None:
             await ctx.reply(tr("whois", "none", ctx))
