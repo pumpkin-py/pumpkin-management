@@ -109,6 +109,30 @@ class Whois(commands.Cog):
             await ctx.reply(tr("whois", "none", ctx))
             return
 
+        await self._whois_reply(ctx, db_member, dc_member)
+        await guild_log.info(ctx.author, ctx.channel, f"Whois lookup for {member}.")
+
+    @commands.guild_only()
+    @commands.check(check.acl)
+    @commands.command()
+    async def rwhois(self, ctx, address: str):
+        db_member = VerifyMember.get_by_address(ctx.guild.id, address)
+
+        if db_member is None:
+            await ctx.reply(tr("whois", "none", ctx))
+            return
+
+        dc_member = ctx.guild.get_member(db_member.user_id)
+        if dc_member is None:
+            await ctx.reply(tr("whois", "none", ctx))
+            return
+
+        await self._whois_reply(ctx, db_member, dc_member)
+        await guild_log.info(
+            ctx.author, ctx.channel, f"Reverse whois lookup for {address}."
+        )
+
+    async def _whois_reply(self, ctx, db_member, dc_member):
         description: str
         if dc_member is not None:
             description = f"{dc_member.name} ({dc_member.id})"
@@ -152,8 +176,6 @@ class Whois(commands.Cog):
                 )
 
         await ctx.reply(embed=embed)
-
-        await guild_log.info(ctx.author, ctx.channel, f"Whois lookup for {member}.")
 
 
 def setup(bot) -> None:
