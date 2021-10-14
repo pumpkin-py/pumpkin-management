@@ -1,8 +1,6 @@
 from typing import Optional, Union
 
 import discord
-import re
-
 from discord.ext import commands
 
 from core import check, logger, text, utils
