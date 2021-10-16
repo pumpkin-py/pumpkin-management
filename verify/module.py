@@ -714,8 +714,7 @@ class Verify(commands.Cog):
 
     def _send_email(self, message: MIMEMultipart) -> None:
         """Send the verification e-mail."""
-        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
-            server.starttls()
+        with smtplib.SMTP_SSL(SMTP_SERVER) as server:
             server.ehlo()
             server.login(SMTP_ADDRESS, SMTP_PASSWORD)
             server.send_message(message)
