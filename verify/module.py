@@ -34,22 +34,13 @@ config = database.config.Config.get()
 
 SMTP_SERVER: str = os.getenv("SMTP_SERVER")
 IMAP_SERVER: str = os.getenv("IMAP_SERVER")
-SMTP_PORT: int = os.getenv("SMTP_PORT")
 SMTP_ADDRESS: str = os.getenv("SMTP_ADDRESS")
 SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
 
 
 def test_dotenv() -> None:
-    global SMTP_PORT
-
     if type(SMTP_SERVER) != str:
         raise exceptions.DotEnvException("SMTP_SERVER is not set.")
-    if type(SMTP_PORT) != str:
-        raise exceptions.DotEnvException("SMTP_PORT is not set.")
-    try:
-        SMTP_PORT = int(SMTP_PORT)
-    except ValueError:
-        raise exceptions.DotEnvException("SMTP_PORT is not set correctly.")
     if type(SMTP_ADDRESS) != str:
         raise exceptions.DotEnvException("SMTP_ADDRESS is not set.")
     if type(SMTP_PASSWORD) != str:
