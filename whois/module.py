@@ -124,9 +124,6 @@ class Whois(commands.Cog):
             return
 
         dc_member = ctx.guild.get_member(db_member.user_id)
-        if dc_member is None:
-            await ctx.reply(_(ctx, "Member is not on this server."))
-            return
 
         await self._whois_reply(ctx, db_member, dc_member)
         await guild_log.info(
