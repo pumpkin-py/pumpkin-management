@@ -3,13 +3,14 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-from core import check, logger, text, utils
+from core import check, i18n, logger, text, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enums import VerifyStatus
 
 
 tr = text.Translator(__file__).translate
+_ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
 
 
@@ -119,12 +120,12 @@ class Whois(commands.Cog):
         db_member = VerifyMember.get_by_address(ctx.guild.id, address)
 
         if db_member is None:
-            await ctx.reply(tr("whois", "none", ctx))
+            await ctx.reply(_(ctx, "Member is not in a database."))
             return
 
         dc_member = ctx.guild.get_member(db_member.user_id)
         if dc_member is None:
-            await ctx.reply(tr("whois", "none", ctx))
+            await ctx.reply(_(ctx, "Member is not on this server."))
             return
 
         await self._whois_reply(ctx, db_member, dc_member)
