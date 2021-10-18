@@ -316,7 +316,7 @@ class Verify(commands.Cog):
                 member = ctx.guild.get_member(member_id)
                 db_member = VerifyMember.get_by_member(ctx.guild.id, member_id)
                 if db_member:
-                    VerifyMember.remove(ctx.guild.id, member.id)
+                    VerifyMember.remove(ctx.guild.id, member_id)
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.is_assignable()]
