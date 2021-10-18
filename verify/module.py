@@ -376,6 +376,7 @@ class Verify(commands.Cog):
     @verification.command(name="statistics", aliases=["stats"])
     async def verification_statistics(self, ctx):
         """Filter the data by verify status."""
+        # TODO
         pass
 
     @commands.check(check.acl)
@@ -636,7 +637,7 @@ class Verify(commands.Cog):
         code: str,
     ) -> MIMEMultipart:
         """Generate the verification e-mail."""
-        BOT_URL = "https://github.com/pumpkin-py/pumpkin.py"
+        BOT_URL = "https://github.com/pumpkin-py"
 
         # Because we were considered spam by Google and our SMTP provider,
         # these paddings are attempt to fight that.
