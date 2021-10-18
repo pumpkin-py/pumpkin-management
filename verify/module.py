@@ -657,22 +657,6 @@ class Verify(commands.Cog):
             prefix=config.prefix,
             bot_name=self.bot.user.name,
         )
-        rich = tr(
-            "_get_email",
-            "html",
-            color_bg="#AA761B",
-            color_fg="#EFEFEF",
-            font_family="Arial,Verdana,sans-serif",
-            guild_name=member.guild.name,
-            user_name=member.name,
-            bot_name=self.bot.user.name,
-            code=code,
-            prefix=config.prefix,
-            bot_url=BOT_URL,
-            padding1=_generate_padding(),
-            padding2=_generate_padding(),
-            padding3=_generate_padding(),
-        )
 
         message = MIMEMultipart("alternative")
 
@@ -699,7 +683,6 @@ class Verify(commands.Cog):
         message[MAIL_HEADER_PREFIX + "url"] = BOT_URL
 
         message.attach(MIMEText(clear, "plain"))
-        # message.attach(MIMEText(rich, "html"))
 
         return message
 
