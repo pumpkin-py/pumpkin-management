@@ -5,12 +5,12 @@ import tempfile
 import discord
 from discord.ext import commands
 
-from core import check, logger, text, utils
+from core import check, i18n, logger, utils
 
 from . import utils as helper_utils
 
 
-tr = text.Translator(__file__).translate
+_ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
 
 
@@ -38,14 +38,7 @@ class Channels(commands.Cog):
         for name in shlex.split(groups):
             category = discord.utils.get(ctx.guild.categories, name=name)
             if category is None:
-                await ctx.reply(
-                    tr(
-                        "reaction-channel_init-channels",
-                        "not found",
-                        ctx,
-                        name=utils.Text.sanitise(name),
-                    )
-                )
+                await ctx.reply(_(ctx, "That category does not exist here."))
                 return
             categories.append(category)
 
@@ -78,7 +71,7 @@ class Channels(commands.Cog):
             ctx.channel,
             "Initiated react-to-role channel links.",
         )
-        await ctx.reply("Done.")
+        await ctx.reply(_(ctx, "Done."))
 
 
 def setup(bot) -> None:

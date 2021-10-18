@@ -32,16 +32,16 @@ class Whois(commands.Cog):
             description=role.id,
         )
         embed.add_field(
-            name=tr("roleinfo", "member count", ctx),
+            name=_(ctx, "Member count"),
             value=f"{len(role.members)}",
         )
         embed.add_field(
-            name=tr("roleinfo", "mentionable", ctx),
-            value=tr("roleinfo", f"{role.mentionable}", ctx),
+            name=_(ctx, "Taggable"),
+            value=_(ctx, "Yes") if role.mentionable else _(ctx, "No"),
         )
         if acl_group is not None:
             embed.add_field(
-                name=tr("roleinfo", "ACL group", ctx),
+                name=_(ctx, "ACL group"),
                 value=acl_group.name,
             )
         await ctx.reply(embed=embed)
@@ -51,7 +51,12 @@ class Whois(commands.Cog):
     @commands.command()
     async def channelinfo(self, ctx, channel: discord.TextChannel):
         if ctx.author not in channel.members:
-            ctx.reply(tr("channelinfo", "not permitted", ctx))
+            ctx.reply(
+                _(
+                    ctx,
+                    "You don't have permission to view information about this channel.",
+                )
+            )
             return
 
         webhook_count = len(await channel.webhooks())
@@ -72,17 +77,17 @@ class Whois(commands.Cog):
 
         if role_count:
             embed.add_field(
-                name=tr("channelinfo", "role count", ctx),
+                name=_(ctx, "Role count"),
                 value=f"{role_count}",
             )
         if user_count:
             embed.add_field(
-                name=tr("channelinfo", "user count", ctx),
+                name=_(ctx, "User count"),
                 value=f"{user_count}",
             )
         if webhook_count:
             embed.add_field(
-                name=tr("channelinfo", "webhook count", ctx),
+                name=_(ctx, "Webhook count"),
                 value=f"{webhook_count}",
             )
         await ctx.reply(embed=embed)
@@ -107,7 +112,7 @@ class Whois(commands.Cog):
             dc_member = ctx.guild.get_member(db_member.user_id)
 
         if db_member is None and dc_member is None:
-            await ctx.reply(tr("whois", "none", ctx))
+            await ctx.reply(_(ctx, "No such user."))
             return
 
         await self._whois_reply(ctx, db_member, dc_member)
@@ -139,38 +144,39 @@ class Whois(commands.Cog):
 
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=tr("whois", "title", ctx),
+            title=_(ctx, "Whois"),
             description=description,
         )
 
         if db_member is not None:
             embed.add_field(
-                name=tr("whois", "address", ctx),
+                name=_(ctx, "Address"),
                 value=db_member.address,
                 inline=False,
             )
             embed.add_field(
-                name=tr("whois", "code", ctx),
+                name=_(ctx, "Verification code"),
                 value=f"`{db_member.code}`",
             )
             embed.add_field(
-                name=tr("whois", "status", ctx),
+                name=_(ctx, "Verification status"),
                 value=f"{VerifyStatus(db_member.status).name}",
             )
             embed.add_field(
-                name=tr("whois", "timestamp", ctx),
+                name=_(ctx, "Timestamp"),
                 value=utils.Time.datetime(db_member.timestamp),
                 inline=False,
             )
+
         if dc_member is not None:
             avatar_url: str = dc_member.display_avatar.replace(size=256).url
             embed.set_thumbnail(url=avatar_url)
 
-            if dc_member.roles:
-                roles: str = ", ".join(list(r.name for r in dc_member.roles[::-1][:-1]))
+            dc_member_roles = list(r.name for r in dc_member.roles[::-1][:-1])
+            if dc_member_roles:
                 embed.add_field(
-                    name=tr("whois", "roles", ctx),
-                    value=roles if roles else tr("whois", "no roles"),
+                    name=_(ctx, "Roles"),
+                    value=", ".join(dc_member_roles),
                 )
 
         await ctx.reply(embed=embed)

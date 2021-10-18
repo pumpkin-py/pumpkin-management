@@ -20,13 +20,14 @@ import discord
 from discord.ext import commands
 
 import database.config
-from core import check, exceptions, text, logger, utils
+from core import check, exceptions, i18n, logger, utils
+from core import TranslationContext
 
 from .enums import VerifyStatus
 from .database import VerifyGroup, VerifyMember
 
 
-tr = text.Translator(__file__).translate
+_ = i18n.Translator("modules/mgmt").translate
 bot_log = logger.Bot.logger()
 guild_log = logger.Guild.logger()
 config = database.config.Config.get()
@@ -68,8 +69,10 @@ class Verify(commands.Cog):
         """Ask for a verification code."""
         await utils.Discord.delete_message(ctx.message)
         if not address:
-            await ctx.reply(
-                tr("verify", "no address", ctx, mention=ctx.author.mention),
+            await ctx.send(
+                _(ctx, "{mention} You have to include your e-mail.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -84,7 +87,9 @@ class Verify(commands.Cog):
                 f"Attempted to verify with unsupported address '{address}'.",
             )
             await ctx.send(
-                tr("verify", "unsupported address", mention=ctx.author.mention),
+                _(ctx, "{mention} This e-mail cannot be used.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -99,7 +104,13 @@ class Verify(commands.Cog):
                 ),
             )
             await ctx.send(
-                tr("verify", "in database", mention=ctx.author.mention),
+                _(
+                    ctx,
+                    (
+                        "{mention} You are already in the database. "
+                        "Contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
@@ -114,7 +125,15 @@ class Verify(commands.Cog):
                 ),
             )
             await ctx.send(
-                tr("verify", "in database", mention=ctx.author.mention),
+                _(
+                    ctx,
+                    # Here we are using the same error message as above
+                    # to prevent unnecessary leakage of information.
+                    (
+                        "{mention} You are already in the database. "
+                        "Contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
@@ -152,7 +171,13 @@ class Verify(commands.Cog):
                     exception=exc,
                 )
                 await ctx.send(
-                    tr("verify", "smtp error", mention=ctx.author.mention),
+                    _(
+                        ctx,
+                        (
+                            "{mention} An error has occured while sending the code. "
+                            "Contact the moderator team."
+                        ),
+                    ).format(mention=ctx.author.mention),
                     delete_after=120,
                 )
                 return
@@ -164,7 +189,13 @@ class Verify(commands.Cog):
         )
 
         await ctx.send(
-            tr("verify", "reply", mention=ctx.author.mention),
+            _(
+                ctx,
+                (
+                    "{mention} I've sent you the verification code "
+                    "to the submitted e-mail."
+                ),
+            ).format(mention=ctx.author.mention),
             delete_after=120,
         )
 
@@ -191,12 +222,37 @@ class Verify(commands.Cog):
                 "Could not deliver verification code: "
                 f"{message['subject']} (User ID {message['user']})",
             )
+
+            error_private: str = _(
+                ctx,
+                (
+                    "I could not send the verification code, you've probably made "
+                    "a typo: `{address}`. Invoke the command `{prefix}strip` "
+                    "before requesting a new code."
+                ),
+            ).format(address=address, prefix=config.prefix)
+            error_public: str = _(
+                ctx,
+                (
+                    "I could not send the verification code, you've probably made "
+                    "a typo. Invoke the command `{prefix}strip` "
+                    "before requesting a new code."
+                ),
+            ).format(address=address, prefix=config.prefix)
+            error_epilog: str = _(
+                ctx,
+                (
+                    "If I'm wrong and the e-mail is correct, "
+                    "contact the moderator team."
+                ),
+            )
+
             if not await utils.Discord.send_dm(
                 ctx.author,
-                tr("_post_verify", "error", ctx, address=address, prefix=config.prefix),
+                error_private + "\n" + error_epilog,
             ):
                 await ctx.send(
-                    tr("_post_verify", "dm_error", ctx, prefix=config.prefix),
+                    error_public + "\n" + error_epilog,
                     delete_after=120,
                 )
 
@@ -207,8 +263,10 @@ class Verify(commands.Cog):
         """Submit verification code."""
         await utils.Discord.delete_message(ctx.message)
         if not code:
-            await ctx.reply(
-                tr("submit", "no code", ctx, mention=ctx.author.mention),
+            await ctx.send(
+                _(ctx, "{mention} You have to include your verification code.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -216,10 +274,13 @@ class Verify(commands.Cog):
         db_member = VerifyMember.get_by_member(ctx.guild.id, ctx.author.id)
         if db_member is None or db_member.code is None:
             await ctx.send(
-                tr("submit", "no code", mention=ctx.author.mention),
+                _(ctx, "{mention} You have to request the code first.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
+
         if db_member.status != VerifyStatus.PENDING.value:
             await guild_log.info(
                 ctx.author,
@@ -230,7 +291,13 @@ class Verify(commands.Cog):
                 ),
             )
             await ctx.send(
-                tr("submit", "not pending", mention=ctx.author.mention),
+                _(
+                    ctx,
+                    (
+                        "{mention} You are not in code verification phase. "
+                        "Contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
@@ -246,7 +313,9 @@ class Verify(commands.Cog):
                 ),
             )
             await ctx.send(
-                tr("submit", "bad code", mention=ctx.author.mention),
+                _(ctx, "{mention} That is not your verification code.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -254,16 +323,17 @@ class Verify(commands.Cog):
         db_member.status = VerifyStatus.VERIFIED.value
         db_member.save()
 
-        await guild_log.info(ctx.author, ctx.channel, "Verification succesfull.")
+        await guild_log.info(ctx.author, ctx.channel, "Verification sucessfull.")
 
         await self._add_roles(ctx.author, db_member)
 
-        await utils.Discord.send_dm(ctx.author, tr("submit", "reply dm"))
+        await utils.Discord.send_dm(
+            ctx.author,
+            _(ctx, "You have been verified, congratulations!"),
+        )
 
         await ctx.send(
-            tr(
-                "submit",
-                "reply public",
+            _(ctx, "Member **{name}** has been verified.").format(
                 name=utils.Text.sanitise(ctx.author.name),
             ),
             delete_after=120,
@@ -281,14 +351,10 @@ class Verify(commands.Cog):
                 ctx.channel,
                 f"Strip attempt blocked, has status {VerifyStatus(db_member.status).value}.",
             )
-            await ctx.reply("strip", "disallowed", ctx)
+            await ctx.reply(_(ctx, "Something went wrong, contact the moderator team."))
             return
 
-        roles: List[discord.Role] = [
-            role for role in ctx.author.roles if role.name != "@everyone"
-        ]
-        if discord.version_info.major == 2:
-            roles = [role for role in roles if role.is_assignable()]
+        roles = [role for role in ctx.author.roles if role.is_assignable()]
 
         with contextlib.suppress(discord.Forbidden):
             await ctx.author.remove_roles(*roles, reason="strip")
@@ -300,7 +366,17 @@ class Verify(commands.Cog):
         message += "."
         await guild_log.info(ctx.author, ctx.channel, message)
 
-        await utils.Discord.send_dm(ctx.author, tr("strip", "reply"))
+        await utils.Discord.send_dm(
+            ctx.author,
+            _(
+                ctx,
+                (
+                    "You've been deleted from the database "
+                    "and your roles have been removed. "
+                    "You have to go through verfication in order to get back."
+                ),
+            ),
+        )
         await utils.Discord.delete_message(ctx.message)
 
     @commands.check(check.acl)
@@ -323,12 +399,30 @@ class Verify(commands.Cog):
                     with contextlib.suppress(discord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
+                elif member is not None:
+                    await ctx.send(
+                        _(
+                            ctx,
+                            "Member **{member_id}** (<@{member_id}>) has no roles.",
+                        ).format(member_id=member_id)
+                    )
                 else:
                     await ctx.send(
-                        tr("groupstrip", "no member", ctx, member_id=member_id)
+                        _(
+                            ctx,
+                            "Member **{member_id}** (<@{member_id}>) not found.",
+                        ).format(member_id=member_id)
                     )
 
-        await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
+        await ctx.reply(
+            _(
+                ctx,
+                (
+                    "**{db}** database entries have been removed, "
+                    "**{dc}** users have been stripped."
+                ),
+            ).format(db=removed_db, dc=removed_dc)
+        )
         await guild_log.warning(
             ctx.author,
             ctx.channel,
@@ -358,7 +452,15 @@ class Verify(commands.Cog):
                         await member.remove_roles(*roles, reason="grouprolestrip")
                     removed_dc += 1
 
-        await ctx.reply(tr("groupstrip", "reply", ctx, db=removed_db, dc=removed_dc))
+        await ctx.reply(
+            _(
+                ctx,
+                (
+                    "**{db}** database entries have been removed, "
+                    "**{dc}** users have been stripped."
+                ),
+            ).format(db=removed_db, dc=removed_dc)
+        )
         await guild_log.warning(
             ctx.author,
             ctx.channel,
@@ -390,12 +492,14 @@ class Verify(commands.Cog):
         """Display list of all verification groups."""
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=tr("verification groups list", "title"),
+            title=_(ctx, "Verification groups"),
         )
         for group in VerifyGroup.get_all(ctx.guild.id):
+            role_label: str = _(ctx, "Role")
+            regex_label: str = _(ctx, "Regex")
             embed.add_field(
                 name=group.name,
-                value=f"Role {group.role_id}\nRegex `{group.regex}`",
+                value=f"{role_label} {group.role_id}\n{regex_label} `{group.regex}`",
                 inline=False,
             )
         await ctx.reply(embed=embed)
@@ -434,7 +538,7 @@ class Verify(commands.Cog):
 
         file.seek(0)
         await ctx.reply(
-            tr("verification groups template", "reply", ctx),
+            _(ctx, "The template file has been exported."),
             file=discord.File(fp=file, filename=filename),
         )
         file.close()
@@ -460,7 +564,9 @@ class Verify(commands.Cog):
 
         file.seek(0)
         await ctx.reply(
-            tr("verification groups export", "reply", ctx, count=len(groups)),
+            _(ctx, "**{count}** verification groups have been exported.").format(
+                count=len(groups)
+            ),
             file=discord.File(fp=file, filename=filename),
         )
         file.close()
@@ -471,10 +577,10 @@ class Verify(commands.Cog):
     async def verification_groups_import(self, ctx):
         """Import new verification groups. This fully replaces old data."""
         if len(ctx.message.attachments) != 1:
-            await ctx.reply(tr("verification groups import", "wrong file", ctx))
+            await ctx.reply(_(ctx, "I'm expecting one JSON file."))
             return
         if not ctx.message.attachments[0].filename.lower().endswith(".json"):
-            await ctx.reply(tr("verification groups import", "wrong json", ctx))
+            await ctx.reply(_(ctx, "You have to upload a JSON file."))
             return
 
         # download the file
@@ -485,9 +591,7 @@ class Verify(commands.Cog):
         try:
             json_data = json.load(data_file)
         except json.decoder.JSONDecodeError as exc:
-            await ctx.reply(
-                tr("verification groups import", "bad json", ctx) + f"\n> `{exc}`"
-            )
+            await ctx.reply(_(ctx, "Your JSON file contains errors.") + f"\n> `{exc}`")
             data_file.close()
             return
 
@@ -498,7 +602,13 @@ class Verify(commands.Cog):
         data_file.close()
 
         await ctx.reply(
-            tr("verification groups import", "reply", ctx, count=len(groups))
+            _(
+                ctx,
+                (
+                    "I've imported **{count}** verification groups. "
+                    "Old groups have been backed up above."
+                ),
+            ).format(count=len(groups))
         )
 
     #
@@ -639,40 +749,30 @@ class Verify(commands.Cog):
         """Generate the verification e-mail."""
         BOT_URL = "https://github.com/pumpkin-py"
 
-        # Because we were considered spam by Google and our SMTP provider,
-        # these paddings are attempt to fight that.
-        letters: str = string.ascii_letters + string.digits
+        tc = TranslationContext(member.guild.id, member.id)
 
-        def _generate_padding():
-            padding: str = "".join(
-                random.choices(letters, k=random.randint(50, 200))  # nosec
-            )
-            return "<!-- " + padding + "-->"
-
-        clear = tr(
-            "_get_email",
-            "plain",
-            guild_name=member.guild.name,
-            code=code,
-            # TODO Update when we have guild-dependent prefix
-            prefix=config.prefix,
-            bot_name=self.bot.user.name,
-        )
+        clear_list: List[str] = [
+            _(
+                tc,
+                "Your verification e-mail for Discord server {guild_name} is {code}.",
+            ).format(guild_name=member.guild.name, code=code),
+            _(tc, "You can use it by sending the following message:"),
+            _(tc, "  {prefix}submit {code}").format(prefix=config.prefix, code=code),
+            _(tc, "to the channel named #{channel}.").format(channel=channel.name),
+        ]
+        clear: str = "\n".join(clear_list)
 
         message = MIMEMultipart("alternative")
 
-        message["Subject"] = tr(
-            "_get_email",
-            "subject",
-            guild_name=member.guild.name,
-            user_name=member.name,
-        )
         # TODO Instead of normalization to ASCII we should do encoding
         # so the accents are kept.
         # '=?utf-8?b?<base64 with plus instead of equals>?=' should work,
         # but it needs more testing.
         ascii_bot_name: str = unidecode.unidecode(self.bot.user.name)
         ascii_member_name: str = unidecode.unidecode(member.name)
+        ascii_guild_name: str = unidecode.unidecode(member.guild.name)
+
+        message["Subject"] = f"{ascii_guild_name} → {ascii_member_name}"
         message["From"] = f"{ascii_bot_name} <{SMTP_ADDRESS}>"
         message["To"] = f"{ascii_member_name} <{address}>"
         message["Bcc"] = f"{ascii_bot_name} <{SMTP_ADDRESS}>"
