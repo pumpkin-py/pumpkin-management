@@ -14,10 +14,10 @@ msgid {mention} I've sent you the verification code to the submitted e-mail.
 msgstr {mention} Na zadaný e-mail ti byl poslán verifikační kód.
 
 msgid I could not send the verification code, you've probably made a typo: `{address}`. Invoke the command `{prefix}strip` before requesting a new code.
-msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně jsi se překlepl: `{address}`. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
+msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně v něm je překlep: `{address}`. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
 
 msgid I could not send the verification code, you've probably made a typo. Invoke the command `{prefix}strip` before requesting a new code.
-msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně jsi se překlepl. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
+msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně v něm je překlep. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
 
 msgid If I'm wrong and the e-mail is correct, contact the moderator team.
 msgstr Pokud se pletu a e-mail je správný, kontaktuj moderátory.
@@ -44,7 +44,7 @@ msgid Something went wrong, contact the moderator team.
 msgstr Něco se pokazilo, kontaktuj moderátory.
 
 msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
-msgstr Byl jsi vymazán z databáze a byly ti odebrány role. Pro návrat musíš znovu projít verifikací.
+msgstr Byli jste vymazáni z databáze a byly vám odebrány role. Pro návrat musíte znovu projít verifikací.
 
 msgid Member **{member_id}** (<@{member_id}>) has no roles.
 msgstr Člen **{member_id}** (<@{member_id}>) nemá žádné role.
@@ -53,7 +53,7 @@ msgid Member **{member_id}** (<@{member_id}>) not found.
 msgstr Člen **{member_id}** (<@{member_id}>) nebyl nalezen.
 
 msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
-msgstr Záznamy byly odstraněny z databáze **{db}**, **{dc}** uživatelům byly odebrány role.
+msgstr **{db}** záznamů bylo odstraněno z databáze, **{dc}** uživatelům byly odebrány role.
 
 msgid Verification groups
 msgstr Verifikační skupiny
@@ -86,10 +86,10 @@ msgid Your verification e-mail for Discord server {guild_name} is {code}.
 msgstr Tvůj verifikační e-mail pro Discord server {guild_name} je {code}.
 
 msgid You can use it by sending the following message:
-msgstr Můžeš to použít posláním následující zprávy:
+msgstr Můžeš ho použít posláním následující zprávy:
 
 msgid   {prefix}submit {code}
-msgstr {prefix} poslat {code}
+msgstr  {prefix}submit {code}
 
 msgid to the channel named #{channel}.
 msgstr kanálu jménem #{channel}.
@@ -98,7 +98,7 @@ msgid Member count
 msgstr Počet členů
 
 msgid Taggable
-msgstr Tagovatelné
+msgstr Tagovatelná
 
 msgid ACL group
 msgstr ACL skupina
@@ -122,7 +122,7 @@ msgid Member is not in a database.
 msgstr Uživatel není v databázi.
 
 msgid Whois
-msgstr Kdoje
+msgstr Whois
 
 msgid Address
 msgstr Adresa
@@ -179,7 +179,7 @@ msgid This server is not synchronized.
 msgstr Tento server není synchronizovaný.
 
 msgid I'm not on that server.
-msgstr Nejsem na daném serveru.
+msgstr Na tom serveru nejsem.
 
 msgid That server is already a satellite.
 msgstr Daný server už je satelitem.
