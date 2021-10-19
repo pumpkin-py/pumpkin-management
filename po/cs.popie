@@ -32,7 +32,7 @@ msgid {mention} You are not in code verification phase. Contact the moderator te
 msgstr {mention} Nejsi ve verifikační fázi. Kontaktuj moderátory.
 
 msgid {mention} That is not your verification code.
-msgstr {mention} To není tvůj verifikační kód
+msgstr {mention} To není tvůj verifikační kód.
 
 msgid You have been verified, congratulations!
 msgstr Byl jsi verifikován, gratuluji!
