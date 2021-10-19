@@ -1,5 +1,227 @@
+msgid {mention} You have to include your e-mail.
+msgstr {mention} Musíš přiložit svůj e-mail.
+
+msgid {mention} This e-mail cannot be used.
+msgstr {mention} Tento e-mail nejde použít.
+
+msgid {mention} You are already in the database. Contact the moderator team.
+msgstr {mention} Už jsi v databázi. Kontaktuj moderátory.
+
+msgid {mention} An error has occured while sending the code. Contact the moderator team.
+msgstr {mention} Při posílání kódu nastala chyba. Kontaktuj moderátory.
+
+msgid {mention} I've sent you the verification code to the submitted e-mail.
+msgstr {mention} Na zadaný e-mail ti byl poslán verifikační kód.
+
+msgid I could not send the verification code, you've probably made a typo: `{address}`. Invoke the command `{prefix}strip` before requesting a new code.
+msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně v něm je překlep: `{address}`. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
+
+msgid I could not send the verification code, you've probably made a typo. Invoke the command `{prefix}strip` before requesting a new code.
+msgstr Nemohl ti být zaslán verifikační kód, pravděpodobně v něm je překlep. Použij příkaz `{prefix}strip` předtím, než zažádáš o nový kód.
+
+msgid If I'm wrong and the e-mail is correct, contact the moderator team.
+msgstr Pokud se pletu a e-mail je správný, kontaktuj moderátory.
+
+msgid {mention} You have to include your verification code.
+msgstr {mention} Musíš přiložit verifikační kód.
+
+msgid {mention} You have to request the code first.
+msgstr {mention} Nejdřív musíš požádat o kód.
+
+msgid {mention} You are not in code verification phase. Contact the moderator team.
+msgstr {mention} Nejsi ve verifikační fázi. Kontaktuj moderátory.
+
+msgid {mention} That is not your verification code.
+msgstr {mention} To není tvůj verifikační kód.
+
+msgid You have been verified, congratulations!
+msgstr Byl jsi verifikován, gratuluji!
+
+msgid Member **{name}** has been verified.
+msgstr Uživatel **{name}** byl verifikován.
+
+msgid Something went wrong, contact the moderator team.
+msgstr Něco se pokazilo, kontaktuj moderátory.
+
+msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
+msgstr Byli jste vymazáni z databáze a byly vám odebrány role. Pro návrat musíte znovu projít verifikací.
+
+msgid Member **{member_id}** (<@{member_id}>) has no roles.
+msgstr Člen **{member_id}** (<@{member_id}>) nemá žádné role.
+
+msgid Member **{member_id}** (<@{member_id}>) not found.
+msgstr Člen **{member_id}** (<@{member_id}>) nebyl nalezen.
+
+msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
+msgstr **{db}** záznamů bylo odstraněno z databáze, **{dc}** uživatelům byly odebrány role.
+
+msgid Verification groups
+msgstr Verifikační skupiny
+
+msgid Role
+msgstr Role
+
+msgid Regex
+msgstr Regex
+
+msgid The template file has been exported.
+msgstr Vzorový soubor byl exportován.
+
+msgid **{count}** verification groups have been exported.
+msgstr **{count}** verifikačních skupin bylo exportováno.
+
+msgid I'm expecting one JSON file.
+msgstr Očekávám jeden JSON soubor.
+
+msgid You have to upload a JSON file.
+msgstr Musíš nahrát JSON soubor.
+
+msgid Your JSON file contains errors.
+msgstr Tvůj JSON soubor obsahuje chyby.
+
+msgid I've imported **{count}** verification groups. Old groups have been backed up above.
+msgstr Bylo importováno **{count}** verifikačních skupin. Staré skupiny byly zálohovány výše.
+
+msgid Your verification e-mail for Discord server {guild_name} is {code}.
+msgstr Tvůj verifikační e-mail pro Discord server {guild_name} je {code}.
+
+msgid You can use it by sending the following message:
+msgstr Můžeš ho použít posláním následující zprávy:
+
+msgid   {prefix}submit {code}
+msgstr  {prefix}submit {code}
+
+msgid to the channel named #{channel}.
+msgstr kanálu jménem #{channel}.
+
+msgid Member count
+msgstr Počet členů
+
+msgid Taggable
+msgstr Tagovatelná
+
+msgid ACL group
+msgstr ACL skupina
+
+msgid You don't have permission to view information about this channel.
+msgstr Nemáš právo zobrazit informace o tomto kanálu.
+
+msgid Role count
+msgstr Počet rolí
+
+msgid User count
+msgstr Počet uživatelů
+
+msgid Webhook count
+msgstr Počet webhooků
+
+msgid No such user.
+msgstr Takový uživatel neexistuje.
+
 msgid Member is not in a database.
 msgstr Uživatel není v databázi.
 
-msgid Member is not on this server.
-msgstr Uživatel není na tomto serveru.
+msgid Whois
+msgstr Whois
+
+msgid Address
+msgstr Adresa
+
+msgid Verification code
+msgstr Verifikační kód
+
+msgid Verification status
+msgstr Stav verifikace
+
+msgid Timestamp
+msgstr Časová značka
+
+msgid Roles
+msgstr Role
+
+msgid That category does not exist here.
+msgstr Tato kategorie tady neexistuje.
+
+msgid Done.
+msgstr Hotovo.
+
+msgid {mention} This server is not a satellite.
+msgstr {mention} Tento server není satelit.
+
+msgid {mention} I could not contact the main server.
+msgstr {mention} hlavní server nemohl být kontaktován.
+
+msgid {mention} You are not on the main server.
+msgstr {mention} Nejsi na hlavním serveru.
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr {mention} Nemáš žádné synchronizovatelné role na hlavním serveru.
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr {mention} Bylo ti přidáno **{count}** nových rolí.
+
+msgid Synchronizations
+msgstr Synchronizace
+
+msgid This server is a satellite of
+msgstr Tento server je satelitem
+
+msgid not found
+msgstr nenalezeno
+
+msgid Satellite of this server
+msgstr Satelit tohoto serveru
+
+msgid Disabled
+msgstr Vypnuto
+
+msgid This server is not synchronized.
+msgstr Tento server není synchronizovaný.
+
+msgid I'm not on that server.
+msgstr Na tom serveru nejsem.
+
+msgid That server is already a satellite.
+msgstr Daný server už je satelitem.
+
+msgid I've sucessfully registered the new satellite.
+msgstr Nový satelit byl úspěšně zaregistrován.
+
+msgid That server is not synchronized.
+msgstr Daný server není synchronizovaný.
+
+msgid Satellite has been sucessfully removed.
+msgstr Satelit byl úspěšně odebrán.
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr Hodnoty nalevo jsou ID rolí na hlavním serveru, hodnoty napravo jsou ID rolí na satelitu.
+
+msgid Satellite information
+msgstr Informace o satelitu
+
+msgid Main server
+msgstr Hlavní server
+
+msgid Role mapping
+msgstr Mapování rolí
+
+msgid There are no mapped roles
+msgstr Neexistují žádné mapované role
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr Očekávám JSON data uzavřená v \`\`\`.
+
+msgid JSON must include dictionary `mapping`.
+msgstr JSON musí obsahovat slovník `mapping`.
+
+msgid Error while decoding: `{error}`.
+msgstr Chyba při dekódování: `{error}`.
+
+msgid Satellite has been sucessfully constructed.
+msgstr Satelit byl úspěšně vytvořen.
+
+msgid This server does not have any satellite mapping.
+msgstr Tento server nemá žádný satelitní mapping.
+
+msgid Satellite has been deconstructed.
+msgstr Satelit byl odebrán.

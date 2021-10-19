@@ -5,11 +5,11 @@ from typing import Dict, Optional, List
 import discord
 from discord.ext import commands
 
-from core import check, logger, text, utils
+from core import check, i18n, logger, utils
 
 from .database import Link, Satellite
 
-tr = text.Translator(__file__).translate
+_ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
 
 
@@ -31,14 +31,18 @@ class Sync(commands.Cog):
         link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
         if not link:
             await ctx.send(
-                tr("sync me", "not satellite", ctx, mention=ctx.author.mention),
+                _(ctx, "{mention} This server is not a satellite.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
         satellite: Optional[Satellite] = Satellite.get(ctx.guild.id)
         if not satellite:
             await ctx.send(
-                tr("sync me", "not satellite", ctx, mention=ctx.author.mention),
+                _(ctx, "{mention} This server is not a satellite.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -50,14 +54,18 @@ class Sync(commands.Cog):
                 f"Cannot sync, main guild '{link.guild_id}' not found.",
             )
             await ctx.send(
-                tr("sync me", "no main guild", ctx, mention=ctx.author.mention),
+                _(ctx, "{mention} I could not contact the main server.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
         main_member: Optional[discord.Member] = main_guild.get_member(ctx.author.id)
         if not main_member:
             await ctx.send(
-                tr("sync me", "not in main guild", ctx, mention=ctx.author.mention),
+                _(ctx, "{mention} You are not on the main server.").format(
+                    mention=ctx.author.mention
+                ),
                 delete_after=120,
             )
             return
@@ -65,7 +73,10 @@ class Sync(commands.Cog):
         roles = await self._get_satellite_roles(ctx, main_member, satellite.data)
         if not roles:
             await ctx.send(
-                tr("sync me", "no sync roles", ctx, mention=ctx.author.mention),
+                _(
+                    ctx,
+                    "{mention} You don't have any synchronizable roles on the main server.",
+                ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
@@ -77,7 +88,9 @@ class Sync(commands.Cog):
         )
         await ctx.author.add_roles(*roles)
         await ctx.send(
-            tr("sync me", "reply", ctx, mention=ctx.author.mention, count=len(roles)),
+            _(ctx, "{mention} I've added **{count}** new roles to you.").format(
+                mention=ctx.author.mention, count=len(roles)
+            ),
             delete_after=120,
         )
 
@@ -112,13 +125,13 @@ class Sync(commands.Cog):
 
         embed = utils.Discord.create_embed(
             author=ctx.author,
-            title=tr("sync list", "title", ctx),
+            title=_(ctx, "Synchronizations"),
         )
         if satellite:
             guild = self.bot.get_guild(satellite.guild_id)
             embed.add_field(
-                name=tr("sync list", "is satellite", ctx),
-                value=getattr(guild, "name", tr("sync list", "not found", ctx))
+                name=_(ctx, "This server is a satellite of"),
+                value=getattr(guild, "name", _(ctx, "not found"))
                 + f"\n{satellite.guild_id}",
                 inline=False,
             )
@@ -127,15 +140,15 @@ class Sync(commands.Cog):
             guilds = [self.bot.get_guild(s.guild_id) for s in satellites]
             for link, guild in zip(satellites, guilds):
                 embed.add_field(
-                    name=tr("sync list", "satellite", ctx),
-                    value=getattr(guild, "name", tr("sync list", "not found", ctx))
+                    name=_(ctx, "Satellite of this server"),
+                    value=getattr(guild, "name", _(ctx, "not found"))
                     + f"\n{link.satellite_id}",
                 )
 
         if not (satellite or satellites):
             embed.add_field(
-                name=tr("sync list", "nothing", ctx),
-                value=tr("sync list", "no satellites", ctx),
+                name=_(ctx, "Disabled"),
+                value=_(ctx, "This server is not synchronized."),
             )
 
         await ctx.reply(embed=embed)
@@ -149,16 +162,16 @@ class Sync(commands.Cog):
                 satellite = guild
                 break
         else:
-            await ctx.reply(tr("sync add", "not in guild", ctx))
+            await ctx.reply(_(ctx, "I'm not on that server."))
             return
 
         try:
             Link.add(guild_id=ctx.guild.id, satellite_id=guild_id)
         except ValueError:
-            await ctx.reply(tr("sync add", "already satellite", ctx))
+            await ctx.reply(_(ctx, "That server is already a satellite."))
             return
 
-        await ctx.reply(tr("sync add", "reply", ctx))
+        await ctx.reply(_(ctx, "I've sucessfully registered the new satellite."))
         await guild_log.info(
             ctx.author,
             ctx.channel,
@@ -170,11 +183,11 @@ class Sync(commands.Cog):
     async def sync_remove(self, ctx, guild_id: int):
         link = Link.get_by_satellite(satellite_id=guild_id)
         if link is None or link.guild_id != ctx.guild.id:
-            await ctx.reply(tr("sync remove", "not linked", ctx))
+            await ctx.reply(_(ctx, "That server is not synchronized."))
             return
 
         Link.remove(guild_id=ctx.guild.id, satellite_id=guild_id)
-        await ctx.reply(tr("sync remove", "reply", ctx))
+        await ctx.reply(_(ctx, "Satellite has been sucessfully removed."))
 
         guild_name: str = getattr(self.bot.get_guild(guild_id), "name", "???")
         await guild_log.info(
@@ -197,8 +210,15 @@ class Sync(commands.Cog):
                 "1234567890": 8765432109,
             }
         }
+        help_text = _(
+            ctx,
+            (
+                "Values on the left are IDs of roles on the main server, "
+                "values on the right are role IDs on the satellite."
+            ),
+        )
         text = (
-            f'{tr("satellite template", "text", ctx)} ```json\n'
+            f"{help_text} ```json\n"
             + f"{json.dumps(template, ensure_ascii=False, indent=4)}\n```"
         )
 
@@ -208,21 +228,21 @@ class Sync(commands.Cog):
     @satellite_.command(name="get")
     async def satellite_get(self, ctx):
         embed = utils.Discord.create_embed(
-            author=ctx.author, title=tr("satellite get", "title", ctx)
+            author=ctx.author, title=_(ctx, "Satellite information")
         )
 
         link = Link.get_by_satellite(satellite_id=ctx.guild.id)
         if link:
             main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
             embed.add_field(
-                name=tr("satellite get", "main guild", ctx),
+                name=_(ctx, "Main server"),
                 value=getattr(main_guild, "name", f"{link.guild_id}"),
                 inline=False,
             )
         else:
             embed.add_field(
-                name=tr("satellite get", "nothing", ctx),
-                value=tr("satellite get", "not satellite", ctx),
+                name=_(ctx, "Disabled"),
+                value=_(ctx, "This server is not synchronized."),
                 inline=False,
             )
         satellite: Optional[Satellite] = Satellite.get(ctx.guild.id)
@@ -235,14 +255,14 @@ class Sync(commands.Cog):
                 role_to_str = getattr(role_to, "name", f"`{role_to_id}`")
                 result += f"{role_from_str} → {role_to_str}\n"
             embed.add_field(
-                name=tr("satellite get", "mapping", ctx),
+                name=_(ctx, "Role mapping"),
                 value=result[:512],
                 inline=False,
             )
         else:
             embed.add_field(
-                name=tr("satellite get", "mapping", ctx),
-                value=tr("satellite get", "no mapping", ctx),
+                name=_(ctx, "Role mapping"),
+                value=_(ctx, "There are no mapped roles"),
                 inline=False,
             )
 
@@ -256,35 +276,38 @@ class Sync(commands.Cog):
                 re.search(r"```([^\s]+)?([^`]*)```", ctx.message.content, re.M).group(2)
             )
         except (AttributeError, json.decoder.JSONDecodeError):
-            await ctx.reply(tr("satellite set", "no json", ctx))
+            await ctx.reply(_(ctx, r"I'm expecting JSON data enclosed in \`\`\`."))
             return
 
         if "mapping" not in satellite_data:
-            await ctx.reply(tr("satellite set", "bad json", ctx))
+            await ctx.reply(_(ctx, "JSON must include dictionary `mapping`."))
             return
 
         try:
             for key, value in satellite_data["mapping"].items():
-                _, _ = int(key), int(value)
+                int(key)
+                int(value)
         except ValueError as exc:
-            await ctx.reply(tr("satellite set", "broken json", ctx, error=str(exc)))
+            await ctx.reply(
+                _(ctx, "Error while decoding: `{error}`.").format(error=str(exc))
+            )
             return
 
         Satellite.add(ctx.guild.id, satellite_data["mapping"])
 
         await guild_log.info(ctx.author, ctx.channel, "Satellite enabled.")
-        await ctx.reply(tr("satellite set", "reply", ctx))
+        await ctx.reply(_(ctx, "Satellite has been sucessfully constructed."))
 
     @commands.check(check.acl)
     @satellite_.command(name="unset")
     async def satellite_unset(self, ctx):
         deleted: int = Satellite.remove(ctx.guild.id)
         if not deleted:
-            await ctx.reply(tr("satellite unset", "nothing", ctx))
+            await ctx.reply(_(ctx, "This server does not have any satellite mapping."))
             return
 
         await guild_log.info(ctx.author, ctx.channel, "Satellite disabled.")
-        await ctx.reply(tr("satellite unset", "reply", ctx))
+        await ctx.reply(_(ctx, "Satellite has been deconstructed."))
 
 
 def setup(bot) -> None:

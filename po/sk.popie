@@ -1,5 +1,227 @@
+msgid {mention} You have to include your e-mail.
+msgstr
+
+msgid {mention} This e-mail cannot be used.
+msgstr
+
+msgid {mention} You are already in the database. Contact the moderator team.
+msgstr
+
+msgid {mention} An error has occured while sending the code. Contact the moderator team.
+msgstr
+
+msgid {mention} I've sent you the verification code to the submitted e-mail.
+msgstr
+
+msgid I could not send the verification code, you've probably made a typo: `{address}`. Invoke the command `{prefix}strip` before requesting a new code.
+msgstr
+
+msgid I could not send the verification code, you've probably made a typo. Invoke the command `{prefix}strip` before requesting a new code.
+msgstr
+
+msgid If I'm wrong and the e-mail is correct, contact the moderator team.
+msgstr
+
+msgid {mention} You have to include your verification code.
+msgstr
+
+msgid {mention} You have to request the code first.
+msgstr
+
+msgid {mention} You are not in code verification phase. Contact the moderator team.
+msgstr
+
+msgid {mention} That is not your verification code.
+msgstr
+
+msgid You have been verified, congratulations!
+msgstr
+
+msgid Member **{name}** has been verified.
+msgstr
+
+msgid Something went wrong, contact the moderator team.
+msgstr
+
+msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
+msgstr
+
+msgid Member **{member_id}** (<@{member_id}>) has no roles.
+msgstr
+
+msgid Member **{member_id}** (<@{member_id}>) not found.
+msgstr
+
+msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
+msgstr
+
+msgid Verification groups
+msgstr
+
+msgid Role
+msgstr
+
+msgid Regex
+msgstr
+
+msgid The template file has been exported.
+msgstr
+
+msgid **{count}** verification groups have been exported.
+msgstr
+
+msgid I'm expecting one JSON file.
+msgstr
+
+msgid You have to upload a JSON file.
+msgstr
+
+msgid Your JSON file contains errors.
+msgstr
+
+msgid I've imported **{count}** verification groups. Old groups have been backed up above.
+msgstr
+
+msgid Your verification e-mail for Discord server {guild_name} is {code}.
+msgstr
+
+msgid You can use it by sending the following message:
+msgstr
+
+msgid   {prefix}submit {code}
+msgstr
+
+msgid to the channel named #{channel}.
+msgstr
+
+msgid Member count
+msgstr
+
+msgid Taggable
+msgstr
+
+msgid ACL group
+msgstr
+
+msgid You don't have permission to view information about this channel.
+msgstr
+
+msgid Role count
+msgstr
+
+msgid User count
+msgstr
+
+msgid Webhook count
+msgstr
+
+msgid No such user.
+msgstr
+
 msgid Member is not in a database.
 msgstr
 
-msgid Member is not on this server.
+msgid Whois
+msgstr
+
+msgid Address
+msgstr
+
+msgid Verification code
+msgstr
+
+msgid Verification status
+msgstr
+
+msgid Timestamp
+msgstr
+
+msgid Roles
+msgstr
+
+msgid That category does not exist here.
+msgstr
+
+msgid Done.
+msgstr
+
+msgid {mention} This server is not a satellite.
+msgstr
+
+msgid {mention} I could not contact the main server.
+msgstr
+
+msgid {mention} You are not on the main server.
+msgstr
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr
+
+msgid Synchronizations
+msgstr
+
+msgid This server is a satellite of
+msgstr
+
+msgid not found
+msgstr
+
+msgid Satellite of this server
+msgstr
+
+msgid Disabled
+msgstr
+
+msgid This server is not synchronized.
+msgstr
+
+msgid I'm not on that server.
+msgstr
+
+msgid That server is already a satellite.
+msgstr
+
+msgid I've sucessfully registered the new satellite.
+msgstr
+
+msgid That server is not synchronized.
+msgstr
+
+msgid Satellite has been sucessfully removed.
+msgstr
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr
+
+msgid Satellite information
+msgstr
+
+msgid Main server
+msgstr
+
+msgid Role mapping
+msgstr
+
+msgid There are no mapped roles
+msgstr
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr
+
+msgid JSON must include dictionary `mapping`.
+msgstr
+
+msgid Error while decoding: `{error}`.
+msgstr
+
+msgid Satellite has been sucessfully constructed.
+msgstr
+
+msgid This server does not have any satellite mapping.
+msgstr
+
+msgid Satellite has been deconstructed.
 msgstr
