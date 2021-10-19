@@ -77,6 +77,13 @@ class Verify(commands.Cog):
             )
             return
 
+        """Convert address domain to lower-case (make it case-insensitive)"""
+        domainRegex = r"([^@]+$)"
+        domain = re.search(domainRegex, address)
+        
+        if domain is not None:
+            address = re.sub(domainRegex, domain.group(0).lower(), address)
+        
         groups: List[VerifyGroup] = self._map_address_to_groups(
             ctx.guild.id, ctx.author.id, address, include_wildcard=False
         )
