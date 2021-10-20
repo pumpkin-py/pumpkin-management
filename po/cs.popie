@@ -55,6 +55,12 @@ msgstr Člen **{member_id}** (<@{member_id}>) nebyl nalezen.
 msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
 msgstr **{db}** záznamů bylo odstraněno z databáze, **{dc}** uživatelům byly odebrány role.
 
+msgid If you really want to strip **{count}** users with role **{role}**, add the member count as a second argument.
+msgstr Pokud opravdu chceš odebrat **{count}** uživatelů s rolí **{role}**, přidej jejich počet jako druhý argument.
+
+msgid Role **{role}** has {real_count} members, not {count}. Try again.
+msgstr Role **{role}** má {real_count} uživatelů, ne {count}. Zkus to znovu.
+
 msgid Verification groups
 msgstr Verifikační skupiny
 

@@ -55,6 +55,12 @@ msgstr
 msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
 msgstr
 
+msgid If you really want to strip **{count}** users with role **{role}**, add the member count as a second argument.
+msgstr
+
+msgid Role **{role}** has {real_count} members, not {count}. Try again.
+msgstr
+
 msgid Verification groups
 msgstr
 

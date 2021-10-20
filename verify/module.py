@@ -449,22 +449,24 @@ class Verify(commands.Cog):
                 _(
                     ctx,
                     (
-                        "If you really want to strip **{count}** users with role **{role}**, ",
+                        "If you really want to strip **{count}** users with role **{role}**, "
                         "add the member count as a second argument."
                     ),
-                ).format(count=role.members.count(), role=role.name)
+                ).format(count=len(role.members), role=role.name)
+            )
             return
-        
-        if count != role.members.count():
+
+        if count != len(role.members):
             await ctx.reply(
                 _(
                     ctx,
                     (
-                        "Role **{role}** has {real_count} members, not {count}. Try again!"
+                        "Role **{role}** has {real_count} members, not {count}. Try again."
                     ),
-                ).format(role=role.name, real_count=role.members.count(), count=count)
+                ).format(role=role.name, real_count=len(role.members), count=count)
+            )
             return
-            
+
         removed_db: int = 0
         removed_dc: int = 0
 
