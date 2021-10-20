@@ -439,11 +439,32 @@ class Verify(commands.Cog):
 
     @commands.check(check.acl)
     @commands.command()
-    async def grouprolestrip(self, ctx, role: discord.Role):
+    async def grouprolestrip(self, ctx, role: discord.Role, count: int = None):
         """Remove all roles and reset verification status to None
         from all the users that have given role. Users are not notified
         about this.
         """
+        if count is None:
+            await ctx.reply(
+                _(
+                    ctx,
+                    (
+                        "If you really want to strip **{count}** users with role **{role}**, ",
+                        "add the member count as a second argument."
+                    ),
+                ).format(count=role.members.count(), role=role.name)
+            return
+        
+        if count != role.members.count():
+            await ctx.reply(
+                _(
+                    ctx,
+                    (
+                        "Role **{role}** has {real_count} members, not {count}. Try again!"
+                    ),
+                ).format(role=role.name, real_count=role.members.count(), count=count)
+            return
+            
         removed_db: int = 0
         removed_dc: int = 0
 
