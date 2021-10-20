@@ -3,13 +3,12 @@ from typing import Optional, Union
 import discord
 from discord.ext import commands
 
-from core import check, i18n, logger, text, utils
+from core import check, i18n, logger, utils
 from database.acl import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enums import VerifyStatus
 
 
-tr = text.Translator(__file__).translate
 _ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
 
