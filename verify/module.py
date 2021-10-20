@@ -449,7 +449,7 @@ class Verify(commands.Cog):
                 _(
                     ctx,
                     (
-                        "If you really want to strip **{count}** users with role **{role}**,",
+                        "If you really want to strip **{count}** users with role **{role}**, ",
                         "add the member count as a second argument."
                     ),
                 ).format(count=role.members.count(), role=role.name)
@@ -462,7 +462,7 @@ class Verify(commands.Cog):
                     (
                         "Role **{role}** has {real_count} members, not {count}. Try again!"
                     ),
-                ).format(role = role.name, real_coun = role.members.count(), count = count)
+                ).format(role=role.name, real_count=role.members.count(), count=count)
             return
             
         removed_db: int = 0
