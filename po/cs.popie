@@ -89,10 +89,10 @@ msgid You can use it by sending the following message:
 msgstr Můžeš ho použít posláním následující zprávy:
 
 msgid   {prefix}submit {code}
-msgstr  {prefix}submit {code}
+msgstr   {prefix}submit {code}
 
 msgid to the channel named #{channel}.
-msgstr kanálu jménem #{channel}.
+msgstr do kanálu #{channel}.
 
 msgid Member count
 msgstr Počet členů
