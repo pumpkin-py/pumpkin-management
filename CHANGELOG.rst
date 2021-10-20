@@ -2,6 +2,7 @@ CHANGELOG
 =========
 
 - Verify: Make the e-mail domain case insensitive
+- Verify: Add safety check to grouprolestrip
 
 2021.10.19
 ----------
