@@ -449,7 +449,8 @@ class Verify(commands.Cog):
                 _(
                     ctx,
                     (
-                        "If you really want to strip **{count}** users with role **{role}**, add the member count as another argument."
+                        "If you really want to strip **{count}** users with role **{role}**,",
+                        "add the member count as a second argument."
                     ),
                 ).format(count=role.members.count(), role=role.name)
             return
