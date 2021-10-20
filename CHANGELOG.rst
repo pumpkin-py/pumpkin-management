@@ -1,6 +1,8 @@
 CHANGELOG
 =========
 
+- Verify: Make the e-mail domain case insensitive
+
 2021.10.19
 ----------
 - Whois: Reverse whois
