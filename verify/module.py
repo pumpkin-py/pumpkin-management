@@ -786,7 +786,8 @@ class Verify(commands.Cog):
                 "Your verification e-mail for Discord server {guild_name} is {code}.",
             ).format(guild_name=member.guild.name, code=code),
             _(tc, "You can use it by sending the following message:"),
-            _(tc, "  {prefix}submit {code}").format(prefix=config.prefix, code=code),
+            "  "
+            + _(tc, "{prefix}submit {code}").format(prefix=config.prefix, code=code),
             _(tc, "to the channel named #{channel}.").format(channel=channel.name),
         ]
         clear: str = "\n".join(clear_list)

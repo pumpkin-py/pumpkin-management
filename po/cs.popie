@@ -94,8 +94,8 @@ msgstr Tvůj verifikační e-mail pro Discord server {guild_name} je {code}.
 msgid You can use it by sending the following message:
 msgstr Můžeš ho použít posláním následující zprávy:
 
-msgid   {prefix}submit {code}
-msgstr   {prefix}submit {code}
+msgid {prefix}submit {code}
+msgstr {prefix}submit {code}
 
 msgid to the channel named #{channel}.
 msgstr do kanálu #{channel}.

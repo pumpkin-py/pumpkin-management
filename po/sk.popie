@@ -94,7 +94,7 @@ msgstr
 msgid You can use it by sending the following message:
 msgstr
 
-msgid   {prefix}submit {code}
+msgid {prefix}submit {code}
 msgstr
 
 msgid to the channel named #{channel}.
