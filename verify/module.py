@@ -511,6 +511,33 @@ class Verify(commands.Cog):
         pass
 
     @commands.check(check.acl)
+    @verification.command(name="statistics", aliases=["stats"])
+    async def verification_update(
+        self, ctx, member: Union[discord.Member, int], status: str
+    ):
+        """Update the user's verification status."""
+        verification_status = status.upper()
+        if not VerifyStatus.has_member(verification_status):
+            await ctx.reply(
+                _(
+                    ctx,
+                    f"Wrong status {status} provided. A valid verification status is expected. "
+                    f"Available options are: NONE, PENDING, VERIFIED, BANNED.",
+                ),
+            )
+            return
+        status_value = VerifyStatus[verification_status].value
+        VerifyMember.update(guild_id=ctx.guild.id, user_id=member.id, status=status_value)
+        await guild_log.info(
+            member,
+            member.guild.text_channels[0],
+            f"Verification status of {utils.Text.sanitise(member)} changed to {verification_status}.",
+        )
+        await ctx.reply(
+            _(ctx, f"Member verification status has been updated."),
+        )
+
+    @commands.check(check.acl)
     @verification.group(name="groups")
     async def verification_groups(self, ctx):
         await utils.Discord.send_help(ctx)
