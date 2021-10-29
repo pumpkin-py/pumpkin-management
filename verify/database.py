@@ -217,16 +217,13 @@ class VerifyMember(database.base):
         return query
 
     @staticmethod
-    def update(guild_id: int, user_id: int, status: int) -> VerifyMember:
+    def update(guild_id: int, user_id: int, status: int) -> Optional[VerifyMember]:
         """Update member from database."""
-        query = (
-            session.query(VerifyMember)
-            .filter_by(
-                guild_id=guild_id,
-                user_id=user_id,
-            )
-            .update(status=status)
-        )
+        query = VerifyMember.get_by_member(guild_id, user_id)
+        if not query:
+            return None
+
+        query.status = status
         session.commit()
         return query
 

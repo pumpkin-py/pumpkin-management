@@ -511,30 +511,38 @@ class Verify(commands.Cog):
         pass
 
     @commands.check(check.acl)
-    @verification.command(name="statistics", aliases=["stats"])
+    @verification.command(name="update")
     async def verification_update(
         self, ctx, member: Union[discord.Member, int], status: str
     ):
         """Update the user's verification status."""
-        verification_status = status.upper()
-        if not VerifyStatus.has_member(verification_status):
+        status = status.upper()
+        try:
+            status_value = VerifyStatus[status].value
+        except Exception:
+            options = ", ".join([vs for vs in VerifyStatus.__members__])
             await ctx.reply(
                 _(
                     ctx,
-                    f"Wrong status {status} provided. A valid verification status is expected. "
-                    f"Available options are: NONE, PENDING, VERIFIED, BANNED.",
-                ),
+                    "Invalid verification status. " "Available options are: {options}.",
+                ).format(status=status, options=options),
             )
             return
-        status_value = VerifyStatus[verification_status].value
-        VerifyMember.update(guild_id=ctx.guild.id, user_id=member.id, status=status_value)
+
+        if not VerifyMember.update(ctx.guild.id, member.id, status_value):
+            await ctx.reply(_(ctx, "That member is not in the database."))
+            return
+
         await guild_log.info(
             member,
             member.guild.text_channels[0],
-            f"Verification status of {utils.Text.sanitise(member)} changed to {verification_status}.",
+            f"Verification status of {member} changed to {status}.",
         )
         await ctx.reply(
-            _(ctx, f"Member verification status has been updated."),
+            _(
+                ctx,
+                f"Member verification status of **{member}** has been updated to **{status}**.",
+            ).format(member=utils.Text.sanitise(member.display_name)),
         )
 
     @commands.check(check.acl)

@@ -61,6 +61,12 @@ msgstr Pokud opravdu chceš odebrat **{count}** uživatelů s rolí **{role}**, 
 msgid Role **{role}** has {real_count} members, not {count}. Try again.
 msgstr Role **{role}** má {real_count} uživatelů, ne {count}. Zkus to znovu.
 
+msgid Invalid verification status. Available options are: {options}.
+msgstr Neplatný verifikační status. Platné možnosti jsou: {options}.
+
+msgid That member is not in the database.
+msgstr Tento uživatel není v databázi.
+
 msgid Verification groups
 msgstr Verifikační skupiny
 

@@ -61,6 +61,12 @@ msgstr
 msgid Role **{role}** has {real_count} members, not {count}. Try again.
 msgstr
 
+msgid Invalid verification status. Available options are: {options}.
+msgstr
+
+msgid That member is not in the database.
+msgstr
+
 msgid Verification groups
 msgstr
 
