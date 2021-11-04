@@ -6,3 +6,6 @@ flake8==4.0.1
 flake8-black==0.2.3
 flake8-print==4.0.0
 flake8-todo==0.7
+
+# pumpkin.py tools
+git+https://github.com/pumpkin-py/pumpkin-tools.git
