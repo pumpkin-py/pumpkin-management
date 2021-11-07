@@ -297,7 +297,7 @@ class UnverifyItem(database.base):
             query = query.filter(
                 or_(
                     UnverifyItem.last_check < min_last_checked,
-                    UnverifyItem.last_check is None,
+                    UnverifyItem.last_check == None,  # noqa: E711
                 )
             )
 
@@ -336,7 +336,12 @@ class UnverifyItem(database.base):
         if max_end_time is not None:
             query = query.filter(UnverifyItem.end_time < max_end_time)
         if min_last_checked is not None:
-            query = query.filter(UnverifyItem.last_check < min_last_checked)
+            query = query.filter(
+                or_(
+                    UnverifyItem.last_check < min_last_checked,
+                    UnverifyItem.last_check is None,
+                )
+            )
 
         return query.order_by(UnverifyItem.end_time.asc()).all()
 
@@ -367,7 +372,7 @@ class UnverifyItem(database.base):
             f'user_id="{self.user_id}" start_time="{self.start_time}" end_time="{self.end_time}" '
             f'roles_to_return="{self.roles_to_return}" channels_to_return="{self.channels_to_return}" '
             f'channels_to_remove="{self.channels_to_remove}" reason="{self.reason}" status="{self.status}" '
-            f'type="{self.type}">'
+            f'last_check="{self.last_check}" type="{self.type}">'
         )
 
     def dump(self) -> dict:
