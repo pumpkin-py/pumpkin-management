@@ -561,13 +561,15 @@ class Unverify(commands.Cog):
                 )
             await member.send(embed=embed)
 
+        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+
         ctx.reply(
             _(
                 ctx,
-                "Member {member_name} was temporarily unverified. The access will be returned on: {end_date}",
+                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
             ).format(
                 member_name=member.name,
-                end_date=end_time,
+                end_time=end_time_str,
             )
         )
 
@@ -581,7 +583,7 @@ class Unverify(commands.Cog):
             ).format(
                 member_name=member.name,
                 member_id=member.id,
-                end_time=end_time,
+                end_time=end_time_str,
                 reason=reason,
                 type=UnverifyType.unverify.value,
             ),
@@ -625,18 +627,80 @@ class Unverify(commands.Cog):
         """List unverified members.
 
         Args:
-            status (str, optional): One of ["waiting", "finished", "member_left", "guild_not_found"]. Defaults to "waiting".
+            status (str, optional): One of ["waiting", "finished", "member_left", "guild_not_found", "all"]. Defaults to "waiting".
         """
 
         status: str = status.lower()
-        if status not in ("waiting", "finished", "member_left", "guild_not_found"):
-            await ctx.reply(_(ctx, "Invalid status."))
+        if status not in (
+            "waiting",
+            "finished",
+            "member_left",
+            "guild_not_found",
+            "all",
+        ):
+            await ctx.reply(_(ctx, "Invalid status. Check the command help."))
             return
 
-        result = UnverifyItem.get_guild_items(
-            guild_id=ctx.guild.id, status=UnverifyStatus[status]
-        )
-        print(result)
+        if status == "all":
+            result = UnverifyItem.get_guild_items(guild_id=ctx.guild.id, status=None)
+        else:
+            result = UnverifyItem.get_guild_items(
+                guild_id=ctx.guild.id, status=UnverifyStatus[status]
+            )
+        embeds = []
+        for item in result:
+            guild = self.bot.get_guild(item.guild_id)
+            user = guild.get_member(item.user_id)
+            if user is None:
+                try:
+                    user = await self.bot.fetch_user(item.user_id)
+                    user_name = f"{user.mention}\n{user.name} ({user.id})"
+                except discord.errors.NotFound:
+                    user_name = "_(Unknown user)_"
+            else:
+                user_name = f"{user.mention}\n{user.name} ({user.id})"
+
+            start_time = item.start_time.strftime("%d.%m.%Y %H:%M")
+            end_time = item.end_time.strftime("%d.%m.%Y %H:%M")
+
+            roles = []
+            for role_id in item.roles_to_return:
+                role = discord.utils.get(guild.roles, id=role_id)
+                roles.append(role)
+            channels = []
+            for channel_id in item.channels_to_return:
+                channel = discord.utils.get(guild.channels, id=channel_id)
+                channels.append(channel)
+
+            embed = utils.Discord.create_embed(
+                author=ctx.message.author, title=_(ctx, "Unverify list")
+            )
+            embed.add_field(name=_(ctx, "User"), value=user_name, inline=False)
+            embed.add_field(
+                name=_(ctx, "Start time"), value=str(start_time), inline=True
+            )
+            embed.add_field(name=_(ctx, "End time"), value=str(end_time), inline=True)
+            embed.add_field(name=_(ctx, "Status"), value=item.status.value, inline=True)
+            embed.add_field(name=_(ctx, "Type"), value=item.type.value, inline=True)
+            if roles != []:
+                embed.add_field(
+                    name=_(ctx, "Roles to return"),
+                    value=", ".join(role.name for role in roles),
+                    inline=True,
+                )
+
+            if channels != []:
+                embed.add_field(
+                    name=_(ctx, "Channels to return"),
+                    value=", ".join(channel.name for channel in channels),
+                    inline=True,
+                )
+            if item.reason != "{}":
+                embed.add_field(name=_(ctx, "Reason"), value=item.reason, inline=False)
+            embeds.append(embed)
+
+        scrollable_embed = utils.ScrollableEmbed(ctx, embeds)
+        await scrollable_embed.scroll()
 
 
 def setup(bot) -> None:
