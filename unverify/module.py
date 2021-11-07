@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import asyncio
 import contextlib
 from datetime import datetime, timedelta
@@ -37,7 +38,7 @@ class Unverify(commands.Cog):
     @tasks.loop(seconds=30.0)
     async def reverifier(self):
         max_end_time = datetime.now() + timedelta(seconds=30)
-        min_last_checked = datetime.now() + timedelta(hours=1)
+        min_last_checked = datetime.now() - timedelta(hours=1)
         items = UnverifyItem.get_items(
             status=UnverifyStatus.waiting,
             max_end_time=max_end_time,
@@ -51,6 +52,26 @@ class Unverify(commands.Cog):
     async def before_reverifier(self):
         print("Reverify loop waiting until ready().")
         await self.bot.wait_until_ready()
+
+    @staticmethod
+    def _parse_datetime(datetime_str: str) -> datetime:
+        regex = re.compile(
+            r"(?!\s*$)(?:(?P<weeks>\d+)(?: )?(?:w)(?: )?)?(?:(?P<days>\d+)(?: )?(?:d)(?: )?)?(?:(?P<hours>\d+)(?: )?(?:h)(?: )?)?(?:(?P<minutes>\d+)(?: )?(?:m)(?: )?)?"
+        )
+        result = re.fullmatch(regex, datetime_str)
+        if result is not None:
+            match_dict = result.groupdict(default=0)
+            end_time = datetime.now() + timedelta(
+                weeks=int(match_dict["weeks"]),
+                days=int(match_dict["days"]),
+                hours=int(match_dict["hours"]),
+                minutes=int(match_dict["minutes"]),
+            )
+            return end_time
+
+        end_time = dparser.parse(timestr=datetime_str, dayfirst=True, yearfirst=False)
+
+        return end_time
 
     async def _get_guild(self, item: UnverifyItem) -> Optional[Guild]:
         guild = self.bot.get_guild(item.guild_id)
@@ -506,14 +527,21 @@ class Unverify(commands.Cog):
             reason (str, optional): Reason of Unverify. Defaults to None.
         """
         try:
-            end_time = dparser.parse(
-                timestr=datetime_str, dayfirst=True, yearfirst=False
-            )
+            end_time = self._parse_datetime(datetime_str)
         except dparser.ParserError:
             await ctx.reply(
                 _(
                     ctx,
                     "I don't know how to parse `{datetime_str}`, please try again.",
+                ).format(datetime_str=datetime_str)
+            )
+            return
+
+        if end_time < datetime.now():
+            await ctx.reply(
+                _(
+                    ctx,
+                    "End time already passed.",
                 ).format(datetime_str=datetime_str)
             )
             return
@@ -526,7 +554,7 @@ class Unverify(commands.Cog):
             await ctx.reply(
                 _(
                     ctx,
-                    "End time already passed or Member is already unverified.",
+                    "Member is already unverified.",
                 )
             )
             return
@@ -563,7 +591,7 @@ class Unverify(commands.Cog):
 
         end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
 
-        ctx.reply(
+        await ctx.reply(
             _(
                 ctx,
                 "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
@@ -599,26 +627,31 @@ class Unverify(commands.Cog):
             member (discord.Member): Member to be pardoned
         """
         result = UnverifyItem.get_member(member=member, status=UnverifyStatus.waiting)
-        if result is not None:
-            item = result[0]
-            item.end_time = datetime.now()
-            item.save()
+        if result == []:
+            await ctx.reply(_(ctx, "Is this member really unverified?"))
+            return
+        item = result[0]
+        item.end_time = datetime.now()
+        item.save()
 
-            gc = TranslationContext(ctx.guild.id, None)
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                _(gc, "Unverify of {member_name} ({member_id}) was pardoned.",).format(
-                    member_name=member.name,
-                    member_id=member.id,
-                ),
+        gc = TranslationContext(ctx.guild.id, None)
+        await guild_log.info(
+            ctx.author,
+            ctx.channel,
+            _(gc, "Unverify of {member_name} ({member_id}) was pardoned.",).format(
+                member_name=member.name,
+                member_id=member.id,
+            ),
+        )
+        await ctx.reply(
+            _(
+                ctx,
+                "Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.",
+            ).format(
+                member_name=member.name,
+                member_id=member.id,
             )
-            await ctx.reply(
-                _(ctx, "Unverify of {member_name} ({member_id}) was pardoned.").format(
-                    member_name=member.name,
-                    member_id=member.id,
-                )
-            )
+        )
 
     @commands.guild_only()
     @commands.check(check.acl)
@@ -701,6 +734,168 @@ class Unverify(commands.Cog):
 
         scrollable_embed = utils.ScrollableEmbed(ctx, embeds)
         await scrollable_embed.scroll()
+
+    @commands.guild_only()
+    @commands.command()
+    async def selfunverify(self, ctx: commands.Context, datetime_str: str):
+        """Unverify self.
+
+        Args:
+            datetime_str (str): Until when. Preferably quoted.
+        """
+        try:
+            end_time = self._parse_datetime(datetime_str)
+        except dparser.ParserError:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "I don't know how to parse `{datetime_str}`, please try again.",
+                ).format(datetime_str=datetime_str)
+            )
+            return
+
+        if end_time < datetime.now():
+            await ctx.reply(
+                _(
+                    ctx,
+                    "End time already passed.",
+                ).format(datetime_str=datetime_str)
+            )
+            return
+
+        try:
+            await self._unverify_member(
+                ctx.message.author,
+                end_time,
+                UnverifyType.selfunverify.value,
+                type=UnverifyType.selfunverify,
+            )
+        except ValueError:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "Member is already unverified.",
+                )
+            )
+            return
+
+        with contextlib.suppress(discord.Forbidden):
+            tc = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            embed = utils.Discord.create_embed(
+                author=ctx.message.author,
+                title=_(
+                    tc,
+                    "Your access to {guild_name} was temporarily revoked.",
+                ).format(
+                    guild_name=ctx.guild.name,
+                ),
+            )
+            embed.add_field(
+                name=_(
+                    tc,
+                    "Your access will be automatically returned on",
+                ),
+                value=end_time,
+                inline=False,
+            )
+            await ctx.message.author.send(embed=embed)
+
+        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+
+        await ctx.reply(
+            _(
+                ctx,
+                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
+            ).format(
+                member_name=ctx.message.author.name,
+                end_time=end_time_str,
+            )
+        )
+
+        gc = TranslationContext(ctx.message.author.guild.id, None)
+        await guild_log.info(
+            ctx.message.author,
+            ctx.message.author.guild,
+            _(
+                gc,
+                "Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}",
+            ).format(
+                member_name=ctx.message.author.name,
+                member_id=ctx.message.author.id,
+                end_time=end_time_str,
+                type=UnverifyType.selfunverify.value,
+            ),
+        )
+
+    @commands.guild_only()
+    @commands.command()
+    async def gn(self, ctx: commands.Context):
+        """Goodnight!"""
+        end_time = datetime.now().replace(hour=6, minute=00) + timedelta(days=1)
+
+        try:
+            await self._unverify_member(
+                ctx.message.author,
+                end_time,
+                UnverifyType.selfunverify.value,
+                type=UnverifyType.selfunverify,
+            )
+        except ValueError:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "Member is already unverified.",
+                )
+            )
+            return
+
+        with contextlib.suppress(discord.Forbidden):
+            tc = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            embed = utils.Discord.create_embed(
+                author=ctx.message.author,
+                title=_(
+                    tc,
+                    "Your access to {guild_name} was temporarily revoked.",
+                ).format(
+                    guild_name=ctx.guild.name,
+                ),
+            )
+            embed.add_field(
+                name=_(
+                    tc,
+                    "Your access will be automatically returned on",
+                ),
+                value=end_time,
+                inline=False,
+            )
+            await ctx.message.author.send(embed=embed)
+
+        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+
+        await ctx.reply(
+            _(
+                ctx,
+                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
+            ).format(
+                member_name=ctx.message.author.name,
+                end_time=end_time_str,
+            )
+        )
+
+        gc = TranslationContext(ctx.message.author.guild.id, None)
+        await guild_log.info(
+            ctx.message.author,
+            ctx.message.author.guild,
+            _(
+                gc,
+                "Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}",
+            ).format(
+                member_name=ctx.message.author.name,
+                member_id=ctx.message.author.id,
+                end_time=end_time_str,
+                type=UnverifyType.selfunverify.value,
+            ),
+        )
 
 
 def setup(bot) -> None:
