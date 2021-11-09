@@ -81,7 +81,7 @@ class Unverify(commands.Cog):
                 await bot_log.warning(
                     None,
                     None,
-                    f"Reverify failed: Guild ({item.guild_id}) was not found. Setting status to `guild could not be found`",
+                    f"Reverify failed: Guild ({item.guild_id}) was not found.\nSetting status to `guild could not be found`",
                 )
                 item.status = UnverifyStatus.guild_not_found
             item.last_checked = datetime.now()
@@ -141,7 +141,6 @@ class Unverify(commands.Cog):
                             member_name=member.name,
                             member_id=member.id,
                         ),
-                        f"Returning role {role.name} to {member.name} ({member.id}) failed. Insufficient permissions.",
                     )
             else:
                 gtx = TranslationContext(member.guild.id, None)
@@ -559,34 +558,35 @@ class Unverify(commands.Cog):
             )
             return
 
-        with contextlib.suppress(discord.Forbidden):
-            utx = TranslationContext(ctx.guild.id, member.id)
-            embed = utils.Discord.create_embed(
-                author=ctx.message.author,
-                title=_(
-                    utx,
-                    "Your access to {guild_name} was temporarily revoked.",
-                ).format(
-                    guild_name=ctx.guild.name,
-                ),
-            )
+        utx = TranslationContext(ctx.guild.id, member.id)
+        embed = utils.Discord.create_embed(
+            author=ctx.message.author,
+            title=_(
+                utx,
+                "Your access to {guild_name} was temporarily revoked.",
+            ).format(
+                guild_name=ctx.guild.name,
+            ),
+        )
+        embed.add_field(
+            name=_(
+                utx,
+                "Your access will be automatically returned on",
+            ),
+            value=end_time,
+            inline=False,
+        )
+        if reason is not None:
             embed.add_field(
                 name=_(
                     utx,
-                    "Your access will be automatically returned on",
+                    "Reason",
                 ),
-                value=end_time,
+                value=reason,
                 inline=False,
             )
-            if reason is not None:
-                embed.add_field(
-                    name=_(
-                        utx,
-                        "Reason",
-                    ),
-                    value=reason,
-                    inline=False,
-                )
+
+        with contextlib.suppress(discord.Forbidden):
             await member.send(embed=embed)
 
         end_time_str = end_time.strftime("%d.%m.%Y %H:%M")

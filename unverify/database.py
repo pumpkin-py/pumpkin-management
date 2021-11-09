@@ -40,7 +40,7 @@ class GuildConfig(database.base):
     guild_id = Column(BigInteger, primary_key=True, autoincrement=False)
     unverify_role_id = Column(BigInteger)
 
-    def set(guild_id, unverify_role_id) -> GuildConfig:
+    def set(guild_id: int, unverify_role_id: int) -> GuildConfig:
         """Updates the Guild Config item. Creates if not already present
 
         Args:
@@ -61,7 +61,7 @@ class GuildConfig(database.base):
         session.commit()
         return query
 
-    def get(guild_id) -> GuildConfig:
+    def get(guild_id: int) -> Optional[GuildConfig]:
         """Retreives the guild configuration
 
         Args:
@@ -159,12 +159,12 @@ class UnverifyItem(database.base):
                 Type of the unverify.
 
         Raises:
-        - :class:`ValueError`: End time already passed or Member is already unverified.
-        - :class:`sqlalchemy.orm.exc.MultipleResultsFound`: Multiple items were found (which is not expected).
+            :class:`ValueError`: End time already passed or Member is already unverified.
+            :class:`sqlalchemy.orm.exc.MultipleResultsFound`: Multiple items were found (which is not expected).
 
         Returns:
-        :class:`UnverifyItem`
-            The created database item.
+            :class:`UnverifyItem`
+                The created database item.
         """
         start_time = datetime.now()
         if end_time < start_time:
@@ -182,44 +182,28 @@ class UnverifyItem(database.base):
 
         if query is not None:
             raise ValueError
-        else:
-            added = UnverifyItem(
-                guild_id=member.guild.id,
-                user_id=member.id,
-                start_time=start_time,
-                end_time=end_time,
-                roles_to_return=roles_to_return,
-                channels_to_return=channels_to_return,
-                channels_to_remove=channels_to_remove,
-                reason=reason,
-                type=type,
-            )
-            session.add(added)
-            session.commit()
+        added = UnverifyItem(
+            guild_id=member.guild.id,
+            user_id=member.id,
+            start_time=start_time,
+            end_time=end_time,
+            roles_to_return=roles_to_return,
+            channels_to_return=channels_to_return,
+            channels_to_remove=channels_to_remove,
+            reason=reason,
+            type=type,
+        )
+        session.add(added)
+        session.commit()
         return added
 
-    def remove(self) -> UnverifyItem:
+    def remove(self):
         """DANGER
         ------
         Deletes the item from the database. Does not reverify the member.
-
-        Raises:
-        - :class:`ValueError`: Item could not be found in the database.
-        - :class:`sqlalchemy.orm.exc.MultipleResultsFound`: Multiple results were found (which is not expected).
-
-        Returns:
-        :class:`UnverifyItem`: The removed item.
         """
-        query = session.query(UnverifyItem).filter_by(idx=self.idx)
-        result = query.one_or_none()
-
-        if result is None:
-            raise ValueError
-        else:
-            query.delete()
-            session.commit()
-
-        return result
+        session.delete(self)
+        session.commit()
 
     @staticmethod
     def get_member(
@@ -257,10 +241,10 @@ class UnverifyItem(database.base):
                 The database idx of the item to retrieve.
 
         Raises:
-        - :class:`sqlalchemy.orm.exc.MultipleResultsFound`: Multiple results were found (which is not expected).
+            :class:`sqlalchemy.orm.exc.MultipleResultsFound`: Multiple results were found (which is not expected).
 
         Returns:
-        :class:`Optional[UnverifyItem]`
+            :class:`Optional[UnverifyItem]`
         """
         return session.query(UnverifyItem).filter_by(idx=idx).one_or_none()
 
