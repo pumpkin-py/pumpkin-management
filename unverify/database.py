@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import enum
-from typing import Optional
+from typing import Optional, List, Dict
 
 from sqlalchemy import ARRAY, Column, Integer, String, DateTime, BigInteger, Enum
 from sqlalchemy import or_
@@ -76,11 +76,11 @@ class GuildConfig(database.base):
     def __repr__(self) -> str:
         return f'<GuildConfig guild_id="{self.guild_id}" unverify_role_id="{self.unverify_role_id}">'
 
-    def dump(self) -> dict:
+    def dump(self) -> Dict:
         """Dumps GuildConfig into a dictionary.
 
         Returns:
-            :class:`dict`: The GuildConfig as a dictionary.
+            :class:`Dict`: The GuildConfig as a dictionary.
         """
         return {"guild_id": self.guild_id, "unverify_role_id": self.unverify_role_id}
 
@@ -101,11 +101,11 @@ class UnverifyItem(database.base):
             When the unverify ends.
         last_check (:class:`datetime.datetime`)
             When the item was last checked. Used when the user left or guild cannot be found.
-        roles_to_return (:class:`list[int]`)
+        roles_to_return (:class:`List[int]`)
             List of :class:`discord.Role.id`s to return after the unverify ends.
-        channels_to_return (:class:`list[int]`)
+        channels_to_return (:class:`List[int]`)
             List of :class:`discord.Role.id`s to return after the unverify ends.
-        channels_to_remove (:class:`list[int]`)
+        channels_to_remove (:class:`List[int]`)
             List of :class:`discord.abc.GuildChannel.id`s to remove after the unverify ends.
         reason (:class:`str`)
             Reason of the unverify.
@@ -134,9 +134,9 @@ class UnverifyItem(database.base):
     def add(
         member: Member,
         end_time: datetime,
-        roles_to_return: list[int],
-        channels_to_return: list[int],
-        channels_to_remove: list[int],
+        roles_to_return: List[int],
+        channels_to_return: List[int],
+        channels_to_remove: List[int],
         reason: str,
         type: UnverifyType,
     ) -> UnverifyItem:
@@ -147,11 +147,11 @@ class UnverifyItem(database.base):
                 The member to be unverified.
             end_time (:class:`datetime.datetime`)
                 When the unverify ends.
-            roles_to_return (:class:`list[int]`)
+            roles_to_return (:class:`List[int]`)
                 List of :class:`discord.Role.id`s to return after the unverify ends.
-            channels_to_return (:class:`list[int]`)
+            channels_to_return (:class:`List[int]`)
                 List of :class:`discord.abc.GuildChannel.id`s to return after the unverify ends.
-            channels_to_remove (:class:`list[int]`)
+            channels_to_remove (:class:`List[int]`)
                 List of :class:`discord.abc.GuildChannel.id`s to remove after the unverify ends.
             reason (:class:`str`)
                 Reason of the unverify.
@@ -208,7 +208,7 @@ class UnverifyItem(database.base):
     @staticmethod
     def get_member(
         member: Member, status: UnverifyStatus = None, type: UnverifyType = None
-    ) -> Optional[list[UnverifyItem]]:
+    ) -> Optional[List[UnverifyItem]]:
         """Retreives UnverifyItems filtered by member and optionally by status and type.
 
         Args:
@@ -220,7 +220,7 @@ class UnverifyItem(database.base):
                 Type of the unverify. Defaults to None.
 
         Returns:
-            :class:`list[UnverifyItem]`
+            :class:`List[UnverifyItem]`
         """
         query = session.query(UnverifyItem).filter_by(
             user_id=member.id, guild_id=member.guild.id
@@ -254,8 +254,8 @@ class UnverifyItem(database.base):
         status: UnverifyStatus = None,
         max_end_time: datetime = None,
         min_last_checked: datetime = None,
-    ) -> Optional[list[UnverifyItem]]:
-        """Retreives list of UnverifyItems filtered optionally by:
+    ) -> Optional[List[UnverifyItem]]:
+        """Retreives List of UnverifyItems filtered optionally by:
             Unverify type, Unverify status, up to end time, with minimum last check time.
 
         Args:
@@ -267,7 +267,7 @@ class UnverifyItem(database.base):
                 Status of the unverify. Defaults to None.
 
         Returns:
-            :class:`list[UnverifyItem]`: The retrieved unverify items.
+            :class:`List[UnverifyItem]`: The retrieved unverify items.
         """
         query = session.query(UnverifyItem)
 
@@ -294,8 +294,8 @@ class UnverifyItem(database.base):
         status: UnverifyStatus = None,
         max_end_time: datetime = None,
         min_last_checked: datetime = None,
-    ) -> Optional[list[UnverifyItem]]:
-        """Retreives list of UnverifyItems filtered by Guild ID and optionally by:
+    ) -> Optional[List[UnverifyItem]]:
+        """Retreives List of UnverifyItems filtered by Guild ID and optionally by:
             Unverify type, Unverify status, up to end time, with minimum last check time.
 
         Args:
@@ -309,7 +309,7 @@ class UnverifyItem(database.base):
                 Status of the unverify. Defaults to None.
 
         Returns:
-            :class:`list[UnverifyItem]`: The retrieved unverify items.
+            :class:`List[UnverifyItem]`: The retrieved unverify items.
         """
         query = session.query(UnverifyItem).filter_by(guild_id=guild_id)
 
@@ -330,7 +330,7 @@ class UnverifyItem(database.base):
         return query.order_by(UnverifyItem.end_time.asc()).all()
 
     @staticmethod
-    def remove_all(guild_id: int) -> Optional[list[UnverifyItem]]:
+    def remove_all(guild_id: int) -> Optional[List[UnverifyItem]]:
         """DANGER
         ------
         Removes all existing UnverifyItems in the guild! Does not reverify anyone.
@@ -340,7 +340,7 @@ class UnverifyItem(database.base):
                 ID of the :class:`discord.Guild` whose items are to be deleted.
 
         Returns:
-            :class:`list[UnverifyItem]`: Deleted items
+            :class:`List[UnverifyItem]`: Deleted items
         """
 
         query = session.query(UnverifyItem).filter_by(guild_id=guild_id)
@@ -359,11 +359,11 @@ class UnverifyItem(database.base):
             f'last_check="{self.last_check}" type="{self.type}">'
         )
 
-    def dump(self) -> dict:
+    def dump(self) -> Dict:
         """Dumps UnverifyItem into a dictionary.
 
         Returns:
-            :class:`dict`: The UnverifyItem as a dictionary.
+            :class:`Dict`: The UnverifyItem as a dictionary.
         """
         return {
             "idx": self.idx,

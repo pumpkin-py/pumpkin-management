@@ -6,7 +6,7 @@ import contextlib
 from datetime import datetime, timedelta
 import dateutil.parser as dparser
 
-from typing import Optional
+from typing import Optional, List, Tuple
 
 import discord
 from discord import Guild, Member
@@ -318,7 +318,7 @@ class Unverify(commands.Cog):
         item.save()
 
     @staticmethod
-    async def _remove_roles(member: Member, type: UnverifyType) -> list[int]:
+    async def _remove_roles(member: Member, type: UnverifyType) -> List[int]:
         guild = member.guild
         removed_role_ids = []
         for role in member.roles:
@@ -380,8 +380,8 @@ class Unverify(commands.Cog):
     async def _remove_or_keep_channels(
         member: Member,
         type: UnverifyType,
-        channels_to_keep: list[discord.abc.GuildChannel],
-    ) -> tuple[list[int], list[int]]:
+        channels_to_keep: List[discord.abc.GuildChannel],
+    ) -> Tuple[List[int], List[int]]:
         removed_channel_ids = []
         added_channel_ids = []
 
@@ -448,7 +448,7 @@ class Unverify(commands.Cog):
         end_time: datetime,
         reason: str,
         type: UnverifyType,
-        channels_to_keep: list[discord.abc.GuildChannel] = None,
+        channels_to_keep: List[discord.abc.GuildChannel] = None,
     ) -> UnverifyItem:
         result = UnverifyItem.get_member(member=member, status=UnverifyStatus.waiting)
         if result != []:
