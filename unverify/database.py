@@ -330,7 +330,7 @@ class UnverifyItem(database.base):
         return query.order_by(UnverifyItem.end_time.asc()).all()
 
     @staticmethod
-    def remove_all(guild_id: int) -> Optional[List[UnverifyItem]]:
+    def remove_all(guild_id: int) -> int:
         """DANGER
         ------
         Removes all existing UnverifyItems in the guild! Does not reverify anyone.
@@ -340,15 +340,10 @@ class UnverifyItem(database.base):
                 ID of the :class:`discord.Guild` whose items are to be deleted.
 
         Returns:
-            :class:`List[UnverifyItem]`: Deleted items
+            :class:`int`: Number of deleted items
         """
 
-        query = session.query(UnverifyItem).filter_by(guild_id=guild_id)
-        result = query.all()
-        if result != []:
-            query.delete()
-            session.commit()
-        return result
+        return session.query(UnverifyItem).filter_by(guild_id=guild_id).delete()
 
     def __repr__(self) -> str:
         return (
