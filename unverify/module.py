@@ -103,12 +103,12 @@ class Unverify(commands.Cog):
                 member = await guild.fetch_member(item.user_id)
             except NotFound:
                 if item.status != UnverifyStatus.member_left:
-                    gc = TranslationContext(member.guild.id, None)
+                    gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         guild,
                         _(
-                            gc,
+                            gtx,
                             "Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.",
                         ).format(
                             user_id=item.user_id,
@@ -129,12 +129,12 @@ class Unverify(commands.Cog):
                 try:
                     await member.add_roles(role, reason="Reverify", atomic=True)
                 except discord.errors.Forbidden:
-                    gc = TranslationContext(member.guild.id, None)
+                    gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
                         _(
-                            gc,
+                            gtx,
                             "Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.",
                         ).format(
                             role_name=role.name,
@@ -144,11 +144,11 @@ class Unverify(commands.Cog):
                         f"Returning role {role.name} to {member.name} ({member.id}) failed. Insufficient permissions.",
                     )
             else:
-                gc = TranslationContext(member.guild.id, None)
+                gtx = TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
-                    _(gc, "Role with ID {role_id} could not be found.",).format(
+                    _(gtx, "Role with ID {role_id} could not be found.",).format(
                         role_id=role_id,
                     ),
                 )
@@ -165,12 +165,12 @@ class Unverify(commands.Cog):
                         member, overwrite=user_overw, reason="Reverify"
                     )
                 except discord.errors.Forbidden:
-                    gc = TranslationContext(member.guild.id, None)
+                    gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
                         _(
-                            gc,
+                            gtx,
                             "Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.",
                         ).format(
                             member_name=member.name,
@@ -183,7 +183,7 @@ class Unverify(commands.Cog):
                     None,
                     member.guild,
                     _(
-                        gc,
+                        gtx,
                         "Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.",
                     ).format(
                         member_name=member.name,
@@ -205,12 +205,12 @@ class Unverify(commands.Cog):
                         member, overwrite=user_overw, reason="Reverify"
                     )
                 except discord.errors.Forbidden:
-                    gc = TranslationContext(member.guild.id, None)
+                    gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
                         _(
-                            gc,
+                            gtx,
                             "Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.",
                         ).format(
                             member_name=member.name,
@@ -219,12 +219,12 @@ class Unverify(commands.Cog):
                         ),
                     )
             else:
-                gc = TranslationContext(member.guild.id, None)
+                gtx = TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
                     _(
-                        gc,
+                        gtx,
                         "Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.",
                     ).format(
                         member_name=member.name,
@@ -246,11 +246,11 @@ class Unverify(commands.Cog):
             duration_in_s = duration.total_seconds()
             await asyncio.sleep(duration_in_s)
 
-        gc = TranslationContext(member.guild.id, None)
+        gtx = TranslationContext(member.guild.id, None)
         await guild_log.info(
             None,
             member.guild,
-            _(gc, "Reverifying {member_name} ({member_id}).",).format(
+            _(gtx, "Reverifying {member_name} ({member_id}).",).format(
                 member_name=member.name,
                 member_id=member.id,
             ),
@@ -266,12 +266,12 @@ class Unverify(commands.Cog):
             try:
                 await member.remove_roles(unverify_role, reason="Reverify", atomic=True)
             except discord.errors.Forbidden:
-                gc = TranslationContext(member.guild.id, None)
+                gtx = TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
                     _(
-                        gc,
+                        gtx,
                         "Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.",
                     ).format(
                         member_name=member.name,
@@ -279,12 +279,12 @@ class Unverify(commands.Cog):
                     ),
                 )
         else:
-            gc = TranslationContext(member.guild.id, None)
+            gtx = TranslationContext(member.guild.id, None)
             await guild_log.warning(
                 None,
                 member.guild,
                 _(
-                    gc,
+                    gtx,
                     "Removing unverify role from  {member_name} ({member_id}) failed. Role not found.",
                 ).format(
                     member_name=member.name,
@@ -292,26 +292,26 @@ class Unverify(commands.Cog):
                 ),
             )
 
-        gc = TranslationContext(guild.id, None)
-        tc = TranslationContext(guild.id, member.id)
+        gtx = TranslationContext(guild.id, None)
+        utx = TranslationContext(guild.id, member.id)
         await guild_log.info(
             None,
             member.guild,
-            _(gc, "Reverify success for member {member_name}.").format(
+            _(gtx, "Reverify success for member {member_name}.").format(
                 member_name=member.name
             ),
         )
         try:
             await member.send(
-                _(tc, "Your access to the guild **{guild_name}** was returned.").format(
-                    guild_name=guild.name
-                )
+                _(
+                    utx, "Your access to the guild **{guild_name}** was returned."
+                ).format(guild_name=guild.name)
             )
         except discord.Forbidden:
             await guild_log.info(
                 None,
                 member.guild,
-                _(gc, "Couldn't send reverify info to {member_name}'s DM").format(
+                _(gtx, "Couldn't send reverify info to {member_name}'s DM").format(
                     member_name=member.name
                 ),
             )
@@ -330,12 +330,12 @@ class Unverify(commands.Cog):
                 # This could be deleted roles just moment after the unverify started of someone tried to unverify a bot.
                 pass
             except discord.errors.Forbidden:
-                gc = TranslationContext(member.guild.id, None)
+                gtx = TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
                     _(
-                        gc,
+                        gtx,
                         "Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.",
                     ).format(
                         role_name=role.name,
@@ -350,12 +350,12 @@ class Unverify(commands.Cog):
             try:
                 await member.add_roles(unverify_role, reason=type.value, atomic=True)
             except discord.errors.Forbidden:
-                gc = TranslationContext(member.guild.id, None)
+                gtx = TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
                     _(
-                        gc,
+                        gtx,
                         "Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.",
                     ).format(
                         member_name=member.name,
@@ -363,12 +363,12 @@ class Unverify(commands.Cog):
                     ),
                 )
         else:
-            gc = TranslationContext(member.guild.id, None)
+            gtx = TranslationContext(member.guild.id, None)
             await guild_log.warning(
                 None,
                 member.guild,
                 _(
-                    gc,
+                    gtx,
                     "Adding unverify role to {member_name} ({member_id}) failed. Role not found.",
                 ).format(
                     member_name=member.name,
@@ -402,12 +402,12 @@ class Unverify(commands.Cog):
                         )
                         added_channel_ids.append(channel.id)
                     except PermissionError:
-                        gc = TranslationContext(member.guild.id, None)
+                        gtx = TranslationContext(member.guild.id, None)
                         await guild_log.warning(
                             None,
                             member.guild,
                             _(
-                                gc,
+                                gtx,
                                 "Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.",
                             ).format(
                                 member_name=member.name,
@@ -428,12 +428,12 @@ class Unverify(commands.Cog):
                     )
                     removed_channel_ids.append(channel.id)
                 except PermissionError:
-                    gc = TranslationContext(member.guild.id, None)
+                    gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
                         _(
-                            gc,
+                            gtx,
                             "Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.",
                         ).format(
                             member_name=member.name,
@@ -494,17 +494,17 @@ class Unverify(commands.Cog):
         """
         GuildConfig.set(guild_id=ctx.guild.id, unverify_role_id=unverify_role.id)
 
-        gc = TranslationContext(ctx.guild.id, None)
+        gtx = TranslationContext(ctx.guild.id, None)
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            _(gc, "Unverify role was set to {role_name}.",).format(
+            _(gtx, "Unverify role was set to {role_name}.",).format(
                 role_name=unverify_role.name,
                 guild_name=ctx.guild.name,
             ),
         )
         await ctx.reply(
-            _(ctx, "Unverify role set to {role_name}.").format(
+            _(ctx, "Unverify role was set to {role_name}.").format(
                 role_name=unverify_role.mention, guild_name=ctx.guild.name
             )
         )
@@ -560,11 +560,11 @@ class Unverify(commands.Cog):
             return
 
         with contextlib.suppress(discord.Forbidden):
-            tc = TranslationContext(ctx.guild.id, member.id)
+            utx = TranslationContext(ctx.guild.id, member.id)
             embed = utils.Discord.create_embed(
                 author=ctx.message.author,
                 title=_(
-                    tc,
+                    utx,
                     "Your access to {guild_name} was temporarily revoked.",
                 ).format(
                     guild_name=ctx.guild.name,
@@ -572,7 +572,7 @@ class Unverify(commands.Cog):
             )
             embed.add_field(
                 name=_(
-                    tc,
+                    utx,
                     "Your access will be automatically returned on",
                 ),
                 value=end_time,
@@ -581,7 +581,7 @@ class Unverify(commands.Cog):
             if reason is not None:
                 embed.add_field(
                     name=_(
-                        tc,
+                        utx,
                         "Reason",
                     ),
                     value=reason,
@@ -601,12 +601,12 @@ class Unverify(commands.Cog):
             )
         )
 
-        gc = TranslationContext(member.guild.id, None)
+        gtx = TranslationContext(member.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             member.guild,
             _(
-                gc,
+                gtx,
                 "Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}",
             ).format(
                 member_name=member.name,
@@ -634,11 +634,11 @@ class Unverify(commands.Cog):
         item.end_time = datetime.now()
         item.save()
 
-        gc = TranslationContext(ctx.guild.id, None)
+        gtx = TranslationContext(ctx.guild.id, None)
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            _(gc, "Unverify of {member_name} ({member_id}) was pardoned.",).format(
+            _(gtx, "Unverify of {member_name} ({member_id}) was pardoned.",).format(
                 member_name=member.name,
                 member_id=member.id,
             ),
@@ -780,11 +780,11 @@ class Unverify(commands.Cog):
             return
 
         with contextlib.suppress(discord.Forbidden):
-            tc = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
             embed = utils.Discord.create_embed(
                 author=ctx.message.author,
                 title=_(
-                    tc,
+                    utx,
                     "Your access to {guild_name} was temporarily revoked.",
                 ).format(
                     guild_name=ctx.guild.name,
@@ -792,7 +792,7 @@ class Unverify(commands.Cog):
             )
             embed.add_field(
                 name=_(
-                    tc,
+                    utx,
                     "Your access will be automatically returned on",
                 ),
                 value=end_time,
@@ -812,12 +812,12 @@ class Unverify(commands.Cog):
             )
         )
 
-        gc = TranslationContext(ctx.message.author.guild.id, None)
+        gtx = TranslationContext(ctx.message.author.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             ctx.message.author.guild,
             _(
-                gc,
+                gtx,
                 "Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}",
             ).format(
                 member_name=ctx.message.author.name,
@@ -850,11 +850,11 @@ class Unverify(commands.Cog):
             return
 
         with contextlib.suppress(discord.Forbidden):
-            tc = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
             embed = utils.Discord.create_embed(
                 author=ctx.message.author,
                 title=_(
-                    tc,
+                    utx,
                     "Your access to {guild_name} was temporarily revoked.",
                 ).format(
                     guild_name=ctx.guild.name,
@@ -862,7 +862,7 @@ class Unverify(commands.Cog):
             )
             embed.add_field(
                 name=_(
-                    tc,
+                    utx,
                     "Your access will be automatically returned on",
                 ),
                 value=end_time,
@@ -882,12 +882,12 @@ class Unverify(commands.Cog):
             )
         )
 
-        gc = TranslationContext(ctx.message.author.guild.id, None)
+        gtx = TranslationContext(ctx.message.author.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             ctx.message.author.guild,
             _(
-                gc,
+                gtx,
                 "Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}",
             ).format(
                 member_name=ctx.message.author.name,
