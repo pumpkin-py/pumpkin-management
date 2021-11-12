@@ -1,3 +1,90 @@
+msgid That category does not exist here.
+msgstr
+
+msgid Done.
+msgstr
+
+msgid {mention} This server is not a satellite.
+msgstr
+
+msgid {mention} I could not contact the main server.
+msgstr
+
+msgid {mention} You are not on the main server.
+msgstr
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr
+
+msgid Synchronizations
+msgstr
+
+msgid This server is a satellite of
+msgstr
+
+msgid not found
+msgstr
+
+msgid Satellite of this server
+msgstr
+
+msgid Disabled
+msgstr
+
+msgid This server is not synchronized.
+msgstr
+
+msgid I'm not on that server.
+msgstr
+
+msgid That server is already a satellite.
+msgstr
+
+msgid I've sucessfully registered the new satellite.
+msgstr
+
+msgid That server is not synchronized.
+msgstr
+
+msgid Satellite has been sucessfully removed.
+msgstr
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr
+
+msgid Satellite information
+msgstr
+
+msgid Main server
+msgstr
+
+msgid Role mapping
+msgstr
+
+msgid There are no mapped roles
+msgstr
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr
+
+msgid JSON must include dictionary `mapping`.
+msgstr
+
+msgid Error while decoding: `{error}`.
+msgstr
+
+msgid Satellite has been sucessfully constructed.
+msgstr
+
+msgid This server does not have any satellite mapping.
+msgstr
+
+msgid Satellite has been deconstructed.
+msgstr
+
 msgid {mention} You have to include your e-mail.
 msgstr
 
@@ -151,89 +238,122 @@ msgstr
 msgid Roles
 msgstr
 
-msgid That category does not exist here.
+msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
 msgstr
 
-msgid Done.
+msgid Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.
 msgstr
 
-msgid {mention} This server is not a satellite.
+msgid Role with ID {role_id} could not be found.
 msgstr
 
-msgid {mention} I could not contact the main server.
+msgid Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.
 msgstr
 
-msgid {mention} You are not on the main server.
+msgid Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.
 msgstr
 
-msgid {mention} You don't have any synchronizable roles on the main server.
+msgid Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.
 msgstr
 
-msgid {mention} I've added **{count}** new roles to you.
+msgid Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.
 msgstr
 
-msgid Synchronizations
+msgid Reverifying {member_name} ({member_id}).
 msgstr
 
-msgid This server is a satellite of
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.
 msgstr
 
-msgid not found
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Role not found.
 msgstr
 
-msgid Satellite of this server
+msgid Reverify success for member {member_name}.
 msgstr
 
-msgid Disabled
+msgid Your access to the guild **{guild_name}** was returned.
 msgstr
 
-msgid This server is not synchronized.
+msgid Couldn't send reverify info to {member_name}'s DM
 msgstr
 
-msgid I'm not on that server.
+msgid Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.
 msgstr
 
-msgid That server is already a satellite.
+msgid Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.
 msgstr
 
-msgid I've sucessfully registered the new satellite.
+msgid Adding unverify role to {member_name} ({member_id}) failed. Role not found.
 msgstr
 
-msgid That server is not synchronized.
+msgid Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.
 msgstr
 
-msgid Satellite has been sucessfully removed.
+msgid Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.
 msgstr
 
-msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgid Unverify role was set to {role_name}.
 msgstr
 
-msgid Satellite information
+msgid I don't know how to parse `{datetime_str}`, please try again.
 msgstr
 
-msgid Main server
+msgid End time already passed.
 msgstr
 
-msgid Role mapping
+msgid Member is already unverified.
 msgstr
 
-msgid There are no mapped roles
+msgid Your access to {guild_name} was temporarily revoked.
 msgstr
 
-msgid I'm expecting JSON data enclosed in \`\`\`.
+msgid Your access will be automatically returned on
 msgstr
 
-msgid JSON must include dictionary `mapping`.
+msgid Reason
 msgstr
 
-msgid Error while decoding: `{error}`.
+msgid Member {member_name} was temporarily unverified. The access will be returned on: {end_time}
 msgstr
 
-msgid Satellite has been sucessfully constructed.
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}
 msgstr
 
-msgid This server does not have any satellite mapping.
+msgid Is this member really unverified?
 msgstr
 
-msgid Satellite has been deconstructed.
+msgid Unverify of {member_name} ({member_id}) was pardoned.
+msgstr
+
+msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
+msgstr
+
+msgid Invalid status. Check the command help.
+msgstr
+
+msgid Unverify list
+msgstr
+
+msgid User
+msgstr
+
+msgid Start time
+msgstr
+
+msgid End time
+msgstr
+
+msgid Status
+msgstr
+
+msgid Type
+msgstr
+
+msgid Roles to return
+msgstr
+
+msgid Channels to return
+msgstr
+
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}
 msgstr

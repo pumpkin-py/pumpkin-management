@@ -1,3 +1,90 @@
+msgid That category does not exist here.
+msgstr Tato kategorie tady neexistuje.
+
+msgid Done.
+msgstr Hotovo.
+
+msgid {mention} This server is not a satellite.
+msgstr {mention} Tento server není satelit.
+
+msgid {mention} I could not contact the main server.
+msgstr {mention} hlavní server nemohl být kontaktován.
+
+msgid {mention} You are not on the main server.
+msgstr {mention} Nejsi na hlavním serveru.
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr {mention} Nemáš žádné synchronizovatelné role na hlavním serveru.
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr {mention} Bylo ti přidáno **{count}** nových rolí.
+
+msgid Synchronizations
+msgstr Synchronizace
+
+msgid This server is a satellite of
+msgstr Tento server je satelitem
+
+msgid not found
+msgstr nenalezeno
+
+msgid Satellite of this server
+msgstr Satelit tohoto serveru
+
+msgid Disabled
+msgstr Vypnuto
+
+msgid This server is not synchronized.
+msgstr Tento server není synchronizovaný.
+
+msgid I'm not on that server.
+msgstr Na tom serveru nejsem.
+
+msgid That server is already a satellite.
+msgstr Daný server už je satelitem.
+
+msgid I've sucessfully registered the new satellite.
+msgstr Nový satelit byl úspěšně zaregistrován.
+
+msgid That server is not synchronized.
+msgstr Daný server není synchronizovaný.
+
+msgid Satellite has been sucessfully removed.
+msgstr Satelit byl úspěšně odebrán.
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr Hodnoty nalevo jsou ID rolí na hlavním serveru, hodnoty napravo jsou ID rolí na satelitu.
+
+msgid Satellite information
+msgstr Informace o satelitu
+
+msgid Main server
+msgstr Hlavní server
+
+msgid Role mapping
+msgstr Mapování rolí
+
+msgid There are no mapped roles
+msgstr Neexistují žádné mapované role
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr Očekávám JSON data uzavřená v \`\`\`.
+
+msgid JSON must include dictionary `mapping`.
+msgstr JSON musí obsahovat slovník `mapping`.
+
+msgid Error while decoding: `{error}`.
+msgstr Chyba při dekódování: `{error}`.
+
+msgid Satellite has been sucessfully constructed.
+msgstr Satelit byl úspěšně vytvořen.
+
+msgid This server does not have any satellite mapping.
+msgstr Tento server nemá žádný satelitní mapping.
+
+msgid Satellite has been deconstructed.
+msgstr Satelit byl odebrán.
+
 msgid {mention} You have to include your e-mail.
 msgstr {mention} Musíš přiložit svůj e-mail.
 
@@ -151,89 +238,122 @@ msgstr Časová značka
 msgid Roles
 msgstr Role
 
-msgid That category does not exist here.
-msgstr Tato kategorie tady neexistuje.
+msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
+msgstr Reverifikace selhala: Člen ({user_id}) nebyl nalezen. Nastavuji jeho status na `member left server`
 
-msgid Done.
-msgstr Hotovo.
+msgid Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Vrácení role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
 
-msgid {mention} This server is not a satellite.
-msgstr {mention} Tento server není satelit.
+msgid Role with ID {role_id} could not be found.
+msgstr Role s ID {role_id} nebyla nalezena.
 
-msgid {mention} I could not contact the main server.
-msgstr {mention} hlavní server nemohl být kontaktován.
+msgid Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Nedostatečná oprávnění.
 
-msgid {mention} You are not on the main server.
-msgstr {mention} Nejsi na hlavním serveru.
+msgid Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
 
-msgid {mention} You don't have any synchronizable roles on the main server.
-msgstr {mention} Nemáš žádné synchronizovatelné role na hlavním serveru.
+msgid Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.
+msgstr Není možné odebrat {member_name} ({member_id}) z kanálu {channel_name}. Nedostatečná oprávnění.
 
-msgid {mention} I've added **{count}** new roles to you.
-msgstr {mention} Bylo ti přidáno **{count}** nových rolí.
+msgid Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
 
-msgid Synchronizations
-msgstr Synchronizace
+msgid Reverifying {member_name} ({member_id}).
+msgstr Reverifikace uživatele {member_name} ({member_id}).
 
-msgid This server is a satellite of
-msgstr Tento server je satelitem
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
 
-msgid not found
-msgstr nenalezeno
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Role not found.
+msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
 
-msgid Satellite of this server
-msgstr Satelit tohoto serveru
+msgid Reverify success for member {member_name}.
+msgstr Reverifikace uživatele {member_name} byla úspěšná.
 
-msgid Disabled
-msgstr Vypnuto
+msgid Your access to the guild **{guild_name}** was returned.
+msgstr Tvoje oprávnění k serveru **{guild_name}** bylo navráceno.
 
-msgid This server is not synchronized.
-msgstr Tento server není synchronizovaný.
+msgid Couldn't send reverify info to {member_name}'s DM
+msgstr Nebylo možné poslat uživateli {member_name} do DM informace o reverifikaci.
 
-msgid I'm not on that server.
-msgstr Na tom serveru nejsem.
+msgid Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Odebrání role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
 
-msgid That server is already a satellite.
-msgstr Daný server už je satelitem.
+msgid Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
 
-msgid I've sucessfully registered the new satellite.
-msgstr Nový satelit byl úspěšně zaregistrován.
+msgid Adding unverify role to {member_name} ({member_id}) failed. Role not found.
+msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
 
-msgid That server is not synchronized.
-msgstr Daný server není synchronizovaný.
+msgid Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.
+msgstr Přidání dočasných oprávnění uživateli {member_name} ({member_id}) do kanálu {channel_name} selhalo. Nedostatečná oprávnění.
 
-msgid Satellite has been sucessfully removed.
-msgstr Satelit byl úspěšně odebrán.
+msgid Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.
+msgstr Odebrání uživatele {member_name} ({member_id}) z kanálu {channel_name} selhalo. Nedostatečná oprávnění
 
-msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
-msgstr Hodnoty nalevo jsou ID rolí na hlavním serveru, hodnoty napravo jsou ID rolí na satelitu.
+msgid Unverify role was set to {role_name}.
+msgstr Unverify role byla nastavena na {role_name}.
 
-msgid Satellite information
-msgstr Informace o satelitu
+msgid I don't know how to parse `{datetime_str}`, please try again.
+msgstr Nevím jak přečíst `{datetime_str}`, zkus to znovu.
 
-msgid Main server
-msgstr Hlavní server
+msgid End time already passed.
+msgstr Tohle datum už bylo.
 
-msgid Role mapping
-msgstr Mapování rolí
+msgid Member is already unverified.
+msgstr Člen už je unverifikovaný
 
-msgid There are no mapped roles
-msgstr Neexistují žádné mapované role
+msgid Your access to {guild_name} was temporarily revoked.
+msgstr Tvůj přístup do {guild_name} byl dočasně odebrán.
 
-msgid I'm expecting JSON data enclosed in \`\`\`.
-msgstr Očekávám JSON data uzavřená v \`\`\`.
+msgid Your access will be automatically returned on
+msgstr Tvůj přístup bude automaticky navrácen
 
-msgid JSON must include dictionary `mapping`.
-msgstr JSON musí obsahovat slovník `mapping`.
+msgid Reason
+msgstr Důvod
 
-msgid Error while decoding: `{error}`.
-msgstr Chyba při dekódování: `{error}`.
+msgid Member {member_name} was temporarily unverified. The access will be returned on: {end_time}
+msgstr Uživateli {member_name} byla dočasně odebrána práva na server. Navrácena budou: {end_time}
 
-msgid Satellite has been sucessfully constructed.
-msgstr Satelit byl úspěšně vytvořen.
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}
+msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, důvod - {reason}, typ - {type}
 
-msgid This server does not have any satellite mapping.
-msgstr Tento server nemá žádný satelitní mapping.
+msgid Is this member really unverified?
+msgstr Je tento uživatel opravdu unverifikován?
 
-msgid Satellite has been deconstructed.
-msgstr Satelit byl odebrán.
+msgid Unverify of {member_name} ({member_id}) was pardoned.
+msgstr Unverifikace {member_name} ({member_id}) byla prominuta.
+
+msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
+msgstr Unverifikace {member_name} ({member_id}) byla prominuta. Přístup bude na
+
+msgid Invalid status. Check the command help.
+msgstr Nesprávný status. Podívej se do nápovědy příkazu.
+
+msgid Unverify list
+msgstr Unverify list
+
+msgid User
+msgstr Uživatel
+
+msgid Start time
+msgstr Začátek
+
+msgid End time
+msgstr Konec
+
+msgid Status
+msgstr Status
+
+msgid Type
+msgstr Druh
+
+msgid Roles to return
+msgstr Role k navrácení
+
+msgid Channels to return
+msgstr Kanály k navrácení
+
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}
+msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, typ - {type}

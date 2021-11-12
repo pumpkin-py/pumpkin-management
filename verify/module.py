@@ -813,17 +813,17 @@ class Verify(commands.Cog):
         """Generate the verification e-mail."""
         BOT_URL = "https://github.com/pumpkin-py"
 
-        tc = TranslationContext(member.guild.id, member.id)
+        utx = TranslationContext(member.guild.id, member.id)
 
         clear_list: List[str] = [
             _(
-                tc,
+                utx,
                 "Your verification e-mail for Discord server {guild_name} is {code}.",
             ).format(guild_name=member.guild.name, code=code),
-            _(tc, "You can use it by sending the following message:"),
+            _(utx, "You can use it by sending the following message:"),
             "  "
-            + _(tc, "{prefix}submit {code}").format(prefix=config.prefix, code=code),
-            _(tc, "to the channel named #{channel}.").format(channel=channel.name),
+            + _(utx, "{prefix}submit {code}").format(prefix=config.prefix, code=code),
+            _(utx, "to the channel named #{channel}.").format(channel=channel.name),
         ]
         clear: str = "\n".join(clear_list)
 

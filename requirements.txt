@@ -1,3 +1,4 @@
 imap_tools
 Pillow
 unidecode
+python-dateutil
