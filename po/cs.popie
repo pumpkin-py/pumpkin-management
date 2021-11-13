@@ -85,6 +85,126 @@ msgstr Tento server nemá žádný satelitní mapping.
 msgid Satellite has been deconstructed.
 msgstr Satelit byl odebrán.
 
+msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
+msgstr Reverifikace selhala: Člen ({user_id}) nebyl nalezen. Nastavuji jeho status na `member left server`
+
+msgid Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Vrácení role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
+
+msgid Role with ID {role_id} could not be found.
+msgstr Role s ID {role_id} nebyla nalezena.
+
+msgid Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Nedostatečná oprávnění.
+
+msgid Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
+
+msgid Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.
+msgstr Není možné odebrat {member_name} ({member_id}) z kanálu {channel_name}. Nedostatečná oprávnění.
+
+msgid Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.
+msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
+
+msgid Reverifying {member_name} ({member_id}).
+msgstr Reverifikace uživatele {member_name} ({member_id}).
+
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
+
+msgid Removing unverify role from  {member_name} ({member_id}) failed. Role not found.
+msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
+
+msgid Reverify success for member {member_name}.
+msgstr Reverifikace uživatele {member_name} byla úspěšná.
+
+msgid Your access to the guild **{guild_name}** was returned.
+msgstr Tvoje oprávnění k serveru **{guild_name}** bylo navráceno.
+
+msgid Couldn't send reverify info to {member_name}'s DM
+msgstr Nebylo možné poslat uživateli {member_name} do DM informace o reverifikaci.
+
+msgid Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Odebrání role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
+
+msgid Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.
+msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
+
+msgid Adding unverify role to {member_name} ({member_id}) failed. Role not found.
+msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
+
+msgid Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.
+msgstr Přidání dočasných oprávnění uživateli {member_name} ({member_id}) do kanálu {channel_name} selhalo. Nedostatečná oprávnění.
+
+msgid Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.
+msgstr Odebrání uživatele {member_name} ({member_id}) z kanálu {channel_name} selhalo. Nedostatečná oprávnění
+
+msgid Unverify role was set to {role_name}.
+msgstr Unverify role byla nastavena na {role_name}.
+
+msgid I don't know how to parse `{datetime_str}`, please try again.
+msgstr Nevím jak přečíst `{datetime_str}`, zkus to znovu.
+
+msgid End time already passed.
+msgstr Tohle datum už bylo.
+
+msgid Member is already unverified.
+msgstr Člen už je unverifikovaný
+
+msgid Your access to {guild_name} was temporarily revoked.
+msgstr Tvůj přístup do {guild_name} byl dočasně odebrán.
+
+msgid Your access will be automatically returned on
+msgstr Tvůj přístup bude automaticky navrácen
+
+msgid Reason
+msgstr Důvod
+
+msgid Member {member_name} was temporarily unverified. The access will be returned on: {end_time}
+msgstr Uživateli {member_name} byla dočasně odebrána práva na server. Navrácena budou: {end_time}
+
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}
+msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, důvod - {reason}, typ - {type}
+
+msgid Is this member really unverified?
+msgstr Je tento uživatel opravdu unverifikován?
+
+msgid Unverify of {member_name} ({member_id}) was pardoned.
+msgstr Unverifikace {member_name} ({member_id}) byla prominuta.
+
+msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
+msgstr Unverifikace {member_name} ({member_id}) byla prominuta. Přístup bude na
+
+msgid Invalid status. Check the command help.
+msgstr Nesprávný status. Podívej se do nápovědy příkazu.
+
+msgid Unverify list
+msgstr Unverify list
+
+msgid User
+msgstr Uživatel
+
+msgid Start time
+msgstr Začátek
+
+msgid End time
+msgstr Konec
+
+msgid Status
+msgstr Status
+
+msgid Type
+msgstr Druh
+
+msgid Roles to return
+msgstr Role k navrácení
+
+msgid Channels to return
+msgstr Kanály k navrácení
+
+msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}
+msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, typ - {type}
+
 msgid {mention} You have to include your e-mail.
 msgstr {mention} Musíš přiložit svůj e-mail.
 
@@ -237,123 +357,3 @@ msgstr Časová značka
 
 msgid Roles
 msgstr Role
-
-msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
-msgstr Reverifikace selhala: Člen ({user_id}) nebyl nalezen. Nastavuji jeho status na `member left server`
-
-msgid Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr Vrácení role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
-
-msgid Role with ID {role_id} could not be found.
-msgstr Role s ID {role_id} nebyla nalezena.
-
-msgid Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.
-msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Nedostatečná oprávnění.
-
-msgid Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.
-msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
-
-msgid Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.
-msgstr Není možné odebrat {member_name} ({member_id}) z kanálu {channel_name}. Nedostatečná oprávnění.
-
-msgid Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.
-msgstr Není možné přiřadit {member_name} ({member_id}) do kanálu {channel_name}. Kanál neexistuje.
-
-msgid Reverifying {member_name} ({member_id}).
-msgstr Reverifikace uživatele {member_name} ({member_id}).
-
-msgid Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
-
-msgid Removing unverify role from  {member_name} ({member_id}) failed. Role not found.
-msgstr Odebrání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
-
-msgid Reverify success for member {member_name}.
-msgstr Reverifikace uživatele {member_name} byla úspěšná.
-
-msgid Your access to the guild **{guild_name}** was returned.
-msgstr Tvoje oprávnění k serveru **{guild_name}** bylo navráceno.
-
-msgid Couldn't send reverify info to {member_name}'s DM
-msgstr Nebylo možné poslat uživateli {member_name} do DM informace o reverifikaci.
-
-msgid Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr Odebrání role {role_name} uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
-
-msgid Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Nedostatečná oprávnění.
-
-msgid Adding unverify role to {member_name} ({member_id}) failed. Role not found.
-msgstr Přidání unverify role uživateli {member_name} ({member_id}) selhalo. Role neexistuje.
-
-msgid Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.
-msgstr Přidání dočasných oprávnění uživateli {member_name} ({member_id}) do kanálu {channel_name} selhalo. Nedostatečná oprávnění.
-
-msgid Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.
-msgstr Odebrání uživatele {member_name} ({member_id}) z kanálu {channel_name} selhalo. Nedostatečná oprávnění
-
-msgid Unverify role was set to {role_name}.
-msgstr Unverify role byla nastavena na {role_name}.
-
-msgid I don't know how to parse `{datetime_str}`, please try again.
-msgstr Nevím jak přečíst `{datetime_str}`, zkus to znovu.
-
-msgid End time already passed.
-msgstr Tohle datum už bylo.
-
-msgid Member is already unverified.
-msgstr Člen už je unverifikovaný
-
-msgid Your access to {guild_name} was temporarily revoked.
-msgstr Tvůj přístup do {guild_name} byl dočasně odebrán.
-
-msgid Your access will be automatically returned on
-msgstr Tvůj přístup bude automaticky navrácen
-
-msgid Reason
-msgstr Důvod
-
-msgid Member {member_name} was temporarily unverified. The access will be returned on: {end_time}
-msgstr Uživateli {member_name} byla dočasně odebrána práva na server. Navrácena budou: {end_time}
-
-msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}
-msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, důvod - {reason}, typ - {type}
-
-msgid Is this member really unverified?
-msgstr Je tento uživatel opravdu unverifikován?
-
-msgid Unverify of {member_name} ({member_id}) was pardoned.
-msgstr Unverifikace {member_name} ({member_id}) byla prominuta.
-
-msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
-msgstr Unverifikace {member_name} ({member_id}) byla prominuta. Přístup bude na
-
-msgid Invalid status. Check the command help.
-msgstr Nesprávný status. Podívej se do nápovědy příkazu.
-
-msgid Unverify list
-msgstr Unverify list
-
-msgid User
-msgstr Uživatel
-
-msgid Start time
-msgstr Začátek
-
-msgid End time
-msgstr Konec
-
-msgid Status
-msgstr Status
-
-msgid Type
-msgstr Druh
-
-msgid Roles to return
-msgstr Role k navrácení
-
-msgid Channels to return
-msgstr Kanály k navrácení
-
-msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}
-msgstr Uživatel {member_name} ({member_id}) unverifikován: Do - {end_time}, typ - {type}
