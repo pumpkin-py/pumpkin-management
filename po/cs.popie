@@ -1,3 +1,90 @@
+msgid That category does not exist here.
+msgstr Tato kategorie tady neexistuje.
+
+msgid Done.
+msgstr Hotovo.
+
+msgid {mention} This server is not a satellite.
+msgstr {mention} Tento server není satelit.
+
+msgid {mention} I could not contact the main server.
+msgstr {mention} hlavní server nemohl být kontaktován.
+
+msgid {mention} You are not on the main server.
+msgstr {mention} Nejsi na hlavním serveru.
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr {mention} Nemáš žádné synchronizovatelné role na hlavním serveru.
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr {mention} Bylo ti přidáno **{count}** nových rolí.
+
+msgid Synchronizations
+msgstr Synchronizace
+
+msgid This server is a satellite of
+msgstr Tento server je satelitem
+
+msgid not found
+msgstr nenalezeno
+
+msgid Satellite of this server
+msgstr Satelit tohoto serveru
+
+msgid Disabled
+msgstr Vypnuto
+
+msgid This server is not synchronized.
+msgstr Tento server není synchronizovaný.
+
+msgid I'm not on that server.
+msgstr Na tom serveru nejsem.
+
+msgid That server is already a satellite.
+msgstr Daný server už je satelitem.
+
+msgid I've sucessfully registered the new satellite.
+msgstr Nový satelit byl úspěšně zaregistrován.
+
+msgid That server is not synchronized.
+msgstr Daný server není synchronizovaný.
+
+msgid Satellite has been sucessfully removed.
+msgstr Satelit byl úspěšně odebrán.
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr Hodnoty nalevo jsou ID rolí na hlavním serveru, hodnoty napravo jsou ID rolí na satelitu.
+
+msgid Satellite information
+msgstr Informace o satelitu
+
+msgid Main server
+msgstr Hlavní server
+
+msgid Role mapping
+msgstr Mapování rolí
+
+msgid There are no mapped roles
+msgstr Neexistují žádné mapované role
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr Očekávám JSON data uzavřená v \`\`\`.
+
+msgid JSON must include dictionary `mapping`.
+msgstr JSON musí obsahovat slovník `mapping`.
+
+msgid Error while decoding: `{error}`.
+msgstr Chyba při dekódování: `{error}`.
+
+msgid Satellite has been sucessfully constructed.
+msgstr Satelit byl úspěšně vytvořen.
+
+msgid This server does not have any satellite mapping.
+msgstr Tento server nemá žádný satelitní mapping.
+
+msgid Satellite has been deconstructed.
+msgstr Satelit byl odebrán.
+
 msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
 msgstr Reverifikace selhala: Člen ({user_id}) nebyl nalezen. Nastavuji jeho status na `member left server`
 
@@ -270,90 +357,3 @@ msgstr Časová značka
 
 msgid Roles
 msgstr Role
-
-msgid That category does not exist here.
-msgstr Tato kategorie tady neexistuje.
-
-msgid Done.
-msgstr Hotovo.
-
-msgid {mention} This server is not a satellite.
-msgstr {mention} Tento server není satelit.
-
-msgid {mention} I could not contact the main server.
-msgstr {mention} hlavní server nemohl být kontaktován.
-
-msgid {mention} You are not on the main server.
-msgstr {mention} Nejsi na hlavním serveru.
-
-msgid {mention} You don't have any synchronizable roles on the main server.
-msgstr {mention} Nemáš žádné synchronizovatelné role na hlavním serveru.
-
-msgid {mention} I've added **{count}** new roles to you.
-msgstr {mention} Bylo ti přidáno **{count}** nových rolí.
-
-msgid Synchronizations
-msgstr Synchronizace
-
-msgid This server is a satellite of
-msgstr Tento server je satelitem
-
-msgid not found
-msgstr nenalezeno
-
-msgid Satellite of this server
-msgstr Satelit tohoto serveru
-
-msgid Disabled
-msgstr Vypnuto
-
-msgid This server is not synchronized.
-msgstr Tento server není synchronizovaný.
-
-msgid I'm not on that server.
-msgstr Na tom serveru nejsem.
-
-msgid That server is already a satellite.
-msgstr Daný server už je satelitem.
-
-msgid I've sucessfully registered the new satellite.
-msgstr Nový satelit byl úspěšně zaregistrován.
-
-msgid That server is not synchronized.
-msgstr Daný server není synchronizovaný.
-
-msgid Satellite has been sucessfully removed.
-msgstr Satelit byl úspěšně odebrán.
-
-msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
-msgstr Hodnoty nalevo jsou ID rolí na hlavním serveru, hodnoty napravo jsou ID rolí na satelitu.
-
-msgid Satellite information
-msgstr Informace o satelitu
-
-msgid Main server
-msgstr Hlavní server
-
-msgid Role mapping
-msgstr Mapování rolí
-
-msgid There are no mapped roles
-msgstr Neexistují žádné mapované role
-
-msgid I'm expecting JSON data enclosed in \`\`\`.
-msgstr Očekávám JSON data uzavřená v \`\`\`.
-
-msgid JSON must include dictionary `mapping`.
-msgstr JSON musí obsahovat slovník `mapping`.
-
-msgid Error while decoding: `{error}`.
-msgstr Chyba při dekódování: `{error}`.
-
-msgid Satellite has been sucessfully constructed.
-msgstr Satelit byl úspěšně vytvořen.
-
-msgid This server does not have any satellite mapping.
-msgstr Tento server nemá žádný satelitní mapping.
-
-msgid Satellite has been deconstructed.
-msgstr Satelit byl odebrán.
