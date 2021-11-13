@@ -21,11 +21,13 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @commands.group(name="sync")
     async def sync(self, ctx):
+        """Synchronize your roles with main server."""
         await utils.Discord.send_help(ctx)
 
     @commands.check(check.acl)
     @sync.command(name="me")
     async def sync_me(self, ctx):
+        """Synchronize your roles with main server."""
         await utils.Discord.delete_message(ctx.message)
 
         link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
@@ -120,6 +122,7 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @sync.command(name="list")
     async def sync_list(self, ctx):
+        """Display synchronization information."""
         satellite: Optional[Link] = Link.get_by_satellite(satellite_id=ctx.guild.id)
         satellites: List[Link] = Link.get_all(guild_id=ctx.guild.id)
 
@@ -156,6 +159,7 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @sync.command(name="add")
     async def sync_add(self, ctx, guild_id: int):
+        """Add server synchronization."""
         satellite: Optional[discord.Guild] = None
         for guild in self.bot.guilds:
             if guild.id == guild_id:
@@ -181,6 +185,7 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @sync.command(name="remove")
     async def sync_remove(self, ctx, guild_id: int):
+        """Remove server synchronization."""
         link = Link.get_by_satellite(satellite_id=guild_id)
         if link is None or link.guild_id != ctx.guild.id:
             await ctx.reply(_(ctx, "That server is not synchronized."))
@@ -199,11 +204,13 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @commands.group(name="satellite")
     async def satellite_(self, ctx):
+        """Manage satellites."""
         await utils.Discord.send_help(ctx)
 
     @commands.check(check.acl)
     @satellite_.command(name="template")
     async def satellite_template(self, ctx):
+        """Send template satellite file."""
         template = {
             "mapping": {
                 "0123456789": 9876543210,

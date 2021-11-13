@@ -21,6 +21,7 @@ class Whois(commands.Cog):
     @commands.check(check.acl)
     @commands.command()
     async def roleinfo(self, ctx, role: discord.Role):
+        """Display role information."""
         acl_group: Optional[ACL_group] = ACL_group.get_by_role(
             guild_id=ctx.guild.id, role_id=role.id
         )
@@ -49,6 +50,7 @@ class Whois(commands.Cog):
     @commands.check(check.acl)
     @commands.command()
     async def channelinfo(self, ctx, channel: discord.TextChannel):
+        """Display channel information."""
         if ctx.author not in channel.members:
             ctx.reply(
                 _(
@@ -95,6 +97,7 @@ class Whois(commands.Cog):
     @commands.check(check.acl)
     @commands.command()
     async def whois(self, ctx, member: Union[discord.Member, int]):
+        """See database info on member."""
         dc_member: Optional[discord.Member] = None
         user_id: Optional[int] = None
 

@@ -1,90 +1,3 @@
-msgid That category does not exist here.
-msgstr
-
-msgid Done.
-msgstr
-
-msgid {mention} This server is not a satellite.
-msgstr
-
-msgid {mention} I could not contact the main server.
-msgstr
-
-msgid {mention} You are not on the main server.
-msgstr
-
-msgid {mention} You don't have any synchronizable roles on the main server.
-msgstr
-
-msgid {mention} I've added **{count}** new roles to you.
-msgstr
-
-msgid Synchronizations
-msgstr
-
-msgid This server is a satellite of
-msgstr
-
-msgid not found
-msgstr
-
-msgid Satellite of this server
-msgstr
-
-msgid Disabled
-msgstr
-
-msgid This server is not synchronized.
-msgstr
-
-msgid I'm not on that server.
-msgstr
-
-msgid That server is already a satellite.
-msgstr
-
-msgid I've sucessfully registered the new satellite.
-msgstr
-
-msgid That server is not synchronized.
-msgstr
-
-msgid Satellite has been sucessfully removed.
-msgstr
-
-msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
-msgstr
-
-msgid Satellite information
-msgstr
-
-msgid Main server
-msgstr
-
-msgid Role mapping
-msgstr
-
-msgid There are no mapped roles
-msgstr
-
-msgid I'm expecting JSON data enclosed in \`\`\`.
-msgstr
-
-msgid JSON must include dictionary `mapping`.
-msgstr
-
-msgid Error while decoding: `{error}`.
-msgstr
-
-msgid Satellite has been sucessfully constructed.
-msgstr
-
-msgid This server does not have any satellite mapping.
-msgstr
-
-msgid Satellite has been deconstructed.
-msgstr
-
 msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
 msgstr
 
@@ -356,4 +269,91 @@ msgid Timestamp
 msgstr
 
 msgid Roles
+msgstr
+
+msgid That category does not exist here.
+msgstr
+
+msgid Done.
+msgstr
+
+msgid {mention} This server is not a satellite.
+msgstr
+
+msgid {mention} I could not contact the main server.
+msgstr
+
+msgid {mention} You are not on the main server.
+msgstr
+
+msgid {mention} You don't have any synchronizable roles on the main server.
+msgstr
+
+msgid {mention} I've added **{count}** new roles to you.
+msgstr
+
+msgid Synchronizations
+msgstr
+
+msgid This server is a satellite of
+msgstr
+
+msgid not found
+msgstr
+
+msgid Satellite of this server
+msgstr
+
+msgid Disabled
+msgstr
+
+msgid This server is not synchronized.
+msgstr
+
+msgid I'm not on that server.
+msgstr
+
+msgid That server is already a satellite.
+msgstr
+
+msgid I've sucessfully registered the new satellite.
+msgstr
+
+msgid That server is not synchronized.
+msgstr
+
+msgid Satellite has been sucessfully removed.
+msgstr
+
+msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
+msgstr
+
+msgid Satellite information
+msgstr
+
+msgid Main server
+msgstr
+
+msgid Role mapping
+msgstr
+
+msgid There are no mapped roles
+msgstr
+
+msgid I'm expecting JSON data enclosed in \`\`\`.
+msgstr
+
+msgid JSON must include dictionary `mapping`.
+msgstr
+
+msgid Error while decoding: `{error}`.
+msgstr
+
+msgid Satellite has been sucessfully constructed.
+msgstr
+
+msgid This server does not have any satellite mapping.
+msgstr
+
+msgid Satellite has been deconstructed.
 msgstr
