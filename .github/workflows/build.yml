@@ -50,7 +50,7 @@ jobs:
 
       - name: Run PoPie
         run: |
-          popie --detached .
+          popie --detached --strict .
 
       - name: Check TODOs
         run: |
