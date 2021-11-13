@@ -21,6 +21,7 @@ class Channels(commands.Cog):
     @commands.check(check.acl)
     @commands.group(name="reaction-channel")
     async def reaction_channel(self, ctx):
+        """Manage react-to-role channels."""
         await utils.Discord.send_help(ctx)
 
     @commands.check(check.acl)
