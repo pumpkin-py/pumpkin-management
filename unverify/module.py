@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import re
 import asyncio
 import contextlib
 from datetime import datetime, timedelta
@@ -52,26 +51,6 @@ class Unverify(commands.Cog):
     async def before_reverifier(self):
         print("Reverify loop waiting until ready().")
         await self.bot.wait_until_ready()
-
-    @staticmethod
-    def _parse_datetime(datetime_str: str) -> datetime:
-        regex = re.compile(
-            r"(?!\s*$)(?:(?P<weeks>\d+)(?: )?(?:w)(?: )?)?(?:(?P<days>\d+)(?: )?(?:d)(?: )?)?(?:(?P<hours>\d+)(?: )?(?:h)(?: )?)?(?:(?P<minutes>\d+)(?: )?(?:m)(?: )?)?"
-        )
-        result = re.fullmatch(regex, datetime_str)
-        if result is not None:
-            match_dict = result.groupdict(default=0)
-            end_time = datetime.now() + timedelta(
-                weeks=int(match_dict["weeks"]),
-                days=int(match_dict["days"]),
-                hours=int(match_dict["hours"]),
-                minutes=int(match_dict["minutes"]),
-            )
-            return end_time
-
-        end_time = dparser.parse(timestr=datetime_str, dayfirst=True, yearfirst=False)
-
-        return end_time
 
     async def _get_guild(self, item: UnverifyItem) -> Optional[Guild]:
         guild = self.bot.get_guild(item.guild_id)
@@ -526,7 +505,7 @@ class Unverify(commands.Cog):
             reason (str, optional): Reason of Unverify. Defaults to None.
         """
         try:
-            end_time = self._parse_datetime(datetime_str)
+            end_time = utils.Time.parse_datetime(datetime_str)
         except dparser.ParserError:
             await ctx.reply(
                 _(
@@ -744,7 +723,7 @@ class Unverify(commands.Cog):
             datetime_str (str): Until when. Preferably quoted.
         """
         try:
-            end_time = self._parse_datetime(datetime_str)
+            end_time = utils.Time.parse_datetime(datetime_str)
         except dparser.ParserError:
             await ctx.reply(
                 _(
