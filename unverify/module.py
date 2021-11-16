@@ -1,12 +1,11 @@
 from __future__ import annotations
 
-import re
 import asyncio
 import contextlib
 from datetime import datetime, timedelta
-import dateutil.parser as dparser
 
 from typing import Optional, List, Tuple
+import dateutil.parser
 
 import discord
 from discord import Guild, Member
@@ -52,26 +51,6 @@ class Unverify(commands.Cog):
     async def before_reverifier(self):
         print("Reverify loop waiting until ready().")
         await self.bot.wait_until_ready()
-
-    @staticmethod
-    def _parse_datetime(datetime_str: str) -> datetime:
-        regex = re.compile(
-            r"(?!\s*$)(?:(?P<weeks>\d+)(?: )?(?:w)(?: )?)?(?:(?P<days>\d+)(?: )?(?:d)(?: )?)?(?:(?P<hours>\d+)(?: )?(?:h)(?: )?)?(?:(?P<minutes>\d+)(?: )?(?:m)(?: )?)?"
-        )
-        result = re.fullmatch(regex, datetime_str)
-        if result is not None:
-            match_dict = result.groupdict(default=0)
-            end_time = datetime.now() + timedelta(
-                weeks=int(match_dict["weeks"]),
-                days=int(match_dict["days"]),
-                hours=int(match_dict["hours"]),
-                minutes=int(match_dict["minutes"]),
-            )
-            return end_time
-
-        end_time = dparser.parse(timestr=datetime_str, dayfirst=True, yearfirst=False)
-
-        return end_time
 
     async def _get_guild(self, item: UnverifyItem) -> Optional[Guild]:
         guild = self.bot.get_guild(item.guild_id)
@@ -318,13 +297,13 @@ class Unverify(commands.Cog):
         item.save()
 
     @staticmethod
-    async def _remove_roles(member: Member, type: UnverifyType) -> List[int]:
+    async def _remove_roles(member: Member, type: UnverifyType) -> List[discord.Role]:
         guild = member.guild
-        removed_role_ids = []
+        removed_roles = []
         for role in member.roles:
             try:
                 await member.remove_roles(role, reason=type.value, atomic=True)
-                removed_role_ids.append(role.id)
+                removed_roles.append(role)
             except NotFound:
                 # This could be deleted roles just moment after the unverify started of someone tried to unverify a bot.
                 pass
@@ -374,16 +353,16 @@ class Unverify(commands.Cog):
                     member_id=member.id,
                 ),
             )
-        return removed_role_ids
+        return removed_roles
 
     @staticmethod
     async def _remove_or_keep_channels(
         member: Member,
         type: UnverifyType,
         channels_to_keep: List[discord.abc.GuildChannel],
-    ) -> Tuple[List[int], List[int]]:
-        removed_channel_ids = []
-        added_channel_ids = []
+    ) -> Tuple[List[discord.abc.GuildChannel], List[discord.abc.GuildChannel]]:
+        removed_channels = []
+        added_channels = []
 
         for channel in member.guild.channels:
             if isinstance(channel, discord.CategoryChannel):
@@ -399,7 +378,7 @@ class Unverify(commands.Cog):
                         await channel.set_permissions(
                             member, overwrite=user_overw, reason=type.value
                         )
-                        added_channel_ids.append(channel.id)
+                        added_channels.append(channel)
                     except PermissionError:
                         gtx = TranslationContext(member.guild.id, None)
                         await guild_log.warning(
@@ -425,7 +404,7 @@ class Unverify(commands.Cog):
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason=type.value
                     )
-                    removed_channel_ids.append(channel.id)
+                    removed_channels.append(channel)
                 except PermissionError:
                     gtx = TranslationContext(member.guild.id, None)
                     await guild_log.warning(
@@ -440,7 +419,7 @@ class Unverify(commands.Cog):
                             channel_name=channel.name,
                         ),
                     )
-        return removed_channel_ids, added_channel_ids
+        return removed_channels, added_channels
 
     async def _unverify_member(
         self,
@@ -454,9 +433,9 @@ class Unverify(commands.Cog):
         if result != []:
             raise ValueError
 
-        removed_role_ids = await self._remove_roles(member, type)
+        removed_roles = await self._remove_roles(member, type)
         await asyncio.sleep(2)
-        removed_channel_ids, added_channel_ids = await self._remove_or_keep_channels(
+        removed_channels, added_channels = await self._remove_or_keep_channels(
             member, type, channels_to_keep
         )
 
@@ -467,9 +446,9 @@ class Unverify(commands.Cog):
         result = UnverifyItem.add(
             member=member,
             end_time=end_time,
-            roles_to_return=removed_role_ids,
-            channels_to_return=removed_channel_ids,
-            channels_to_remove=added_channel_ids,
+            roles_to_return=removed_roles,
+            channels_to_return=removed_channels,
+            channels_to_remove=added_channels,
             reason=reason,
             type=type,
         )
@@ -489,7 +468,7 @@ class Unverify(commands.Cog):
         """Set configuration of guild that the message was sent from.
 
         Args:
-            unverify_role (discord.Role): Role that unverified members get.
+            unverify_role: Role that unverified members get.
         """
         GuildConfig.set(guild_id=ctx.guild.id, unverify_role_id=unverify_role.id)
 
@@ -521,13 +500,13 @@ class Unverify(commands.Cog):
         """Unverify a guild member.
 
         Args:
-            member (discord.Member): Member to be unverified
-            datetime_str (str): Datetime string Preferably quoted.
-            reason (str, optional): Reason of Unverify. Defaults to None.
+            member: Member to be unverified
+            datetime_str: Datetime string Preferably quoted.
+            reason: Reason of Unverify. Defaults to None.
         """
         try:
-            end_time = self._parse_datetime(datetime_str)
-        except dparser.ParserError:
+            end_time = utils.Time.parse_datetime(datetime_str)
+        except dateutil.parser.ParserError:
             await ctx.reply(
                 _(
                     ctx,
@@ -589,7 +568,7 @@ class Unverify(commands.Cog):
         with contextlib.suppress(discord.Forbidden):
             await member.send(embed=embed)
 
-        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+        end_time_str = utils.Time.datetime(end_time)
 
         await ctx.reply(
             _(
@@ -624,7 +603,7 @@ class Unverify(commands.Cog):
         """Pardon unverified member.
 
         Args:
-            member (discord.Member): Member to be pardoned
+            member: Member to be pardoned
         """
         result = UnverifyItem.get_member(member=member, status=UnverifyStatus.waiting)
         if result == []:
@@ -660,7 +639,7 @@ class Unverify(commands.Cog):
         """List unverified members.
 
         Args:
-            status (str, optional): One of ["waiting", "finished", "member_left", "guild_not_found", "all"]. Defaults to "waiting".
+            status: One of ["waiting", "finished", "member_left", "guild_not_found", "all"]. Defaults to "waiting".
         """
 
         status: str = status.lower()
@@ -675,10 +654,10 @@ class Unverify(commands.Cog):
             return
 
         if status == "all":
-            result = UnverifyItem.get_guild_items(guild_id=ctx.guild.id, status=None)
+            result = UnverifyItem.get_items(guild=ctx.guild, status=None)
         else:
-            result = UnverifyItem.get_guild_items(
-                guild_id=ctx.guild.id, status=UnverifyStatus[status]
+            result = UnverifyItem.get_items(
+                guild=ctx.guild, status=UnverifyStatus[status]
             )
         embeds = []
         for item in result:
@@ -693,8 +672,8 @@ class Unverify(commands.Cog):
             else:
                 user_name = f"{user.mention}\n{user.name} ({user.id})"
 
-            start_time = item.start_time.strftime("%d.%m.%Y %H:%M")
-            end_time = item.end_time.strftime("%d.%m.%Y %H:%M")
+            start_time = utils.Time.datetime(item.start_time)
+            end_time = utils.Time.datetime(item.end_time)
 
             roles = []
             for role_id in item.roles_to_return:
@@ -741,11 +720,11 @@ class Unverify(commands.Cog):
         """Unverify self.
 
         Args:
-            datetime_str (str): Until when. Preferably quoted.
+            datetime_str: Until when. Preferably quoted.
         """
         try:
-            end_time = self._parse_datetime(datetime_str)
-        except dparser.ParserError:
+            end_time = utils.Time.parse_datetime(datetime_str)
+        except dateutil.parser.ParserError:
             await ctx.reply(
                 _(
                     ctx,
@@ -800,7 +779,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+        end_time_str = utils.Time.datetime(end_time)
 
         await ctx.reply(
             _(
@@ -830,8 +809,13 @@ class Unverify(commands.Cog):
     @commands.guild_only()
     @commands.command()
     async def gn(self, ctx: commands.Context):
-        """Goodnight!"""
-        end_time = datetime.now().replace(hour=6, minute=00) + timedelta(days=1)
+        """Goodnight!
+
+        Selfunverifies user until the morning.
+        """
+        end_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
+        if end_time < datetime.now():
+            end_time = end_time + timedelta(days=1)
 
         try:
             await self._unverify_member(
@@ -870,7 +854,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = end_time.strftime("%d.%m.%Y %H:%M")
+        end_time_str = utils.Time.datetime(end_time)
 
         await ctx.reply(
             _(

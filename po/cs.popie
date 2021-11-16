@@ -173,7 +173,7 @@ msgid Unverify of {member_name} ({member_id}) was pardoned.
 msgstr Unverifikace {member_name} ({member_id}) byla prominuta.
 
 msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
-msgstr Unverifikace {member_name} ({member_id}) byla prominuta. Přístup bude na
+msgstr Unverifikace {member_name} ({member_id}) byla prominuta. Přístup bude navrácen při příštím běhu reverify.
 
 msgid Invalid status. Check the command help.
 msgstr Nesprávný status. Podívej se do nápovědy příkazu.
