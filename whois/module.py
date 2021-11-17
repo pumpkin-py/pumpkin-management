@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
 from core import check, i18n, logger, utils
 from database.acl import ACL_group
@@ -20,7 +20,7 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @commands.check(check.acl)
     @commands.command()
-    async def roleinfo(self, ctx, role: discord.Role):
+    async def roleinfo(self, ctx, role: nextcord.Role):
         """Display role information."""
         acl_group: Optional[ACL_group] = ACL_group.get_by_role(
             guild_id=ctx.guild.id, role_id=role.id
@@ -49,7 +49,7 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @commands.check(check.acl)
     @commands.command()
-    async def channelinfo(self, ctx, channel: discord.TextChannel):
+    async def channelinfo(self, ctx, channel: nextcord.TextChannel):
         """Display channel information."""
         if ctx.author not in channel.members:
             ctx.reply(
@@ -64,7 +64,7 @@ class Whois(commands.Cog):
         role_count: int = 0
         user_count: int = 0
         for overwrite in channel.overwrites:
-            if isinstance(overwrite, discord.Role):
+            if isinstance(overwrite, nextcord.Role):
                 role_count += 1
             else:
                 user_count += 1
@@ -96,12 +96,12 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @commands.check(check.acl)
     @commands.command()
-    async def whois(self, ctx, member: Union[discord.Member, int]):
+    async def whois(self, ctx, member: Union[nextcord.Member, int]):
         """See database info on member."""
-        dc_member: Optional[discord.Member] = None
+        dc_member: Optional[nextcord.Member] = None
         user_id: Optional[int] = None
 
-        if type(member) == discord.Member:
+        if type(member) == nextcord.Member:
             user_id = member.id
             dc_member = member
         elif type(member) == int:

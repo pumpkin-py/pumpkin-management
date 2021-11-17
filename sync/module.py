@@ -2,8 +2,8 @@ import json
 import re
 from typing import Dict, Optional, List
 
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
 from core import check, i18n, logger, utils
 
@@ -48,7 +48,7 @@ class Sync(commands.Cog):
                 delete_after=120,
             )
             return
-        main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
+        main_guild: Optional[nextcord.Guild] = self.bot.get_guild(link.guild_id)
         if not main_guild:
             await guild_log.error(
                 ctx.author,
@@ -62,7 +62,7 @@ class Sync(commands.Cog):
                 delete_after=120,
             )
             return
-        main_member: Optional[discord.Member] = main_guild.get_member(ctx.author.id)
+        main_member: Optional[nextcord.Member] = main_guild.get_member(ctx.author.id)
         if not main_member:
             await ctx.send(
                 _(ctx, "{mention} You are not on the main server.").format(
@@ -99,10 +99,10 @@ class Sync(commands.Cog):
     async def _get_satellite_roles(
         self,
         ctx: commands.Context,
-        main_member: discord.Member,
+        main_member: nextcord.Member,
         mapping: Dict[str, int],
-    ) -> List[discord.Role]:
-        roles: List[discord.Role] = []
+    ) -> List[nextcord.Role]:
+        roles: List[nextcord.Role] = []
         for role in main_member.roles:
             for role_from, role_to in mapping.items():
                 if str(role.id) != role_from:
@@ -160,7 +160,7 @@ class Sync(commands.Cog):
     @sync.command(name="add")
     async def sync_add(self, ctx, guild_id: int):
         """Add server synchronization."""
-        satellite: Optional[discord.Guild] = None
+        satellite: Optional[nextcord.Guild] = None
         for guild in self.bot.guilds:
             if guild.id == guild_id:
                 satellite = guild
@@ -240,7 +240,7 @@ class Sync(commands.Cog):
 
         link = Link.get_by_satellite(satellite_id=ctx.guild.id)
         if link:
-            main_guild: Optional[discord.Guild] = self.bot.get_guild(link.guild_id)
+            main_guild: Optional[nextcord.Guild] = self.bot.get_guild(link.guild_id)
             embed.add_field(
                 name=_(ctx, "Main server"),
                 value=getattr(main_guild, "name", f"{link.guild_id}"),

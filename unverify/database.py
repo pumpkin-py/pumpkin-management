@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 
 import enum
-import discord
+import nextcord
 from typing import Optional, List, Dict
 
 from sqlalchemy import ARRAY, Column, Integer, String, DateTime, BigInteger, Enum
@@ -38,7 +38,7 @@ class GuildConfig(database.base):
     unverify_role_id = Column(BigInteger)
 
     @staticmethod
-    def set(guild: discord.Guild, unverify_role: discord.Role) -> GuildConfig:
+    def set(guild: nextcord.Guild, unverify_role: nextcord.Role) -> GuildConfig:
         """Updates the Guild Config item. Creates if not already present
 
         Args:
@@ -58,7 +58,7 @@ class GuildConfig(database.base):
         return query
 
     @staticmethod
-    def get(guild_id: discord.Guild) -> Optional[GuildConfig]:
+    def get(guild_id: nextcord.Guild) -> Optional[GuildConfig]:
         """Retreives the guild configuration
 
         Args:
@@ -116,11 +116,11 @@ class UnverifyItem(database.base):
 
     @staticmethod
     def add(
-        member: discord.Member,
+        member: nextcord.Member,
         end_time: datetime,
-        roles_to_return: List[discord.Role],
-        channels_to_return: List[discord.abc.GuildChannel],
-        channels_to_remove: List[discord.abc.GuildChannel],
+        roles_to_return: List[nextcord.Role],
+        channels_to_return: List[nextcord.abc.GuildChannel],
+        channels_to_remove: List[nextcord.abc.GuildChannel],
         reason: str,
         type: UnverifyType,
     ) -> UnverifyItem:
@@ -198,7 +198,9 @@ class UnverifyItem(database.base):
 
     @staticmethod
     def get_member(
-        member: discord.Member, status: UnverifyStatus = None, type: UnverifyType = None
+        member: nextcord.Member,
+        status: UnverifyStatus = None,
+        type: UnverifyType = None,
     ) -> Optional[List[UnverifyItem]]:
         """Retreives UnverifyItems filtered by member and optionally by status and type.
 
@@ -237,7 +239,7 @@ class UnverifyItem(database.base):
 
     @staticmethod
     def get_items(
-        guild: discord.Guild = None,
+        guild: nextcord.Guild = None,
         type: UnverifyType = None,
         status: UnverifyStatus = None,
         max_end_time: datetime = None,
@@ -276,14 +278,14 @@ class UnverifyItem(database.base):
         return query.order_by(UnverifyItem.end_time.asc()).all()
 
     @staticmethod
-    def remove_all(guild: discord.Guild) -> int:
+    def remove_all(guild: nextcord.Guild) -> int:
         """DANGER
         ------
         Removes all existing UnverifyItems in the guild! Does not reverify anyone.
 
         Args:
             guild_id (:class:`int`)
-                ID of the :class:`discord.Guild` whose items are to be deleted.
+                ID of the :class:`nextcord.Guild` whose items are to be deleted.
 
         Returns:
             :class:`int`: Number of deleted items
