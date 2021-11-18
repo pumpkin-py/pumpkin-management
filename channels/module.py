@@ -2,8 +2,8 @@ from typing import List
 import shlex
 import tempfile
 
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
 from core import check, i18n, logger, utils
 
@@ -27,7 +27,7 @@ class Channels(commands.Cog):
     @commands.check(check.acl)
     @reaction_channel.command(name="init-channels")
     async def reaction_channel_init_channels(
-        self, ctx, target: discord.TextChannel, *, groups: str
+        self, ctx, target: nextcord.TextChannel, *, groups: str
     ):
         """Initialise links for react-to-role functionality.
 
@@ -35,9 +35,9 @@ class Channels(commands.Cog):
         :param groups: List of group channels that will be linked from in this
             target channel.
         """
-        categories: List[discord.CategoryChannel] = []
+        categories: List[nextcord.CategoryChannel] = []
         for name in shlex.split(groups):
-            category = discord.utils.get(ctx.guild.categories, name=name)
+            category = nextcord.utils.get(ctx.guild.categories, name=name)
             if category is None:
                 await ctx.reply(_(ctx, "That category does not exist here."))
                 return
@@ -49,7 +49,7 @@ class Channels(commands.Cog):
             header_image = helper_utils.generate_header(group.name)
             header_image.save(header_file, "png")
             header_file.seek(0)
-            await target.send(file=discord.File(fp=header_file, filename="group.png"))
+            await target.send(file=nextcord.File(fp=header_file, filename="group.png"))
 
             # send list of channels
             message: List[str] = []

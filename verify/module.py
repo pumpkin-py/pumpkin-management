@@ -16,8 +16,8 @@ from email.mime.multipart import MIMEMultipart
 
 import imap_tools
 
-import discord
-from discord.ext import commands
+import nextcord
+from nextcord.ext import commands
 
 import database.config
 from core import check, exceptions, i18n, logger, utils
@@ -219,9 +219,9 @@ class Verify(commands.Cog):
         await asyncio.sleep(20)
         unread_messages = self._check_inbox_for_errors()
         for message in unread_messages:
-            guild: discord.Guild = self.bot.get_guild(int(message["guild"]))
-            user: discord.Member = self.bot.get_user(int(message["user"]))
-            channel: discord.TextChannel = guild.get_channel(int(message["channel"]))
+            guild: nextcord.Guild = self.bot.get_guild(int(message["guild"]))
+            user: nextcord.Member = self.bot.get_user(int(message["user"]))
+            channel: nextcord.TextChannel = guild.get_channel(int(message["channel"]))
             await guild_log.warning(
                 user,
                 channel,
@@ -362,7 +362,7 @@ class Verify(commands.Cog):
 
         roles = [role for role in ctx.author.roles if role.is_assignable()]
 
-        with contextlib.suppress(discord.Forbidden):
+        with contextlib.suppress(nextcord.Forbidden):
             await ctx.author.remove_roles(*roles, reason="strip")
         removed: int = VerifyMember.remove(ctx.guild.id, ctx.author.id)
 
@@ -402,7 +402,7 @@ class Verify(commands.Cog):
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.is_assignable()]
-                    with contextlib.suppress(discord.Forbidden):
+                    with contextlib.suppress(nextcord.Forbidden):
                         await member.remove_roles(*roles, reason="groupstrip")
                     removed_dc += 1
                 elif member is not None:
@@ -438,7 +438,7 @@ class Verify(commands.Cog):
 
     @commands.check(check.acl)
     @commands.command()
-    async def grouprolestrip(self, ctx, role: discord.Role, count: int = None):
+    async def grouprolestrip(self, ctx, role: nextcord.Role, count: int = None):
         """Remove all roles and reset verification status to None
         from all the users that have given role. Users are not notified
         about this.
@@ -477,7 +477,7 @@ class Verify(commands.Cog):
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [r for r in member.roles if r.is_assignable()]
-                    with contextlib.suppress(discord.Forbidden):
+                    with contextlib.suppress(nextcord.Forbidden):
                         await member.remove_roles(*roles, reason="grouprolestrip")
                     removed_dc += 1
 
@@ -513,7 +513,7 @@ class Verify(commands.Cog):
     @commands.check(check.acl)
     @verification.command(name="update")
     async def verification_update(
-        self, ctx, member: Union[discord.Member, int], status: str
+        self, ctx, member: Union[nextcord.Member, int], status: str
     ):
         """Update the user's verification status."""
         status = status.upper()
@@ -603,7 +603,7 @@ class Verify(commands.Cog):
         file.seek(0)
         await ctx.reply(
             _(ctx, "The template file has been exported."),
-            file=discord.File(fp=file, filename=filename),
+            file=nextcord.File(fp=file, filename=filename),
         )
         file.close()
 
@@ -631,7 +631,7 @@ class Verify(commands.Cog):
             _(ctx, "**{count}** verification groups have been exported.").format(
                 count=len(groups)
             ),
-            file=discord.File(fp=file, filename=filename),
+            file=nextcord.File(fp=file, filename=filename),
         )
         file.close()
         await guild_log.info(ctx.author, ctx.channel, "Verification groups exported.")
@@ -678,7 +678,7 @@ class Verify(commands.Cog):
     #
 
     @commands.Cog.listener()
-    async def on_member_join(self, member: discord.Member):
+    async def on_member_join(self, member: nextcord.Member):
         """Add the roles back if they have been verified before."""
         db_member = VerifyMember.get_by_member(member.guild.id, member.id)
         if db_member is None:
@@ -696,7 +696,7 @@ class Verify(commands.Cog):
         )
 
     @commands.Cog.listener()
-    async def on_member_ban(self, guild, member: Union[discord.Member, discord.User]):
+    async def on_member_ban(self, guild, member: Union[nextcord.Member, nextcord.User]):
         """When the member is banned, update the database status."""
         db_member = VerifyMember.get_by_member(guild.id, member.id)
 
@@ -805,8 +805,8 @@ class Verify(commands.Cog):
 
     def _get_message(
         self,
-        member: discord.Member,
-        channel: discord.TextChannel,
+        member: nextcord.Member,
+        channel: nextcord.TextChannel,
         address: str,
         code: str,
     ) -> MIMEMultipart:
@@ -859,12 +859,12 @@ class Verify(commands.Cog):
             server.login(SMTP_ADDRESS, SMTP_PASSWORD)
             server.send_message(message)
 
-    async def _add_roles(self, member: discord.Member, db_member: VerifyMember):
+    async def _add_roles(self, member: nextcord.Member, db_member: VerifyMember):
         """Add roles to the member."""
         groups: List[VerifyGroup] = self._map_address_to_groups(
             member.guild.id, member.id, db_member.address
         )
-        roles: List[discord.Role] = list()
+        roles: List[nextcord.Role] = list()
         for group in groups:
             roles.append(member.guild.get_role(group.role_id))
         await member.add_roles(*roles)
