@@ -15,7 +15,6 @@ from nextcord.ext import tasks, commands
 
 import pie.database.config
 from core import check, i18n, logger, utils
-from core import TranslationContext
 
 from .database import UnverifyStatus, UnverifyType, UnverifyItem, GuildConfig
 
@@ -82,7 +81,7 @@ class Unverify(commands.Cog):
                 member = await guild.fetch_member(item.user_id)
             except NotFound:
                 if item.status != UnverifyStatus.member_left:
-                    gtx = TranslationContext(member.guild.id, None)
+                    gtx = i18n.TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         guild,
@@ -108,7 +107,7 @@ class Unverify(commands.Cog):
                 try:
                     await member.add_roles(role, reason="Reverify", atomic=True)
                 except nextcord.errors.Forbidden:
-                    gtx = TranslationContext(member.guild.id, None)
+                    gtx = i18n.TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -122,7 +121,7 @@ class Unverify(commands.Cog):
                         ),
                     )
             else:
-                gtx = TranslationContext(member.guild.id, None)
+                gtx = i18n.TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -142,7 +141,7 @@ class Unverify(commands.Cog):
                         member, overwrite=user_overw, reason="Reverify"
                     )
                 except nextcord.errors.Forbidden:
-                    gtx = TranslationContext(member.guild.id, None)
+                    gtx = i18n.TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -182,7 +181,7 @@ class Unverify(commands.Cog):
                         member, overwrite=user_overw, reason="Reverify"
                     )
                 except nextcord.errors.Forbidden:
-                    gtx = TranslationContext(member.guild.id, None)
+                    gtx = i18n.TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -196,7 +195,7 @@ class Unverify(commands.Cog):
                         ),
                     )
             else:
-                gtx = TranslationContext(member.guild.id, None)
+                gtx = i18n.TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -223,7 +222,7 @@ class Unverify(commands.Cog):
             duration_in_s = duration.total_seconds()
             await asyncio.sleep(duration_in_s)
 
-        gtx = TranslationContext(member.guild.id, None)
+        gtx = i18n.TranslationContext(member.guild.id, None)
         await guild_log.info(
             None,
             member.guild,
@@ -243,7 +242,7 @@ class Unverify(commands.Cog):
             try:
                 await member.remove_roles(unverify_role, reason="Reverify", atomic=True)
             except nextcord.errors.Forbidden:
-                gtx = TranslationContext(member.guild.id, None)
+                gtx = i18n.TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -256,7 +255,7 @@ class Unverify(commands.Cog):
                     ),
                 )
         else:
-            gtx = TranslationContext(member.guild.id, None)
+            gtx = i18n.TranslationContext(member.guild.id, None)
             await guild_log.warning(
                 None,
                 member.guild,
@@ -269,8 +268,8 @@ class Unverify(commands.Cog):
                 ),
             )
 
-        gtx = TranslationContext(guild.id, None)
-        utx = TranslationContext(guild.id, member.id)
+        gtx = i18n.TranslationContext(guild.id, None)
+        utx = i18n.TranslationContext(guild.id, member.id)
         await guild_log.info(
             None,
             member.guild,
@@ -307,7 +306,7 @@ class Unverify(commands.Cog):
                 # This could be deleted roles just moment after the unverify started of someone tried to unverify a bot.
                 pass
             except nextcord.errors.Forbidden:
-                gtx = TranslationContext(member.guild.id, None)
+                gtx = i18n.TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -327,7 +326,7 @@ class Unverify(commands.Cog):
             try:
                 await member.add_roles(unverify_role, reason=type.value, atomic=True)
             except nextcord.errors.Forbidden:
-                gtx = TranslationContext(member.guild.id, None)
+                gtx = i18n.TranslationContext(member.guild.id, None)
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -340,7 +339,7 @@ class Unverify(commands.Cog):
                     ),
                 )
         else:
-            gtx = TranslationContext(member.guild.id, None)
+            gtx = i18n.TranslationContext(member.guild.id, None)
             await guild_log.warning(
                 None,
                 member.guild,
@@ -379,7 +378,7 @@ class Unverify(commands.Cog):
                         )
                         added_channels.append(channel)
                     except PermissionError:
-                        gtx = TranslationContext(member.guild.id, None)
+                        gtx = i18n.TranslationContext(member.guild.id, None)
                         await guild_log.warning(
                             None,
                             member.guild,
@@ -405,7 +404,7 @@ class Unverify(commands.Cog):
                     )
                     removed_channels.append(channel)
                 except PermissionError:
-                    gtx = TranslationContext(member.guild.id, None)
+                    gtx = i18n.TranslationContext(member.guild.id, None)
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -471,7 +470,7 @@ class Unverify(commands.Cog):
         """
         GuildConfig.set(guild_id=ctx.guild.id, unverify_role_id=unverify_role.id)
 
-        gtx = TranslationContext(ctx.guild.id, None)
+        gtx = i18n.TranslationContext(ctx.guild.id, None)
         await guild_log.info(
             ctx.author,
             ctx.channel,
@@ -536,7 +535,7 @@ class Unverify(commands.Cog):
             )
             return
 
-        utx = TranslationContext(ctx.guild.id, member.id)
+        utx = i18n.TranslationContext(ctx.guild.id, member.id)
         embed = utils.discord.create_embed(
             author=ctx.message.author,
             title=_(
@@ -579,7 +578,7 @@ class Unverify(commands.Cog):
             )
         )
 
-        gtx = TranslationContext(member.guild.id, None)
+        gtx = i18n.TranslationContext(member.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             member.guild,
@@ -612,7 +611,7 @@ class Unverify(commands.Cog):
         item.end_time = datetime.now()
         item.save()
 
-        gtx = TranslationContext(ctx.guild.id, None)
+        gtx = i18n.TranslationContext(ctx.guild.id, None)
         await guild_log.info(
             ctx.author,
             ctx.channel,
@@ -758,7 +757,7 @@ class Unverify(commands.Cog):
             return
 
         with contextlib.suppress(nextcord.Forbidden):
-            utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
             embed = utils.discord.create_embed(
                 author=ctx.message.author,
                 title=_(
@@ -790,7 +789,7 @@ class Unverify(commands.Cog):
             )
         )
 
-        gtx = TranslationContext(ctx.message.author.guild.id, None)
+        gtx = i18n.TranslationContext(ctx.message.author.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             ctx.message.author.guild,
@@ -833,7 +832,7 @@ class Unverify(commands.Cog):
             return
 
         with contextlib.suppress(nextcord.Forbidden):
-            utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
+            utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
             embed = utils.discord.create_embed(
                 author=ctx.message.author,
                 title=_(
@@ -865,7 +864,7 @@ class Unverify(commands.Cog):
             )
         )
 
-        gtx = TranslationContext(ctx.message.author.guild.id, None)
+        gtx = i18n.TranslationContext(ctx.message.author.guild.id, None)
         await guild_log.info(
             ctx.message.author,
             ctx.message.author.guild,
