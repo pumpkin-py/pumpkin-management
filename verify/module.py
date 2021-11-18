@@ -713,7 +713,6 @@ class Verify(commands.Cog):
             guild_id=guild.id,
             user_id=member.id,
             address=None,
-            group=None,
             code=None,
             status=VerifyStatus.BANNED,
         )
