@@ -37,11 +37,11 @@ class Unverify(commands.Cog):
     @tasks.loop(seconds=30.0)
     async def reverifier(self):
         max_end_time = datetime.now() + timedelta(seconds=30)
-        min_last_checked = datetime.now() - timedelta(hours=1)
+        min_last_check = datetime.now() - timedelta(hours=1)
         items = UnverifyItem.get_items(
             status=UnverifyStatus.waiting,
             max_end_time=max_end_time,
-            min_last_checked=min_last_checked,
+            min_last_check=min_last_check,
         )
         if items is not None:
             for item in items:
@@ -63,7 +63,7 @@ class Unverify(commands.Cog):
                     f"Reverify failed: Guild ({item.guild_id}) was not found.\nSetting status to `guild could not be found`",
                 )
                 item.status = UnverifyStatus.guild_not_found
-            item.last_checked = datetime.now()
+            item.last_check = datetime.now()
             item.save()
             await bot_log.warning(
                 None,
@@ -95,7 +95,7 @@ class Unverify(commands.Cog):
                     )
                     item.status = UnverifyStatus.member_left
                     item.save()
-                item.last_checked = datetime.now()
+                item.last_check = datetime.now()
                 item.save()
                 raise NotFound
         return member
@@ -136,8 +136,7 @@ class Unverify(commands.Cog):
         for channel_id in item.channels_to_return:
             channel = nextcord.utils.get(member.guild.channels, id=channel_id)
             if channel is not None:
-                user_overw = channel.overwrites_for(member)
-                user_overw.update(read_messages=True)
+                user_overw = nextcord.PermissionOverwrite(read_messages=True)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason="Reverify"

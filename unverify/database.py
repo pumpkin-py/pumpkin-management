@@ -104,9 +104,9 @@ class UnverifyItem(database.base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
     user_id = Column(BigInteger)
-    start_time = Column(DateTime)
-    end_time = Column(DateTime)
-    last_check = Column(DateTime)
+    start_time = Column(DateTime(timezone=True))
+    end_time = Column(DateTime(timezone=True))
+    last_check = Column(DateTime(timezone=True))
     roles_to_return = Column(ARRAY(BigInteger))
     channels_to_return = Column(ARRAY(BigInteger))
     channels_to_remove = Column(ARRAY(BigInteger))
@@ -243,7 +243,7 @@ class UnverifyItem(database.base):
         type: UnverifyType = None,
         status: UnverifyStatus = None,
         max_end_time: datetime = None,
-        min_last_checked: datetime = None,
+        min_last_check: datetime = None,
     ) -> Optional[List[UnverifyItem]]:
         """Retreives List of UnverifyItems filtered optionally by:
             Unverify type, Unverify status, up to end time, with minimum last check time.
@@ -267,10 +267,10 @@ class UnverifyItem(database.base):
             query = query.filter_by(status=status)
         if max_end_time is not None:
             query = query.filter(UnverifyItem.end_time < max_end_time)
-        if min_last_checked is not None:
+        if min_last_check is not None:
             query = query.filter(
                 or_(
-                    UnverifyItem.last_check < min_last_checked,
+                    UnverifyItem.last_check < min_last_check,
                     UnverifyItem.last_check == None,  # noqa: E711
                 )
             )
