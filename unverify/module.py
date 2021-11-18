@@ -13,7 +13,7 @@ from nextcord.errors import NotFound
 from nextcord.ext.commands.bot import Bot
 from nextcord.ext import tasks, commands
 
-import database.config
+import pie.database.config
 from core import check, i18n, logger, utils
 from core import TranslationContext
 
@@ -23,7 +23,7 @@ from .database import UnverifyStatus, UnverifyType, UnverifyItem, GuildConfig
 _ = i18n.Translator("modules/mgmt").translate
 bot_log = logger.Bot.logger()
 guild_log = logger.Guild.logger()
-config = database.config.Config.get()
+config = pie.database.config.Config.get()
 
 
 class Unverify(commands.Cog):
@@ -458,7 +458,7 @@ class Unverify(commands.Cog):
     @commands.group(name="unverify")
     async def unverify_(self, ctx):
         """Pest control."""
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.guild_only()
     @commands.check(check.acl)
@@ -504,7 +504,7 @@ class Unverify(commands.Cog):
             reason: Reason of Unverify. Defaults to None.
         """
         try:
-            end_time = utils.Time.parse_datetime(datetime_str)
+            end_time = utils.time.parse_datetime(datetime_str)
         except dateutil.parser.ParserError:
             await ctx.reply(
                 _(
@@ -537,7 +537,7 @@ class Unverify(commands.Cog):
             return
 
         utx = TranslationContext(ctx.guild.id, member.id)
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.message.author,
             title=_(
                 utx,
@@ -567,7 +567,7 @@ class Unverify(commands.Cog):
         with contextlib.suppress(nextcord.Forbidden):
             await member.send(embed=embed)
 
-        end_time_str = utils.Time.datetime(end_time)
+        end_time_str = utils.time.format_datetime(end_time)
 
         await ctx.reply(
             _(
@@ -671,8 +671,8 @@ class Unverify(commands.Cog):
             else:
                 user_name = f"{user.mention}\n{user.name} ({user.id})"
 
-            start_time = utils.Time.datetime(item.start_time)
-            end_time = utils.Time.datetime(item.end_time)
+            start_time = utils.time.format_datetime(item.start_time)
+            end_time = utils.time.format_datetime(item.end_time)
 
             roles = []
             for role_id in item.roles_to_return:
@@ -683,7 +683,7 @@ class Unverify(commands.Cog):
                 channel = nextcord.utils.get(guild.channels, id=channel_id)
                 channels.append(channel)
 
-            embed = utils.Discord.create_embed(
+            embed = utils.discord.create_embed(
                 author=ctx.message.author, title=_(ctx, "Unverify list")
             )
             embed.add_field(name=_(ctx, "User"), value=user_name, inline=False)
@@ -722,7 +722,7 @@ class Unverify(commands.Cog):
             datetime_str: Until when. Preferably quoted.
         """
         try:
-            end_time = utils.Time.parse_datetime(datetime_str)
+            end_time = utils.time.parse_datetime(datetime_str)
         except dateutil.parser.ParserError:
             await ctx.reply(
                 _(
@@ -759,7 +759,7 @@ class Unverify(commands.Cog):
 
         with contextlib.suppress(nextcord.Forbidden):
             utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
-            embed = utils.Discord.create_embed(
+            embed = utils.discord.create_embed(
                 author=ctx.message.author,
                 title=_(
                     utx,
@@ -778,7 +778,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = utils.Time.datetime(end_time)
+        end_time_str = utils.time.datetime(end_time)
 
         await ctx.reply(
             _(
@@ -834,7 +834,7 @@ class Unverify(commands.Cog):
 
         with contextlib.suppress(nextcord.Forbidden):
             utx = TranslationContext(ctx.guild.id, ctx.message.author.id)
-            embed = utils.Discord.create_embed(
+            embed = utils.discord.create_embed(
                 author=ctx.message.author,
                 title=_(
                     utx,
@@ -853,7 +853,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = utils.Time.datetime(end_time)
+        end_time_str = utils.time.datetime(end_time)
 
         await ctx.reply(
             _(

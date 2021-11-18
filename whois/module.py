@@ -3,8 +3,8 @@ from typing import Optional, Union
 import nextcord
 from nextcord.ext import commands
 
-from core import check, i18n, logger, utils
-from database.acl import ACL_group
+from pie import check, i18n, logger, utils
+from pie.acl.database import ACL_group
 from ..verify.database import VerifyMember
 from ..verify.enums import VerifyStatus
 
@@ -26,7 +26,7 @@ class Whois(commands.Cog):
             guild_id=ctx.guild.id, role_id=role.id
         )
 
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author,
             title=role.name,
             description=role.id,
@@ -70,7 +70,7 @@ class Whois(commands.Cog):
                 user_count += 1
 
         topic: str = f"{channel.topic}\n" if channel.topic else ""
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author,
             title=f"#{channel.name}",
             description=f"{topic}{channel.id}",
@@ -144,7 +144,7 @@ class Whois(commands.Cog):
         else:
             description = f"{db_member.user_id}"
 
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author,
             title=_(ctx, "Whois"),
             description=description,

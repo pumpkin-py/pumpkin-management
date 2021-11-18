@@ -19,9 +19,8 @@ import imap_tools
 import nextcord
 from nextcord.ext import commands
 
-import database.config
-from core import check, exceptions, i18n, logger, utils
-from core import TranslationContext
+import pie.database.config
+from pie import check, exceptions, i18n, logger, utils
 
 from .enums import VerifyStatus
 from .database import VerifyGroup, VerifyMember
@@ -30,7 +29,7 @@ from .database import VerifyGroup, VerifyMember
 _ = i18n.Translator("modules/mgmt").translate
 bot_log = logger.Bot.logger()
 guild_log = logger.Guild.logger()
-config = database.config.Config.get()
+config = pie.database.config.Config.get()
 
 
 SMTP_SERVER: str = os.getenv("SMTP_SERVER")
@@ -67,7 +66,7 @@ class Verify(commands.Cog):
     @commands.command()
     async def verify(self, ctx, address: Optional[str] = None):
         """Ask for a verification code."""
-        await utils.Discord.delete_message(ctx.message)
+        await utils.discord.delete_message(ctx.message)
         if not address:
             await ctx.send(
                 _(ctx, "{mention} You have to include your e-mail.").format(
@@ -253,7 +252,7 @@ class Verify(commands.Cog):
                 ),
             )
 
-            if not await utils.Discord.send_dm(
+            if not await utils.discord.send_dm(
                 ctx.author,
                 error_private + "\n" + error_epilog,
             ):
@@ -267,7 +266,7 @@ class Verify(commands.Cog):
     @commands.command()
     async def submit(self, ctx, code: Optional[str] = None):
         """Submit verification code."""
-        await utils.Discord.delete_message(ctx.message)
+        await utils.discord.delete_message(ctx.message)
         if not code:
             await ctx.send(
                 _(ctx, "{mention} You have to include your verification code.").format(
@@ -333,7 +332,7 @@ class Verify(commands.Cog):
 
         await self._add_roles(ctx.author, db_member)
 
-        await utils.Discord.send_dm(
+        await utils.discord.send_dm(
             ctx.author,
             _(ctx, "You have been verified, congratulations!"),
         )
@@ -372,7 +371,7 @@ class Verify(commands.Cog):
         message += "."
         await guild_log.info(ctx.author, ctx.channel, message)
 
-        await utils.Discord.send_dm(
+        await utils.discord.send_dm(
             ctx.author,
             _(
                 ctx,
@@ -383,7 +382,7 @@ class Verify(commands.Cog):
                 ),
             ),
         )
-        await utils.Discord.delete_message(ctx.message)
+        await utils.discord.delete_message(ctx.message)
 
     @commands.check(check.acl)
     @commands.command()
@@ -501,7 +500,7 @@ class Verify(commands.Cog):
     @commands.check(check.acl)
     @commands.group(name="verification")
     async def verification(self, ctx):
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.check(check.acl)
     @verification.command(name="statistics", aliases=["stats"])
@@ -548,13 +547,13 @@ class Verify(commands.Cog):
     @commands.check(check.acl)
     @verification.group(name="groups")
     async def verification_groups(self, ctx):
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.check(check.acl)
     @verification_groups.command(name="list")
     async def verification_groups_list(self, ctx):
         """Display list of all verification groups."""
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author,
             title=_(ctx, "Verification groups"),
         )
@@ -813,7 +812,7 @@ class Verify(commands.Cog):
         """Generate the verification e-mail."""
         BOT_URL = "https://github.com/pumpkin-py"
 
-        utx = TranslationContext(member.guild.id, member.id)
+        utx = i18n.TranslationContext(member.guild.id, member.id)
 
         clear_list: List[str] = [
             _(

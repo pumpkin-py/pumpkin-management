@@ -5,7 +5,7 @@ import tempfile
 import nextcord
 from nextcord.ext import commands
 
-from core import check, i18n, logger, utils
+from pie import check, i18n, logger, utils
 
 from . import utils as helper_utils
 
@@ -22,7 +22,7 @@ class Channels(commands.Cog):
     @commands.group(name="reaction-channel")
     async def reaction_channel(self, ctx):
         """Manage react-to-role channels."""
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.check(check.acl)
     @reaction_channel.command(name="init-channels")

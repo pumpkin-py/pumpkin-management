@@ -5,7 +5,7 @@ from typing import Dict, Optional, List
 import nextcord
 from nextcord.ext import commands
 
-from core import check, i18n, logger, utils
+from pie import check, i18n, logger, utils
 
 from .database import Link, Satellite
 
@@ -22,13 +22,13 @@ class Sync(commands.Cog):
     @commands.group(name="sync")
     async def sync(self, ctx):
         """Synchronize your roles with main server."""
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.check(check.acl)
     @sync.command(name="me")
     async def sync_me(self, ctx):
         """Synchronize your roles with main server."""
-        await utils.Discord.delete_message(ctx.message)
+        await utils.discord.delete_message(ctx.message)
 
         link: Optional[Link] = Link.get_by_satellite(ctx.guild.id)
         if not link:
@@ -126,7 +126,7 @@ class Sync(commands.Cog):
         satellite: Optional[Link] = Link.get_by_satellite(satellite_id=ctx.guild.id)
         satellites: List[Link] = Link.get_all(guild_id=ctx.guild.id)
 
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author,
             title=_(ctx, "Synchronizations"),
         )
@@ -205,7 +205,7 @@ class Sync(commands.Cog):
     @commands.group(name="satellite")
     async def satellite_(self, ctx):
         """Manage satellites."""
-        await utils.Discord.send_help(ctx)
+        await utils.discord.send_help(ctx)
 
     @commands.check(check.acl)
     @satellite_.command(name="template")
@@ -234,7 +234,7 @@ class Sync(commands.Cog):
     @commands.check(check.acl)
     @satellite_.command(name="get")
     async def satellite_get(self, ctx):
-        embed = utils.Discord.create_embed(
+        embed = utils.discord.create_embed(
             author=ctx.author, title=_(ctx, "Satellite information")
         )
 

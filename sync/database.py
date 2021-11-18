@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from sqlalchemy import BigInteger, Column, Integer, JSON
 
-from database import database, session
+from pie.database import database, session
 
 
 class Link(database.base):

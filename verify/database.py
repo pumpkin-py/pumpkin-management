@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from sqlalchemy import BigInteger, Column, DateTime, Integer, String
 
-from database import database, session
+from pie.database import database, session
 
 from .enums import VerifyStatus
 
