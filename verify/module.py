@@ -105,7 +105,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 (
                     "Attempted to verify with ID already in database: "
-                    f"'{utils.Text.sanitise(address)}'."
+                    f"'{utils.text.sanitise(address)}'."
                 ),
             )
             await ctx.send(
@@ -126,7 +126,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 (
                     "Attempted to verify with address already in database: "
-                    f"'{utils.Text.sanitise(address)}'."
+                    f"'{utils.text.sanitise(address)}'."
                 ),
             )
             await ctx.send(
@@ -314,7 +314,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 (
                     "Attempted to submit bad code: "
-                    f"`{utils.Text.sanitise(code)}` instead of `{db_member.code}`."
+                    f"`{utils.text.sanitise(code)}` instead of `{db_member.code}`."
                 ),
             )
             await ctx.send(
@@ -339,7 +339,7 @@ class Verify(commands.Cog):
 
         await ctx.send(
             _(ctx, "Member **{name}** has been verified.").format(
-                name=utils.Text.sanitise(ctx.author.name),
+                name=utils.text.sanitise(ctx.author.name),
             ),
             delete_after=120,
         )
@@ -541,7 +541,7 @@ class Verify(commands.Cog):
             _(
                 ctx,
                 f"Member verification status of **{member}** has been updated to **{status}**.",
-            ).format(member=utils.Text.sanitise(member.display_name)),
+            ).format(member=utils.text.sanitise(member.display_name)),
         )
 
     @commands.check(check.acl)

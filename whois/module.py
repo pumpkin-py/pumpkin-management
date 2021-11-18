@@ -166,7 +166,7 @@ class Whois(commands.Cog):
             )
             embed.add_field(
                 name=_(ctx, "Timestamp"),
-                value=utils.Time.datetime(db_member.timestamp),
+                value=utils.time.format_datetime(db_member.timestamp),
                 inline=False,
             )
 
