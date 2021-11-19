@@ -14,7 +14,7 @@ from nextcord.ext.commands.bot import Bot
 from nextcord.ext import tasks, commands
 
 import pie.database.config
-from core import check, i18n, logger, utils
+from pie import check, i18n, logger, utils
 
 from .database import UnverifyStatus, UnverifyType, UnverifyItem, GuildConfig
 
@@ -174,8 +174,7 @@ class Unverify(commands.Cog):
         for channel_id in item.channels_to_remove:
             channel = nextcord.utils.get(member.guild.channels, id=channel_id)
             if channel is not None:
-                user_overw = channel.overwrites_for(member)
-                user_overw.update(read_messages=None)
+                user_overw = nextcord.PermissionOverwrite(read_messages=None)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason="Reverify"
@@ -367,11 +366,14 @@ class Unverify(commands.Cog):
                 continue
 
             perms = channel.permissions_for(member)
-            user_overw = channel.overwrites_for(member)
+            try:
+                user_overw = channel.overwrites_for(member)
+            except TypeError:
+                user_overw = nextcord.PermissionOverwrite(read_messages=None)
 
             if channels_to_keep is not None and channel in channels_to_keep:
                 if not perms.read_messages:
-                    user_overw.update(read_messages=True)
+                    user_overw = nextcord.PermissionOverwrite(read_messages=True)
                     try:
                         await channel.set_permissions(
                             member, overwrite=user_overw, reason=type.value
@@ -397,7 +399,7 @@ class Unverify(commands.Cog):
             elif not perms.read_messages:
                 pass
             else:
-                user_overw.update(read_messages=False)
+                user_overw = nextcord.PermissionOverwrite(read_messages=False)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason=type.value
@@ -777,7 +779,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = utils.time.datetime(end_time)
+        end_time_str = utils.time.format_datetime(end_time)
 
         await ctx.reply(
             _(
@@ -852,7 +854,7 @@ class Unverify(commands.Cog):
             )
             await ctx.message.author.send(embed=embed)
 
-        end_time_str = utils.time.datetime(end_time)
+        end_time_str = utils.time.format_datetime(end_time)
 
         await ctx.reply(
             _(
