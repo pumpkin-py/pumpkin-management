@@ -59,7 +59,8 @@ class Unverify(commands.Cog):
                 await bot_log.warning(
                     None,
                     None,
-                    f"Reverify failed: Guild ({item.guild_id}) was not found.\nSetting status to `guild could not be found`",
+                    f"Reverify failed: Guild ({item.guild_id}) was not found. "
+                    + "Setting status to `guild could not be found`",
                 )
                 item.status = UnverifyStatus.guild_not_found
             item.last_check = datetime.now()
@@ -84,7 +85,8 @@ class Unverify(commands.Cog):
                     await guild_log.warning(
                         None,
                         guild,
-                        f"Reverify failed: Member ({item.user_id}) was not found. Setting status to `member left server`.",
+                        f"Reverify failed: Member ({item.user_id}) was not found. "
+                        + "Setting status to `member left server`.",
                     )
                     item.status = UnverifyStatus.member_left
                     item.save()
@@ -104,7 +106,8 @@ class Unverify(commands.Cog):
                     await guild_log.warning(
                         None,
                         member.guild,
-                        f"Returning role {role.name} to {member.name} ({member.id}) failed. Insufficient permissions.",
+                        f"Returning role {role.name} to {member.name} ({member.id}) failed. "
+                        + "Insufficient permissions.",
                     )
             else:
                 await guild_log.warning(
@@ -127,13 +130,15 @@ class Unverify(commands.Cog):
                     await guild_log.warning(
                         None,
                         member.guild,
-                        f"Could not add {member.name} ({member.id}) to {channel.name}. Insufficient permissions.",
+                        f"Could not add {member.name} ({member.id}) to {channel.name}. "
+                        + "Insufficient permissions.",
                     )
             else:
                 await guild_log.warning(
                     None,
                     member.guild,
-                    f"Could not add {member.name} ({member.id}) to {channel.name}. Channel doesn't exist.",
+                    f"Could not add {member.name} ({member.id}) to {channel.name}. "
+                    + "Channel doesn't exist.",
                 )
 
     @staticmethod
@@ -150,13 +155,15 @@ class Unverify(commands.Cog):
                     await guild_log.warning(
                         None,
                         member.guild,
-                        f"Could not remove {member.name} ({member.id}) from {channel.name}. Insufficient permissions.",
+                        f"Could not remove {member.name} ({member.id}) "
+                        + f"from {channel.name}. Insufficient permissions.",
                     )
             else:
                 await guild_log.warning(
                     None,
                     member.guild,
-                    f"Could not remove {member.name} ({member.id}) from channel ({channel.id}). Channel doesn't exist.",
+                    f"Could not remove {member.name} ({member.id}) "
+                    + f"from channel ({channel.id}). Channel doesn't exist.",
                 )
 
     async def _reverify_user(self, item: UnverifyItem):
@@ -189,13 +196,15 @@ class Unverify(commands.Cog):
                 await guild_log.warning(
                     None,
                     member.guild,
-                    f"Removing unverify role from  {member.name} ({member.id}) failed. Insufficient permissions.",
+                    f"Removing unverify role from  {member.name} ({member.id}) failed. "
+                    + "Insufficient permissions.",
                 )
         else:
             await guild_log.warning(
                 None,
                 member.guild,
-                f"Removing unverify role from  {member.name} ({member.id}) failed. Role not found.",
+                f"Removing unverify role from  {member.name} ({member.id}) failed. "
+                + "Role not found.",
             )
 
         utx = i18n.TranslationContext(guild.id, member.id)
@@ -225,13 +234,14 @@ class Unverify(commands.Cog):
                 await member.remove_roles(role, reason=type.value, atomic=True)
                 removed_roles.append(role)
             except NotFound:
-                # This could be deleted roles just moment after the unverify started of someone tried to unverify a bot.
+                # The role got deleted or someone tried to unverify a bot.
                 pass
             except nextcord.errors.Forbidden:
                 await guild_log.warning(
                     None,
                     member.guild,
-                    f"Removing role {role.name} from  {member.name} ({member.id}) failed. Insufficient permissions.",
+                    f"Removing role {role.name} from  {member.name} ({member.id}) failed. "
+                    + "Insufficient permissions.",
                 )
 
         config = GuildConfig.get(guild.id)
@@ -243,7 +253,8 @@ class Unverify(commands.Cog):
                 await guild_log.warning(
                     None,
                     member.guild,
-                    f"Adding unverify role to {member.name} ({member.id}) failed. Insufficient permissions.",
+                    f"Adding unverify role to {member.name} ({member.id}) failed. "
+                    + "Insufficient permissions.",
                 )
         else:
             await guild_log.warning(
@@ -284,7 +295,8 @@ class Unverify(commands.Cog):
                         await guild_log.warning(
                             None,
                             member.guild,
-                            f"Adding temp permissions for {member.name} ({member.id}) to {channel.name} failed. Insufficient permissions.",
+                            f"Adding temp permissions for {member.name} ({member.id}) "
+                            + f"to {channel.name} failed. Insufficient permissions.",
                         )
 
             elif perms.read_messages and not user_overw.read_messages:
@@ -302,7 +314,8 @@ class Unverify(commands.Cog):
                     await guild_log.warning(
                         None,
                         member.guild,
-                        f"Removing {member.name} ({member.id}) from {channel.name} failed. Insufficient permissions.",
+                        f"Removing {member.name} ({member.id}) from {channel.name} failed. "
+                        + "Insufficient permissions.",
                     )
         return removed_channels, added_channels
 
@@ -452,7 +465,10 @@ class Unverify(commands.Cog):
         await ctx.reply(
             _(
                 ctx,
-                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
+                (
+                    "Member {member_name} was temporarily unverified. "
+                    "The access will be returned on: {end_time}"
+                ),
             ).format(
                 member_name=member.name,
                 end_time=end_time_str,
@@ -460,9 +476,10 @@ class Unverify(commands.Cog):
         )
 
         await guild_log.info(
-            ctx.message.author,
+            member,
             ctx.channel,
-            f"Member {member.name} ({member.id}) unverified: Until - {end_time_str}, reason - {reason}, type - {UnverifyType.unverify.value}",
+            f"Member {member.name} ({member.id}) unverified "
+            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
         )
 
     @commands.guild_only()
@@ -485,12 +502,15 @@ class Unverify(commands.Cog):
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            "Unverify of {member.name} ({member.id}) was pardoned.",
+            f"Unverify of {member.name} ({member.id}) was pardoned.",
         )
         await ctx.reply(
             _(
                 ctx,
-                "Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.",
+                (
+                    "Unverify of {member_name} ({member_id}) was pardoned. "
+                    "Access will be returned next time the reverifier loop runs."
+                ),
             ).format(
                 member_name=member.name,
                 member_id=member.id,
@@ -649,7 +669,10 @@ class Unverify(commands.Cog):
         await ctx.reply(
             _(
                 ctx,
-                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
+                (
+                    "Member {member_name} was temporarily unverified. "
+                    "The access will be returned on: {end_time}"
+                ),
             ).format(
                 member_name=ctx.message.author.name,
                 end_time=end_time_str,
@@ -660,7 +683,8 @@ class Unverify(commands.Cog):
         await guild_log.info(
             member,
             ctx.channel,
-            f"Member {member.name} ({member.id}) unverified: Until - {end_time_str}, type - {UnverifyType.selfunverify.value}",
+            f"Member {member.name} ({member.id}) unverified "
+            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
         )
 
     @commands.guild_only()
@@ -716,7 +740,10 @@ class Unverify(commands.Cog):
         await ctx.reply(
             _(
                 ctx,
-                "Member {member_name} was temporarily unverified. The access will be returned on: {end_time}",
+                (
+                    "Member {member_name} was temporarily unverified. "
+                    "The access will be returned on: {end_time}"
+                ),
             ).format(
                 member_name=ctx.message.author.name,
                 end_time=end_time_str,
@@ -727,7 +754,8 @@ class Unverify(commands.Cog):
         await guild_log.info(
             member,
             ctx.channel,
-            f"Member {member.name} ({member.id}) unverified: Until - {end_time_str}, type - {UnverifyType.selfunverify.valu}",
+            f"Member {member.name} ({member.id}) unverified "
+            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
         )
 
 

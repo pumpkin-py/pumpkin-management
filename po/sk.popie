@@ -85,58 +85,7 @@ msgstr
 msgid Satellite has been deconstructed.
 msgstr
 
-msgid Reverify failed: Member ({user_id}) was not found. Setting status to `member left server`.
-msgstr
-
-msgid Returning role {role_name} to {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr
-
-msgid Role with ID {role_id} could not be found.
-msgstr
-
-msgid Could not add {member_name} ({member_id}) to {channel_name}. Insufficient permissions.
-msgstr
-
-msgid Could not add {member_name} ({member_id}) to channel ({channel_id}). Channel doesn't exist.
-msgstr
-
-msgid Could not remove {member_name} ({member_id}) from {channel_name}. Insufficient permissions.
-msgstr
-
-msgid Could not remove {member_name} ({member_id}) from channel ({channel_id}). Channel doesn't exist.
-msgstr
-
-msgid Reverifying {member_name} ({member_id}).
-msgstr
-
-msgid Removing unverify role from  {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr
-
-msgid Removing unverify role from  {member_name} ({member_id}) failed. Role not found.
-msgstr
-
-msgid Reverify success for member {member_name}.
-msgstr
-
 msgid Your access to the guild **{guild_name}** was returned.
-msgstr
-
-msgid Couldn't send reverify info to {member_name}'s DM
-msgstr
-
-msgid Removing role {role_name} from  {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr
-
-msgid Adding unverify role to {member_name} ({member_id}) failed. Insufficient permissions.
-msgstr
-
-msgid Adding unverify role to {member_name} ({member_id}) failed. Role not found.
-msgstr
-
-msgid Adding temp permissions for {member_name} ({member_id}) to {channel_name} failed. Insufficient permissions.
-msgstr
-
-msgid Removing {member_name} ({member_id}) from {channel_name} failed. Insufficient permissions.
 msgstr
 
 msgid Unverify role was set to {role_name}.
@@ -163,13 +112,7 @@ msgstr
 msgid Member {member_name} was temporarily unverified. The access will be returned on: {end_time}
 msgstr
 
-msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, reason - {reason}, type - {type}
-msgstr
-
 msgid Is this member really unverified?
-msgstr
-
-msgid Unverify of {member_name} ({member_id}) was pardoned.
 msgstr
 
 msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
@@ -200,9 +143,6 @@ msgid Roles to return
 msgstr
 
 msgid Channels to return
-msgstr
-
-msgid Member {member_name} ({member_id}) unverified: Until - {end_time}, type - {type}
 msgstr
 
 msgid {mention} You have to include your e-mail.
