@@ -429,6 +429,8 @@ class Unverify(commands.Cog):
             )
             return
 
+        end_time_str = utils.time.format_datetime(end_time)
+
         utx = i18n.TranslationContext(ctx.guild.id, member.id)
         embed = utils.discord.create_embed(
             author=ctx.message.author,
@@ -444,7 +446,7 @@ class Unverify(commands.Cog):
                 utx,
                 "Your access will be automatically returned on",
             ),
-            value=end_time,
+            value=end_time_str,
             inline=False,
         )
         if reason is not None:
@@ -656,28 +658,29 @@ class Unverify(commands.Cog):
             )
             return
 
-        with contextlib.suppress(nextcord.Forbidden):
-            utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
-            embed = utils.discord.create_embed(
-                author=ctx.message.author,
-                title=_(
-                    utx,
-                    "Your access to {guild_name} was temporarily revoked.",
-                ).format(
-                    guild_name=ctx.guild.name,
-                ),
-            )
-            embed.add_field(
-                name=_(
-                    utx,
-                    "Your access will be automatically returned on",
-                ),
-                value=end_time,
-                inline=False,
-            )
-            await ctx.message.author.send(embed=embed)
-
         end_time_str = utils.time.format_datetime(end_time)
+
+        utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
+        embed = utils.discord.create_embed(
+            author=ctx.message.author,
+            title=_(
+                utx,
+                "Your access to {guild_name} was temporarily revoked.",
+            ).format(
+                guild_name=ctx.guild.name,
+            ),
+        )
+        embed.add_field(
+            name=_(
+                utx,
+                "Your access will be automatically returned on",
+            ),
+            value=end_time_str,
+            inline=False,
+        )
+
+        with contextlib.suppress(nextcord.Forbidden):
+            await ctx.message.author.send(embed=embed)
 
         await ctx.reply(
             _(
@@ -727,28 +730,29 @@ class Unverify(commands.Cog):
             )
             return
 
-        with contextlib.suppress(nextcord.Forbidden):
-            utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
-            embed = utils.discord.create_embed(
-                author=ctx.message.author,
-                title=_(
-                    utx,
-                    "Your access to {guild_name} was temporarily revoked.",
-                ).format(
-                    guild_name=ctx.guild.name,
-                ),
-            )
-            embed.add_field(
-                name=_(
-                    utx,
-                    "Your access will be automatically returned on",
-                ),
-                value=end_time,
-                inline=False,
-            )
-            await ctx.message.author.send(embed=embed)
-
         end_time_str = utils.time.format_datetime(end_time)
+
+        utx = i18n.TranslationContext(ctx.guild.id, ctx.message.author.id)
+        embed = utils.discord.create_embed(
+            author=ctx.message.author,
+            title=_(
+                utx,
+                "Your access to {guild_name} was temporarily revoked.",
+            ).format(
+                guild_name=ctx.guild.name,
+            ),
+        )
+        embed.add_field(
+            name=_(
+                utx,
+                "Your access will be automatically returned on",
+            ),
+            value=end_time_str,
+            inline=False,
+        )
+
+        with contextlib.suppress(nextcord.Forbidden):
+            await ctx.message.author.send(embed=embed)
 
         await ctx.reply(
             _(
