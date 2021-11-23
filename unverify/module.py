@@ -601,11 +601,17 @@ class Unverify(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def selfunverify(self, ctx: commands.Context, datetime_str: str):
+    async def selfunverify(
+        self,
+        ctx: commands.Context,
+        datetime_str: str,
+        channels: commands.Greedy[nextcord.TextChannel],
+    ):
         """Unverify self.
 
         Args:
             datetime_str: Until when. Preferably quoted.
+            channels: Channels you want to keep.
         """
         try:
             end_time = utils.time.parse_datetime(datetime_str)
@@ -627,12 +633,19 @@ class Unverify(commands.Cog):
             )
             return
 
+        cleaned_channels = []
+        for channel in channels:
+            perms = channel.permissions_for(ctx.author)
+            if perms.read_messages:
+                cleaned_channels.append(channel)
+
         try:
             await self._unverify_member(
                 ctx.message.author,
                 end_time,
                 UnverifyType.selfunverify.value,
                 type=UnverifyType.selfunverify,
+                channels_to_keep=cleaned_channels,
             )
         except ValueError:
             await ctx.reply(
