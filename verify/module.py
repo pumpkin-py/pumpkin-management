@@ -105,7 +105,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 (
                     "Attempted to verify with ID already in database: "
-                    f"'{utils.text.sanitise(address)}'."
+                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
                 ),
             )
             await ctx.send(
@@ -126,7 +126,7 @@ class Verify(commands.Cog):
                 ctx.channel,
                 (
                     "Attempted to verify with address already in database: "
-                    f"'{utils.text.sanitise(address)}'."
+                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
                 ),
             )
             await ctx.send(
