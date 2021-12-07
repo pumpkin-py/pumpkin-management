@@ -5,25 +5,25 @@ msgid Done.
 msgstr Hotovo.
 
 msgid {mention} This server is not a satellite.
-msgstr {mention} Tento server nie je satelit. 
+msgstr {mention} Tento server nie je satelit.
 
 msgid {mention} I could not contact the main server.
-msgstr {mention} Hlavný server nemohol byť kontaktovaný. 
+msgstr {mention} Hlavný server nemohol byť kontaktovaný.
 
 msgid {mention} You are not on the main server.
-msgstr {mention} Nie si na hlavnom serveri. 
+msgstr {mention} Nie si na hlavnom serveri.
 
 msgid {mention} You don't have any synchronizable roles on the main server.
-msgstr {mention} Nemáš žiadne synchronizovateľné role na hlavnom serveri. 
+msgstr {mention} Nemáš žiadne synchronizovateľné role na hlavnom serveri.
 
 msgid {mention} I've added **{count}** new roles to you.
-msgstr {mention} Bolo ti pridaných **{count}** nových rolí. 
+msgstr {mention} Bolo ti pridaných **{count}** nových rolí.
 
 msgid Synchronizations
 msgstr Synchronizácia
 
 msgid This server is a satellite of
-msgstr Tento server je satelit 
+msgstr Tento server je satelit
 
 msgid not found
 msgstr nenájdený
@@ -50,7 +50,7 @@ msgid That server is not synchronized.
 msgstr Daný server nie je synchronizovaný.
 
 msgid Satellite has been sucessfully removed.
-msgstr Satelit bol úspešne odstránený. 
+msgstr Satelit bol úspešne odstránený.
 
 msgid Values on the left are IDs of roles on the main server, values on the right are role IDs on the satellite.
 msgstr Hodnoty nalavo sú ID rolí na hlavnom serveri, hodnoty na pravej strane sú ID na setelite.
@@ -77,16 +77,16 @@ msgid Error while decoding: `{error}`.
 msgstr Chyba pri dekódovaní: `{error}`.
 
 msgid Satellite has been sucessfully constructed.
-msgstr Satelit bol úspešne vytvorený. 
+msgstr Satelit bol úspešne vytvorený.
 
 msgid This server does not have any satellite mapping.
-msgstr Server nemá žiadny satelitný mapping. 
+msgstr Server nemá žiadny satelitný mapping.
 
 msgid Satellite has been deconstructed.
-msgstr Satelit bol odobraný. 
+msgstr Satelit bol odobraný.
 
 msgid Your access to the guild **{guild_name}** was returned.
-msgstr Tvoje oprávnenia k serveru **{guild_name}** boli navrátené. 
+msgstr Tvoje oprávnenia k serveru **{guild_name}** boli navrátené.
 
 msgid Unverify role was set to {role_name}.
 msgstr Unverify rola bola nastavená na {role_name}.
@@ -95,16 +95,16 @@ msgid I don't know how to parse `{datetime_str}`, please try again.
 msgstr Neviem ako prečítať `{datetime_str}`, prosím skús to znova.
 
 msgid End time already passed.
-msgstr Tento dátum už bol. 
+msgstr Tento dátum už bol.
 
 msgid Member is already unverified.
 msgstr Člen je už unverifikovaný.
 
 msgid Your access to {guild_name} was temporarily revoked.
-msgstr Tvoj prístup do {guild_name} bol dočasne odobraný. 
+msgstr Tvoj prístup do {guild_name} bol dočasne odobraný.
 
 msgid Your access will be automatically returned on
-msgstr Tvoj prístup bude automatický vráteny 
+msgstr Tvoj prístup bude automatický vráteny
 
 msgid Reason
 msgstr Dôvod
@@ -116,10 +116,10 @@ msgid Is this member really unverified?
 msgstr Je tento užívateľ naozaj unverifikovaný?
 
 msgid Unverify of {member_name} ({member_id}) was pardoned. Access will be returned next time the reverifier loop runs.
-msgstr Unverifikácia {member_name} ({member_id}) bola odpustená. Prístup bude navrátený pri budúcom behu reverify. 
+msgstr Unverifikácia {member_name} ({member_id}) bola odpustená. Prístup bude navrátený pri budúcom behu reverify.
 
 msgid Invalid status. Check the command help.
-msgstr Nesprávny status. Pozri sa do nápovedy príkazu. 
+msgstr Nesprávny status. Pozri sa do nápovedy príkazu.
 
 msgid Unverify list
 msgstr Unverify list
@@ -146,7 +146,7 @@ msgid Channels to return
 msgstr Kanály na vrátenie
 
 msgid {mention} You have to include your e-mail.
-msgstr {mention} Musíš priložiť svoj email. 
+msgstr {mention} Musíš priložiť svoj email.
 
 msgid {mention} This e-mail cannot be used.
 msgstr Tento email sa nedá použiť.
@@ -155,59 +155,58 @@ msgid {mention} You are already in the database. Contact the moderator team.
 msgstr {mention} Už si v databáze. Kontaktuj moderátorov.
 
 msgid {mention} An error has occured while sending the code. Contact the moderator team.
-msgstr {mention} Pri posielaní kódu nastala chyba. Kontaktuj moderátorov. 
+msgstr {mention} Pri posielaní kódu nastala chyba. Kontaktuj moderátorov.
 
 msgid {mention} I've sent you the verification code to the submitted e-mail.
-msgstr {mention} Na zadaný email ti bol poslaný verifikačný kód. 
+msgstr {mention} Na zadaný email ti bol poslaný verifikačný kód.
 
 msgid I could not send the verification code, you've probably made a typo: `{address}`. Invoke the command `{prefix}strip` before requesting a new code.
-msgstr Verifikačný kód nemohol byť poslaný, pravdepodobne je v ňom preklep: `{address}`. Použi príkaz `{prefix}strip` predtým, ako požiadaš o nový kód. 
+msgstr Verifikačný kód nemohol byť poslaný, pravdepodobne je v ňom preklep: `{address}`. Použi príkaz `{prefix}strip` predtým, ako požiadaš o nový kód.
 
 msgid I could not send the verification code, you've probably made a typo. Invoke the command `{prefix}strip` before requesting a new code.
-msgstr Verifikačný kód nemohol byť poslaný, pravdepodobne je v ňom preklep. Použi príkaz `{prefix}strip` predtým, ako požiadaš o nový kód. 
- 
+msgstr Verifikačný kód nemohol byť poslaný, pravdepodobne je v ňom preklep. Použi príkaz `{prefix}strip` predtým, ako požiadaš o nový kód.
 
 msgid If I'm wrong and the e-mail is correct, contact the moderator team.
-msgstr Ak sa mýlim a email je správny, kontaktuj moderátorov. 
+msgstr Ak sa mýlim a email je správny, kontaktuj moderátorov.
 
 msgid {mention} You have to include your verification code.
-msgstr {mention} Musíš priložiť verifikačný kód. 
+msgstr {mention} Ke zpráve musíš priložiť verifikačný kód.
 
 msgid {mention} You have to request the code first.
 msgstr {mention} Musíš najskôr požiadať o kód.
 
 msgid {mention} You are not in code verification phase. Contact the moderator team.
-msgstr {mention} Nie si vo verifikačnej fáze. Kontaktuj moderátorov. 
+msgstr {mention} Nie si vo verifikačnej fáze. Kontaktuj moderátorov.
 
 msgid {mention} That is not your verification code.
-msgstr {mention} Toto nie je tvoj verifikačný kód.  
+msgstr {mention} Toto nie je tvoj verifikačný kód.
 
 msgid You have been verified, congratulations!
 msgstr Bol si úspešne verifikovaný, gratulujem!
 
 msgid Member **{name}** has been verified.
-msgstr Užívateľ **{name}** bol verifikovaný. 
+msgstr Užívateľ **{name}** bol verifikovaný.
 
 msgid Something went wrong, contact the moderator team.
-msgstr Niečo sa pokazilo, kontaktuj moderátorov. 
+msgstr Niečo sa pokazilo, kontaktuj moderátorov.
 
 msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
-msgstr Boli ste vymazaný z databáze a vaše role boli odstránené. Pre návrat musíte prejsť verifikáciou.  
+msgstr Boli ste vymazaný z databáze a vaše role boli odstránené. Pre návrat musíte prejsť verifikáciou.
 
 msgid Member **{member_id}** (<@{member_id}>) has no roles.
-msgstr Užívateľ **{member_id}** (<@{member_id}>) nemá žiadne role. 
+msgstr Užívateľ **{member_id}** (<@{member_id}>) nemá žiadne role.
 
 msgid Member **{member_id}** (<@{member_id}>) not found.
 msgstr Užívateľ **{member_id}** (<@{member_id}>) nenájdený.
 
 msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
-msgstr **{db}** záznamov bolo odstránených z databáze, **{dc}** užívateľom boli odobraté role. 
+msgstr **{db}** záznamov bolo odstránených z databáze, **{dc}** užívateľom boli odobraté role.
 
 msgid If you really want to strip **{count}** users with role **{role}**, add the member count as a second argument.
-msgstr Ak naozaj chcete odobrať **{count}** užívateľov s rolami **{role}**, pridajte ich počet ako druhý argument. 
+msgstr Ak naozaj chcete odobrať **{count}** užívateľov s rolami **{role}**, pridajte ich počet ako druhý argument.
 
 msgid Role **{role}** has {real_count} members, not {count}. Try again.
-msgstr Rola **{role}** má {real_count} užívateľov, nie {count}. Skús to znova. 
+msgstr Rola **{role}** má {real_count} užívateľov, nie {count}. Skús to znova.
 
 msgid Invalid verification status. Available options are: {options}.
 msgstr Neplatný verifikačný status. Platné možnosti sú: {options}.
@@ -225,22 +224,22 @@ msgid Regex
 msgstr Regex
 
 msgid The template file has been exported.
-msgstr Vzorový súbor bol exportovaný. 
+msgstr Vzorový súbor bol exportovaný.
 
 msgid **{count}** verification groups have been exported.
-msgstr  **{count}** verifikačných skupín bolo exportovaných. 
+msgstr **{count}** verifikačných skupín bolo exportovaných.
 
 msgid I'm expecting one JSON file.
-msgstr Očakávam jeden JSON súbor. 
+msgstr Očakávam jeden JSON súbor.
 
 msgid You have to upload a JSON file.
-msgstr Musíš nahrať JSON súbor. 
+msgstr Musíš nahrať JSON súbor.
 
 msgid Your JSON file contains errors.
-msgstr Tvoj JSON súbor obsahuje chyby. 
+msgstr Tvoj JSON súbor obsahuje chyby.
 
 msgid I've imported **{count}** verification groups. Old groups have been backed up above.
-msgstr Bolo importovaných **{count}** verifikačných skupín. Staré skupiny boli zálohované vyššie. 
+msgstr Bolo importovaných **{count}** verifikačných skupín. Staré skupiny boli zálohované vyššie.
 
 msgid Your verification e-mail for Discord server {guild_name} is {code}.
 msgstr Tvoj verifikačný e-mail pre Discord server {guild_name} je {code}.
@@ -257,20 +256,20 @@ msgstr do kanála #{channel}.
 msgid Member count
 msgstr Počet užívateľov
 
-msgid Taggable 
-msgstr Tagovateľné
+msgid Taggable
+msgstr Tagovateľná
 
 msgid ACL group
-msgstr ALC skupina 
+msgstr ALC skupina
 
 msgid You don't have permission to view information about this channel.
-msgstr Nemáš oprávnenia na zobrazenie informácií o tomto kanáli. 
+msgstr Nemáš oprávnenia na zobrazenie informácií o tomto kanáli.
 
 msgid Role count
 msgstr Počet rolí
 
 msgid User count
-msgstr Počet užívateľov 
+msgstr Počet užívateľov
 
 msgid Webhook count
 msgstr Počet webhookov
@@ -294,7 +293,7 @@ msgid Verification status
 msgstr Stav verifikácie
 
 msgid Timestamp
-msgstr Časová značka 
+msgstr Časová značka
 
 msgid Roles
 msgstr Role
