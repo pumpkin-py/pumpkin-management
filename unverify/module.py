@@ -338,7 +338,7 @@ class Unverify(commands.Cog):
         )
 
         # Avoiding discord Embed troubles
-        if len(reason) > 1024:
+        if reason is not None and len(reason) > 1024:
             reason = reason[:1024]
 
         result = UnverifyItem.add(
