@@ -112,31 +112,40 @@ class Verify(commands.Cog):
                 _(
                     ctx,
                     (
-                        "{mention} You are already in the database. "
-                        "Contact the moderator team."
+                        "{mention} Your user account is already in the database. "
+                        "Check the e-mail inbox or contact the moderator team."
                     ),
                 ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
 
-        if VerifyMember.get_by_address(ctx.guild.id, address) is not None:
+        if (
+            db_member := VerifyMember.get_by_address(ctx.guild.id, address)
+        ) is not None:
+            dc_member: Optional[nextcord.User] = self.bot.get_user(db_member.user_id)
+            dc_member_str: str = (
+                f"'{utils.text.sanitise(dc_member.name)}' ({db_member.user_id})"
+                if dc_member is not None
+                else f"ID '{db_member.user_id}'"
+            )
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
                 (
-                    "Attempted to verify with address already in database: "
-                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
+                    "Attempted to verify with address associated with different user: "
+                    f"'{address}' is registered to account {dc_member_str} "
+                    f"with status '{VerifyStatus(db_member.status).name}'."
                 ),
             )
+
             await ctx.send(
                 _(
                     ctx,
-                    # Here we are using the same error message as above
-                    # to prevent unnecessary leakage of information.
                     (
-                        "{mention} You are already in the database. "
-                        "Contact the moderator team."
+                        "{mention} This e-mail is already in the database "
+                        "registered under different user account. "
+                        "Login with that account and/or contact the moderator team."
                     ),
                 ).format(mention=ctx.author.mention),
                 delete_after=120,
