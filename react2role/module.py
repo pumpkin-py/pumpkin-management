@@ -14,7 +14,7 @@ _ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
 
 
-class Channels(commands.Cog):
+class React2Role(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
@@ -76,4 +76,4 @@ class Channels(commands.Cog):
 
 
 def setup(bot) -> None:
-    bot.add_cog(Channels(bot))
+    bot.add_cog(React2Role(bot))
