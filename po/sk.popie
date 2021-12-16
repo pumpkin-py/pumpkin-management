@@ -1,8 +1,8 @@
 msgid That category does not exist here.
 msgstr Táto kategória tu neexistuje.
 
-msgid Done.
-msgstr Hotovo.
+msgid Processed {channels} channels in {groups} channel groups.
+msgstr
 
 msgid {mention} This server is not a satellite.
 msgstr {mention} Tento server nie je satelit.

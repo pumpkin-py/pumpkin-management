@@ -31,11 +31,13 @@ class React2Role(commands.Cog):
     ):
         """Initialise links for react-to-role functionality.
 
-        :param target: Target text channel that will act as react-to-role hub.
-        :param groups: List of group channels that will be linked from in this
-            target channel.
+        Args:
+            target: Target text channel that will act as react-to-role hub.
+            groups: List of group channels that will be linked from in this
+                target channel.
         """
         categories: List[nextcord.CategoryChannel] = []
+        channel_count: int = 0
         for name in shlex.split(groups):
             category = nextcord.utils.get(ctx.guild.categories, name=name)
             if category is None:
@@ -44,6 +46,7 @@ class React2Role(commands.Cog):
             categories.append(category)
 
         for group in categories:
+            channel_count += len(group.text_channels)
             # send header
             header_file = tempfile.TemporaryFile()
             header_image = helper_utils.generate_header(group.name)
@@ -72,7 +75,11 @@ class React2Role(commands.Cog):
             ctx.channel,
             "Initiated react-to-role channel links.",
         )
-        await ctx.reply(_(ctx, "Done."))
+        await ctx.reply(
+            _(ctx, "Processed {channels} channels in {groups} channel groups.").format(
+                channels=channel_count, groups=len(categories)
+            )
+        )
 
 
 def setup(bot) -> None:
