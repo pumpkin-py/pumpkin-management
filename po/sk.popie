@@ -1,3 +1,51 @@
+msgid React2role functionality is not enabled on this server.
+msgstr
+
+msgid Channel
+msgstr
+
+msgid Type
+msgstr Druh
+
+msgid Role limit
+msgstr
+
+msgid Top role
+msgstr
+
+msgid Bottom role
+msgstr
+
+msgid Channel **#{channel}** is already react2role channel.
+msgstr
+
+msgid Channel type can only be one of {types}.
+msgstr
+
+msgid **#{channel}** has been set as {type} channel.
+msgstr
+
+msgid Channel **#{channel}** is not react2role channel.
+msgstr
+
+msgid Limiting is only available for 'role' channels.
+msgstr
+
+msgid Role limits for #{channel} were unset.
+msgstr
+
+msgid Role limits for #{channel} were set to **<{top}, {bottom}>**.
+msgstr
+
+msgid You have to set top and bottom roles first.
+msgstr
+
+msgid Role limit for #{channel} was set to **{limit}**.
+msgstr
+
+msgid {type} functionality has been removed from **#{channel}**.
+msgstr
+
 msgid That category does not exist here.
 msgstr Táto kategória tu neexistuje.
 
@@ -135,9 +183,6 @@ msgstr Koniec
 
 msgid Status
 msgstr Status
-
-msgid Type
-msgstr Druh
 
 msgid Roles to return
 msgstr Roly na vrátenie
