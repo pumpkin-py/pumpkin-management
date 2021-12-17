@@ -395,15 +395,20 @@ class Verify(commands.Cog):
 
     @commands.check(check.acl)
     @commands.command()
-    async def groupstrip(self, ctx, member_ids: commands.Greedy[int]):
+    async def groupstrip(self, ctx, *members: Union[nextcord.Member, int]):
         """Remove all roles and reset verification status to None
         from multiple users. Users are not notified about this."""
         removed_db: int = 0
         removed_dc: int = 0
 
         async with ctx.typing():
-            for member_id in member_ids:
-                member = ctx.guild.get_member(member_id)
+            for member in members:
+                if isinstance(member, int):
+                    member_id = member
+                    member = ctx.guild.get_member(member_id)
+                else:
+                    member_id = member.id
+
                 db_member = VerifyMember.get_by_member(ctx.guild.id, member_id)
                 if db_member:
                     VerifyMember.remove(ctx.guild.id, member_id)
