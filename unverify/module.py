@@ -481,7 +481,7 @@ class Unverify(commands.Cog):
             member,
             ctx.channel,
             f"Member {member.name} ({member.id}) unverified "
-            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
+            + f"until {end_time_str}, type {UnverifyType.unverify.value}",
         )
 
     @commands.guild_only()
