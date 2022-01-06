@@ -330,6 +330,343 @@ class React2Role(commands.Cog):
             )
         )
 
+    #
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        """Listen for react2role message."""
+        if not isinstance(message.channel, nextcord.TextChannel):
+            return
+        reaction_channel = ReactionChannel.get(message.guild.id, message.channel.id)
+        if reaction_channel is None:
+            return
+
+        await self._handle_react2role_message_update(message, reaction_channel)
+
+    @commands.Cog.listener()
+    async def on_raw_message_edit(self, payload: nextcord.RawMessageUpdateEvent):
+        """Listen for react2role message."""
+        reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
+        if reaction_channel is None:
+            return
+
+        message = await utils.discord.get_message(
+            self.bot,
+            payload.guild_id or payload.user_id,
+            payload.channel_id,
+            payload.message_id,
+        )
+        await self._handle_react2role_message_update(message, reaction_channel)
+
+    async def _handle_react2role_message_update(
+        self, message: nextcord.Message, reaction_channel: ReactionChannel
+    ):
+        """Check react2role message for emoji changes."""
+        # get react2xxx mapping
+        mapping = await self._get_react2role_message_mapping(
+            message, reaction_channel, announce_warnings=True
+        )
+        if mapping is None:
+            return
+
+        message_emojis = [r.emoji for r in message.reactions]
+
+        mapping_diff: dict = {}
+        for emoji in mapping.keys():
+            if emoji not in message_emojis:
+                await message.add_reaction(emoji)
+                mapping_diff[emoji] = mapping[emoji]
+
+        removed_emojis: list = []
+        for emoji in message_emojis:
+            if emoji not in mapping.keys():
+                removed_emojis.append(emoji)
+
+        if mapping_diff:
+            diff_str = ", ".join(f"{k} => {v.name}" for k, v in mapping_diff.items())
+            await guild_log.info(
+                message.author,
+                message.channel,
+                (
+                    f"react2{reaction_channel.channel_type.name.lower()} "
+                    f"message updated: added {diff_str}."
+                ),
+            )
+
+        if removed_emojis:
+            diff_str = ", ".join(removed_emojis)
+            await guild_log.info(
+                message.author,
+                message.channel,
+                (
+                    f"react2{reaction_channel.channel_type.name.lower()} "
+                    f"message updated: removed {diff_str}."
+                ),
+            )
+
+    async def _get_react2role_message_mapping(
+        self,
+        message: nextcord.Message,
+        reaction_channel: ReactionChannel,
+        *,
+        announce_warnings: bool,
+    ):
+        """Get emoji-role or emoji-channel mapping from message."""
+        content: List[str] = (
+            message.content.replace("*", "")
+            .replace("_", "")
+            .replace("#", "")
+            .split("\n")
+        )
+        content = [line.strip() for line in content]
+
+        log_messages: List[str] = []
+
+        mapping: dict = {}
+
+        # Because we're converting stuff _here_, we rely on internal functions.
+        # The first argument of .convert() is supposed to be 'commands.Context',
+        # but as long as we supply all attributes, we should be fine.
+        ctx = lambda: None  # noqa: E731
+        ctx.bot = self.bot
+        ctx.guild = message.guild
+
+        for i, line in enumerate(content, 1):
+            line_tokens = shlex.split(line)
+            if len(line_tokens) < 2:
+                log_messages.append(f"Line {i} does not contain any mapping.")
+                continue
+
+            emoji_name: str = line_tokens[0]
+            name: str = line_tokens[1]
+
+            emoji = None
+            try:
+                emoji = await commands.EmojiConverter().convert(ctx, emoji_name)
+            except commands.EmojiNotFound:
+                # try to check if the string is emoji
+                if emoji_name in UNICODE_EMOJI:
+                    emoji = emoji_name
+
+            if emoji is None:
+                log_messages.append(f"Line {i} does not start with emoji.")
+                continue
+
+            if reaction_channel.channel_type == ReactionChannelType.ROLE:
+                try:
+                    target = await commands.RoleConverter().convert(ctx, name)
+                except commands.BadArgument:
+                    target = None
+            else:
+                try:
+                    target = await commands.GuildChannelConverter().convert(ctx, name)
+                except commands.BadArgument:
+                    target = None
+
+            if target is None:
+                target_name: str = reaction_channel.channel_type.value
+                await guild_log.error(
+                    message.author,
+                    message.channel,
+                    (
+                        f"React2Role error, "
+                        f"line {i} does does not have valid {target_name} "
+                        f"after the emoji '{emoji}'."
+                    ),
+                )
+                return
+            mapping[emoji] = target
+
+        if log_messages and announce_warnings:
+            await guild_log.warning(
+                message.author,
+                message.channel,
+                "React2Role encountred unexpected lines: " + " ".join(log_messages),
+            )
+
+        return mapping
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload: nextcord.RawReactionActionEvent):
+        reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
+        if reaction_channel is None:
+            return
+
+        message = await utils.discord.get_message(
+            self.bot,
+            payload.guild_id or payload.user_id,
+            payload.channel_id,
+            payload.message_id,
+        )
+
+        mapping = await self._get_react2role_message_mapping(
+            message, reaction_channel, announce_warnings=False
+        )
+        if mapping is None:
+            return
+
+        member = message.guild.get_member(payload.user_id)
+        if member.bot:
+            return
+
+        if payload.emoji.is_custom_emoji():
+            emoji = self.bot.get_emoji(payload.emoji.id) or payload.emoji
+        else:
+            emoji = payload.emoji.name
+
+        if reaction_channel.channel_type == ReactionChannelType.CHANNEL:
+            channel = mapping[emoji]
+            await channel.set_permissions(member, view_channel=True)
+            return
+
+        utx = i18n.TranslationContext(member.guild.id, member.id)
+
+        role = mapping[emoji]
+        # TODO Allow escalation under some conditions?
+        if role >= member.top_role:
+            await member.send(
+                _(
+                    utx,
+                    (
+                        "You cannot ask for role that's higher "
+                        "than your current highest role."
+                    ),
+                )
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+
+        if reaction_channel.top_role is None or reaction_channel.bottom_role is None:
+            # The channel does not have any limits
+            await member.add_roles(role)
+            return
+
+        top_role = message.guild.get_role(reaction_channel.top_role)
+        if top_role is None:
+            await guild_log.error(
+                member,
+                message.channel,
+                f"react2role top role {reaction_channel.top_role} is unavailable.",
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+        if role >= top_role:
+            await member.send(_(utx, "This role can't be currently assigned."))
+            await guild_log.debug(
+                member,
+                message.channel,
+                (
+                    f"react2role '{role}' cannot be assigned becase "
+                    "it's higher than configured top role for the channel."
+                ),
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+
+        bottom_role = message.guild.get_role(reaction_channel.bottom_role)
+        if bottom_role is None:
+            await guild_log.error(
+                member,
+                message.channel,
+                f"react2role bottom role {reaction_channel.bottom_role} is unavailable.",
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+        if role <= bottom_role:
+            await member.send(_(utx, "This role can't be currently assigned."))
+            await utils.discord.remove_reaction(message, emoji, member)
+            await guild_log.debug(
+                member,
+                message.channel,
+                (
+                    f"react2role '{role}' cannot be assigned becase "
+                    "it's lower than configured bottom role for the channel."
+                ),
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+
+        inbetween_roles: list = [r for r in member.roles if bottom_role < r < top_role]
+        if len(inbetween_roles) >= reaction_channel.max_roles:
+            await member.send(
+                _(
+                    utx,
+                    (
+                        "This role category has a limit of **{limit} roles**. "
+                        "Remove some of your roles before adding new ones."
+                    ),
+                ).format(limit=reaction_channel.max_roles)
+            )
+            await utils.discord.remove_reaction(message, emoji, member)
+            return
+
+        await member.add_roles(role)
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload: nextcord.RawReactionActionEvent):
+        reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
+        if reaction_channel is None:
+            return
+
+        message = await utils.discord.get_message(
+            self.bot,
+            payload.guild_id or payload.user_id,
+            payload.channel_id,
+            payload.message_id,
+        )
+
+        mapping = await self._get_react2role_message_mapping(
+            message, reaction_channel, announce_warnings=False
+        )
+        if mapping is None:
+            return
+
+        member = message.guild.get_member(payload.user_id)
+        if member.bot:
+            return
+
+        if payload.emoji.is_custom_emoji():
+            emoji = self.bot.get_emoji(payload.emoji.id) or payload.emoji
+        else:
+            emoji = payload.emoji.name
+
+        if reaction_channel.channel_type == ReactionChannelType.CHANNEL:
+            channel = mapping[emoji]
+            await channel.set_permissions(member, overwrite=None)
+            return
+
+        utx = i18n.TranslationContext(member.guild.id, member.id)
+
+        role = mapping[emoji]
+        if member.top_role == role:
+            await member.send(_(utx, "You cannot remove your top role."))
+            return
+
+        if reaction_channel.top_role is None or reaction_channel.bottom_role is None:
+            # The channel does not have any limits
+            await member.remove_roles(role)
+            return
+
+        top_role = message.guild.get_role(reaction_channel.top_role)
+        if top_role is None:
+            await guild_log.error(
+                member,
+                message.channel,
+                f"react2role top role {reaction_channel.top_role} is unavailable.",
+            )
+            return
+
+        bottom_role = message.guild.get_role(reaction_channel.bottom_role)
+        if bottom_role is None:
+            await guild_log.error(
+                member,
+                message.channel,
+                f"react2role bottom role {reaction_channel.bottom_role} is unavailable.",
+            )
+            return
+
+        await member.remove_roles(role)
+
 
 def setup(bot) -> None:
     bot.add_cog(React2Role(bot))

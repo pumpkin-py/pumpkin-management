@@ -52,6 +52,18 @@ msgstr Táto kategória tu neexistuje.
 msgid Processed {channels} channels in {groups} channel groups.
 msgstr
 
+msgid You cannot ask for role that's higher than your current highest role.
+msgstr
+
+msgid This role can't be currently assigned.
+msgstr
+
+msgid This role category has a limit of **{limit} roles**. Remove some of your roles before adding new ones.
+msgstr
+
+msgid You cannot remove your top role.
+msgstr
+
 msgid {mention} This server is not a satellite.
 msgstr {mention} Tento server nie je satelit.
 
