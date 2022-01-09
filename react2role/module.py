@@ -466,19 +466,19 @@ class React2Role(commands.Cog):
             if target is None:
                 target_name: str = reaction_channel.channel_type.value
                 await guild_log.error(
-                    message.author,
+                    None,
                     message.channel,
                     (
                         f"React2Role error, "
                         f"line {i} does does not have valid {target_name} "
-                        f"after the emoji '{emoji}'."
+                        f"after the emoji '{emoji}': '{name}' not found."
                     ),
                 )
                 return
 
             if emoji in mapping:
                 await guild_log.error(
-                    message.author,
+                    None,
                     message.channel,
                     f"React2Role error, line {i} contains duplicate emoji {emoji}.",
                 )
@@ -488,7 +488,7 @@ class React2Role(commands.Cog):
 
         if log_messages and announce_warnings:
             await guild_log.warning(
-                message.author,
+                None,
                 message.channel,
                 "React2Role encountred unexpected lines: " + " ".join(log_messages),
             )
