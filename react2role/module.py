@@ -475,6 +475,15 @@ class React2Role(commands.Cog):
                     ),
                 )
                 return
+
+            if emoji in mapping:
+                await guild_log.error(
+                    message.author,
+                    message.channel,
+                    f"React2Role error, line {i} contains duplicate emoji {emoji}.",
+                )
+                return
+
             mapping[emoji] = target
 
         if log_messages and announce_warnings:
