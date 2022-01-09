@@ -30,7 +30,7 @@ msgstr Kanál **#{channel}** nie je react2role kanál.
 
 msgid Limiting is only available for 'role' channels.
 msgstr Limitácia je možná len v 'role' kanáloch.
- 
+
 msgid Role limits for #{channel} were unset.
 msgstr Limity rolí pre #{channel} boli zrušené.
 
