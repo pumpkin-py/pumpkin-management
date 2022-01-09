@@ -1,3 +1,4 @@
+emoji
 imap_tools
 Pillow
 unidecode
