@@ -1,68 +1,68 @@
 msgid React2role functionality is not enabled on this server.
-msgstr
+msgstr React2role funkcionalita nie je na tomto serveri zapnutá. 
 
 msgid Channel
-msgstr
+msgstr Kanál
 
 msgid Type
 msgstr Druh
 
 msgid Role limit
-msgstr
+msgstr Limit rolí
 
 msgid Top role
-msgstr
+msgstr Horná rola
 
 msgid Bottom role
-msgstr
+msgstr Dolná rola
 
 msgid Channel **#{channel}** is already react2role channel.
-msgstr
+msgstr Kanál **#{channel}** už kanálom react2role je. 
 
 msgid Channel type can only be one of {types}.
-msgstr
+msgstr Typ kanálu môže byť len jeden z {types}. 
 
 msgid **#{channel}** has been set as {type} channel.
-msgstr
+msgstr **#{channel}** bol nastavený ako {type} kanál.
 
 msgid Channel **#{channel}** is not react2role channel.
-msgstr
+msgstr Kanál **#{channel}** nie je react2role kanál. 
 
 msgid Limiting is only available for 'role' channels.
-msgstr
-
+msgstr Limitácia je možná len v 'role' kanáloch. 
+ 
 msgid Role limits for #{channel} were unset.
-msgstr
+msgstr Limity rolí pre #{channel} boli zrušené.
 
 msgid Role limits for #{channel} were set to **<{top}, {bottom}>**.
-msgstr
+msgstr Limity rolí #{channel} pre boli nastavené na **<{top}, {bottom}>**.
 
 msgid You have to set top and bottom roles first.
-msgstr
+msgstr Najskôr musíš nastaviť hornú a spodnú rolu. 
 
 msgid Role limit for #{channel} was set to **{limit}**.
-msgstr
+msgstr Počet rolí pre #{channel} bol nastavený na **{limit}**.
 
 msgid {type} functionality has been removed from **#{channel}**.
-msgstr
+msgstr {type} funkcionalita bola z **#{channel}** odstránená. 
 
 msgid That category does not exist here.
 msgstr Táto kategória tu neexistuje.
 
 msgid Processed {channels} channels in {groups} channel groups.
-msgstr
+msgstr Spracovaných {channels} kanálov v {groups} skupinách. 
 
 msgid You cannot ask for role that's higher than your current highest role.
-msgstr
+msgstr Rolu, ktorá je vyššia ako tvoja aktuálna si nemôžeš pridať.
 
 msgid This role can't be currently assigned.
-msgstr
+msgstr Táto rola nemôže byť automaticky pridaná. 
 
 msgid This role category has a limit of **{limit} roles**. Remove some of your roles before adding new ones.
-msgstr
+msgstr Táto skupina má maximum **{limit} rolí**. Nejskôr niektoré role odober.
 
 msgid You cannot remove your top role.
-msgstr
+msgstr Nemôžeš si odstrániť svoju najvyššiu rolu.
 
 msgid {mention} This server is not a satellite.
 msgstr {mention} Tento server nie je satelit.
