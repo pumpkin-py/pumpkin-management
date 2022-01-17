@@ -1,3 +1,24 @@
+msgid Unknown member
+msgstr Neznámý uživatel
+
+msgid Comments on member **{member_name}**:
+msgstr Komentáře o uživateli **{member_name}**:
+
+msgid User does not have any comments yet.
+msgstr Uživatel zatím nemá žádné komentáře.
+
+msgid Comment successfully added.
+msgstr Komentář úspěšně přidán.
+
+msgid Comment {idx} not found.
+msgstr Komentář {idx} nenalezen.
+
+msgid Comment removed.
+msgstr Komentář odebrán.
+
+msgid Unknown author
+msgstr Neznámý autor.
+
 msgid React2role functionality is not enabled on this server.
 msgstr React2role funkcionalita není na tomto serveru zapnutá.
 
