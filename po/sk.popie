@@ -1,3 +1,24 @@
+msgid Unknown member
+msgstr
+
+msgid Comments on member **{member_name}**:
+msgstr
+
+msgid User does not have any comments yet.
+msgstr
+
+msgid Comment successfully added.
+msgstr
+
+msgid Comment {idx} not found.
+msgstr
+
+msgid Comment removed.
+msgstr
+
+msgid Unknown author
+msgstr
+
 msgid React2role functionality is not enabled on this server.
 msgstr React2role funkcionalita nie je na tomto serveri zapnutá.
 
