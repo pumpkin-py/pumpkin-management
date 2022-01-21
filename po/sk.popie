@@ -289,6 +289,21 @@ msgstr Ak naozaj chcete odobrať **{count}** užívateľov s rolami **{role}**, 
 msgid Role **{role}** has {real_count} members, not {count}. Try again.
 msgstr Rola **{role}** má {real_count} užívateľov, nie {count}. Skús to znova.
 
+msgid Argument `text` must not be empty.
+msgstr
+
+msgid Welcome message has been set for role {role}.
+msgstr
+
+msgid Welcome message has been set do default for role {role}.
+msgstr
+
+msgid Role
+msgstr Rola
+
+msgid Message to send
+msgstr
+
 msgid Invalid verification status. Available options are: {options}.
 msgstr Neplatný verifikačný status. Platné možnosti sú: {options}.
 
@@ -297,9 +312,6 @@ msgstr Tento užívateľ nie je v databáze.
 
 msgid Verification groups
 msgstr Verifikačné skupiny
-
-msgid Role
-msgstr Rola
 
 msgid Regex
 msgstr Regex

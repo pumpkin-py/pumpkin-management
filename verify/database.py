@@ -244,3 +244,60 @@ class VerifyMember(database.base):
             "code": self.code,
             "status": VerifyStatus(self.status),
         }
+
+
+class VerifyMessage(database.base):
+
+    __tablename__ = "mgmt_verify_message"
+
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    role_id = Column(BigInteger)  # Discord role id or 0 for guild default
+    guild_id = Column(BigInteger)
+    message = Column(String)
+
+    @staticmethod
+    def get(guild_id: int, role_id: int = 0) -> Optional[VerifyMessage]:
+        return (
+            session.query(VerifyMessage)
+            .filter_by(role_id=role_id, guild_id=guild_id)
+            .one_or_none()
+        )
+
+    @staticmethod
+    def set(guild_id: int, role_id: int, message: str) -> VerifyMessage:
+        config = (
+            session.query(VerifyMessage)
+            .filter_by(guild_id=guild_id, role_id=role_id)
+            .one_or_none()
+        )
+        if not config:
+            config = VerifyMessage(role_id=role_id, guild_id=guild_id, message=message)
+            session.add(config)
+        else:
+            config.message = message
+        session.commit()
+        return config
+
+    @staticmethod
+    def unset(guild_id: int, role_id: int) -> int:
+        query = (
+            session.query(VerifyMessage)
+            .filter_by(guild_id=guild_id, role_id=role_id)
+            .delete()
+        )
+        session.commit()
+        return query
+
+    def __repr__(self) -> str:
+        return (
+            f'<VerifyMessage idx="{self.idx}" '
+            f'role_id="{self.role_id}" guild_id="{self.guild_id}" '
+            f'message="{self.message}">'
+        )
+
+    def dump(self) -> dict:
+        return {
+            "role_id": self.role_id,
+            "guild_id": self.guild_id,
+            "message": self.message,
+        }
