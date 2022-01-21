@@ -23,7 +23,7 @@ import pie.database.config
 from pie import check, exceptions, i18n, logger, utils
 
 from .enums import VerifyStatus
-from .database import VerifyGroup, VerifyMember
+from .database import VerifyGroup, VerifyMember, VerifyMessage
 
 
 _ = i18n.Translator("modules/mgmt").translate
@@ -341,10 +341,23 @@ class Verify(commands.Cog):
 
         await self._add_roles(ctx.author, db_member)
 
-        await utils.discord.send_dm(
-            ctx.author,
-            _(ctx, "You have been verified, congratulations!"),
+        config = VerifyMessage.get(ctx.guild.id, 0)
+        roles = self._map_address_to_groups(
+            ctx.guild.id, ctx.author.id, db_member.address
         )
+        for role in roles:
+            # searching for role override
+            config = VerifyMessage.get(ctx.guild.id, role.role_id)
+            if config is not None:
+                break
+
+        if not config:
+            await utils.discord.send_dm(
+                ctx.author,
+                _(ctx, "You have been verified, congratulations!"),
+            )
+        else:
+            await utils.discord.send_dm(ctx.author, config.message)
 
         await ctx.send(
             _(ctx, "Member **{name}** has been verified.").format(
@@ -509,6 +522,77 @@ class Verify(commands.Cog):
             f"Removed {removed_db} database entries and "
             f"stripped {removed_dc} members with group role strip on {role.name}.",
         )
+
+    @commands.guild_only()
+    @commands.check(check.acl)
+    @commands.group(name="welcome-message")
+    async def welcome_message(self, ctx):
+        await utils.discord.send_help(ctx)
+
+    @commands.check(check.acl)
+    @welcome_message.command(name="set")
+    async def welcome_message_set(self, ctx, role_id: int, *, text):
+        """Set post verification message for your guild or a role.
+        Insert role_id of a verify group, 0 for server default"""
+        if text == "":
+            ctx.reply(_(ctx, "Argument `text` must not be empty."))
+            return
+        VerifyMessage.set(ctx.guild.id, role_id, text)
+        await ctx.reply(
+            _(ctx, "Welcome message has been set for role {role}.").format(
+                role=role_id if role_id != 0 else "(server)"
+            )
+        )
+        await guild_log.info(
+            ctx.author, ctx.channel, f"Welcome message changed for role {role_id}."
+        )
+
+    @commands.check(check.acl)
+    @welcome_message.command(name="unset")
+    async def welcome_message_unset(self, ctx, role_id: int = 0):
+        """Set verification message to default for your guild or a role."""
+        VerifyMessage.unset(ctx.guild.id, role_id)
+        await ctx.reply(
+            _(ctx, "Welcome message has been set do default for role {role}.").format(
+                role=role_id if role_id != 0 else "(server)"
+            )
+        )
+        await guild_log.info(
+            ctx.author,
+            ctx.channel,
+            f"Welcome message set to default for role {role_id}.",
+        )
+
+    @commands.check(check.acl)
+    @welcome_message.command(name="list")
+    async def welcome_message_list(self, ctx):
+        """Show verification messages."""
+
+        class Item:
+            def __init__(self, group: VerifyGroup):
+                config = VerifyMessage.get(ctx.guild.id, group.role_id)
+                print(config)
+                self.role = str(group.name) + " " + str(group.role_id)
+                self.message = (
+                    config.message
+                    if config is not None
+                    else _(ctx, "You have been verified, congratulations!")
+                )
+
+        server_group = VerifyGroup()
+        server_group.role_id = 0
+        groups = [Item(server_group)]
+        groups[0].role = "-"
+        groups.extend([Item(group) for group in VerifyGroup.get_all(ctx.guild.id)])
+        table: List[str] = utils.text.create_table(
+            groups,
+            header={
+                "role": _(ctx, "Role"),
+                "message": _(ctx, "Message to send"),
+            },
+        )
+        for page in table:
+            await ctx.send("```" + page + "```")
 
     @commands.guild_only()
     @commands.check(check.acl)
