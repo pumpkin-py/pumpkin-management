@@ -484,7 +484,6 @@ class Unverify(commands.Cog):
             + f"until {end_time_str}, type {UnverifyType.unverify.value}",
         )
 
-    @commands.guild_only()
     @commands.check(check.acl)
     @unverify_.command(name="pardon")
     async def unverify_pardon(self, ctx, member: nextcord.Member):
@@ -603,6 +602,7 @@ class Unverify(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
+    @commands.check(check.acl)
     async def selfunverify(
         self,
         ctx: commands.Context,
@@ -705,6 +705,7 @@ class Unverify(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
+    @commands.check(check.acl)
     async def gn(self, ctx: commands.Context):
         """Goodnight!
 
