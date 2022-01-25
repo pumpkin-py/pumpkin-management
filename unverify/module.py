@@ -70,7 +70,7 @@ class Unverify(commands.Cog):
                 None,
                 f"Reverify failed: Guild ({item.guild_id}) still was not found.",
             )
-            raise NotFound
+            return None
         return guild
 
     @staticmethod
@@ -92,7 +92,7 @@ class Unverify(commands.Cog):
                     item.save()
                 item.last_check = datetime.now()
                 item.save()
-                raise NotFound
+                return None
         return member
 
     @staticmethod
@@ -167,10 +167,10 @@ class Unverify(commands.Cog):
                 )
 
     async def _reverify_user(self, item: UnverifyItem):
-        try:
-            guild = await self._get_guild(item)
-            member = await self._get_member(guild, item)
-        except NotFound:
+        guild = await self._get_guild(item)
+        member = await self._get_member(guild, item)
+
+        if member is None or guild is None:
             return
 
         now = datetime.now()
