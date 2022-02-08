@@ -721,7 +721,7 @@ class Verify(commands.Cog):
             export[group.name] = group_dict
 
         file = tempfile.TemporaryFile(mode="w+")
-        json.dump(export, file, indent="\t")
+        json.dump(export, file, indent="\t", ensure_ascii=False)
 
         file.seek(0)
         await ctx.reply(
