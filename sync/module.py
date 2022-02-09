@@ -18,13 +18,14 @@ class Sync(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.group(name="sync")
     async def sync(self, ctx):
         """Synchronize your roles with main server."""
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @sync.command(name="me")
     async def sync_me(self, ctx):
         """Synchronize your roles with main server."""
@@ -119,7 +120,8 @@ class Sync(commands.Cog):
                 roles.append(satellite_role)
         return roles
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @sync.command(name="list")
     async def sync_list(self, ctx):
         """Display synchronization information."""
@@ -156,7 +158,8 @@ class Sync(commands.Cog):
 
         await ctx.reply(embed=embed)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @sync.command(name="add")
     async def sync_add(self, ctx, guild_id: int):
         """Add server synchronization."""
@@ -182,7 +185,8 @@ class Sync(commands.Cog):
             f"Added sync satellite '{satellite.name}' ({guild_id}).",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @sync.command(name="remove")
     async def sync_remove(self, ctx, guild_id: int):
         """Remove server synchronization."""
@@ -201,13 +205,15 @@ class Sync(commands.Cog):
             f"Removed sync satellite '{guild_name}' ({guild_id}).",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @commands.group(name="satellite")
     async def satellite_(self, ctx):
         """Manage satellites."""
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @satellite_.command(name="template")
     async def satellite_template(self, ctx):
         """Send template satellite file."""
@@ -231,7 +237,8 @@ class Sync(commands.Cog):
 
         await ctx.reply(text)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @satellite_.command(name="get")
     async def satellite_get(self, ctx):
         embed = utils.discord.create_embed(
@@ -275,7 +282,8 @@ class Sync(commands.Cog):
 
         await ctx.reply(embed=embed)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @satellite_.command(name="set")
     async def satellite_set(self, ctx, *, data: str):
         try:
@@ -305,7 +313,8 @@ class Sync(commands.Cog):
         await guild_log.info(ctx.author, ctx.channel, "Satellite enabled.")
         await ctx.reply(_(ctx, "Satellite has been sucessfully constructed."))
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @satellite_.command(name="unset")
     async def satellite_unset(self, ctx):
         deleted: int = Satellite.remove(ctx.guild.id)

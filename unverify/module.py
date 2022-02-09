@@ -353,14 +353,14 @@ class Unverify(commands.Cog):
         return result
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @commands.group(name="unverify")
     async def unverify_(self, ctx):
         """Pest control."""
         await utils.discord.send_help(ctx)
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @unverify_.command(name="set")
     async def unverify_set(self, ctx, unverify_role: nextcord.Role):
         """Set configuration of guild that the message was sent from.
@@ -379,7 +379,7 @@ class Unverify(commands.Cog):
             )
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @unverify_.command(name="user")
     async def unverify_user(
         self,
@@ -485,7 +485,7 @@ class Unverify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @unverify_.command(name="pardon")
     async def unverify_pardon(self, ctx, member: nextcord.Member):
         """Pardon unverified member.
@@ -520,7 +520,7 @@ class Unverify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @unverify_.command(name="list")
     async def unverify_list(self, ctx, status: str = "waiting"):
         """List unverified members.
@@ -602,6 +602,7 @@ class Unverify(commands.Cog):
         await scrollable_embed.scroll()
 
     @commands.guild_only()
+    @check.acl2(check.ACLevel.MEMBER)
     @commands.command()
     async def selfunverify(
         self,
@@ -704,6 +705,7 @@ class Unverify(commands.Cog):
         )
 
     @commands.guild_only()
+    @check.acl2(check.ACLevel.MEMBER)
     @commands.command()
     async def gn(self, ctx: commands.Context):
         """Goodnight!
