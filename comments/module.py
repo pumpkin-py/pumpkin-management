@@ -19,14 +19,14 @@ class Comments(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @commands.group(name="comment")
     async def comment_(self, ctx):
         """Manage comments on guild users."""
         await utils.discord.send_help(ctx)
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @comment_.command(name="list")
     async def comment_list(self, ctx, member: nextcord.Member):
         """List all comments of a user."""
@@ -48,7 +48,7 @@ class Comments(commands.Cog):
         await ctx.reply(result)
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @comment_.command(name="add")
     async def comment_add(self, ctx, member: nextcord.Member, *, text: str):
         """Add comment to a user."""
@@ -63,7 +63,7 @@ class Comments(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @comment_.command(name="remove")
     async def comment_remove(self, ctx, idx: int):
         """Remove a comment."""

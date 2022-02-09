@@ -23,13 +23,14 @@ class React2Role(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.group(name="reaction-channel")
     async def reaction_channel(self, ctx):
         """Manage react2role channels."""
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="list")
     async def reaction_channel_list(self, ctx):
         """List react2role channels."""
@@ -92,7 +93,8 @@ class React2Role(commands.Cog):
         for page in table:
             await ctx.send("```" + page + "```")
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="add")
     async def reaction_channel_add(
         self, ctx, channel: nextcord.TextChannel, channel_type: str
@@ -137,7 +139,8 @@ class React2Role(commands.Cog):
             f"{reaction_channel.React2name} #{channel.name} set up.",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="unlimit")
     async def reaction_channel_unlimit(self, ctx, channel: nextcord.TextChannel):
         """Remove limits on 'role' channel."""
@@ -169,7 +172,8 @@ class React2Role(commands.Cog):
             f"{reaction_channel.React2name} #{channel.name}'s role limits unset.",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="limits", aliases=["set-limits"])
     async def reaction_channel_limits(
         self,
@@ -209,7 +213,8 @@ class React2Role(commands.Cog):
             f"role limits set to <{top.name}, {bottom.name}>.",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="limit", aliases=["set-limit"])
     async def reaction_channel_limit(
         self, ctx, channel: nextcord.TextChannel, maximum: int
@@ -247,7 +252,8 @@ class React2Role(commands.Cog):
             f"role limit set to {maximum}.",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="remove")
     async def reaction_channel_remove(self, ctx, channel: nextcord.TextChannel):
         """Remove react2role functionality from a channel."""
@@ -274,7 +280,8 @@ class React2Role(commands.Cog):
             f"{channel_type} #{channel.name} unset.",
         )
 
-    @commands.check(check.acl)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="init-channels")
     async def reaction_channel_init_channels(
         self, ctx, target: nextcord.TextChannel, *, groups: str

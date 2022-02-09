@@ -55,6 +55,9 @@ test_dotenv()
 MAIL_HEADER_PREFIX = "X-pumpkin.py-"
 
 
+# TODO: confirm dialog for groupstrip and grouprolestrip
+
+
 class Verify(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -62,7 +65,7 @@ class Verify(commands.Cog):
     #
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.EVERYONE)
     @commands.command()
     async def verify(self, ctx, address: Optional[str] = None):
         """Ask for a verification code."""
@@ -271,7 +274,7 @@ class Verify(commands.Cog):
                 )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.EVERYONE)
     @commands.command()
     async def submit(self, ctx, code: Optional[str] = None):
         """Submit verification code."""
@@ -367,7 +370,7 @@ class Verify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MEMBER)
     @commands.command(name="strip")
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
@@ -406,7 +409,7 @@ class Verify(commands.Cog):
         )
         await utils.discord.delete_message(ctx.message)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @commands.command()
     async def groupstrip(self, ctx, *members: Union[nextcord.Member, int]):
         """Remove all roles and reset verification status to None
@@ -462,7 +465,7 @@ class Verify(commands.Cog):
             f"stripped {removed_dc} members with groupstrip.",
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def grouprolestrip(self, ctx, role: nextcord.Role, count: int = None):
         """Remove all roles and reset verification status to None
@@ -524,12 +527,12 @@ class Verify(commands.Cog):
         )
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @commands.group(name="welcome-message")
     async def welcome_message(self, ctx):
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="set")
     async def welcome_message_set(self, ctx, role_id: int, *, text):
         """Set post verification message for your guild or a role.
@@ -547,7 +550,7 @@ class Verify(commands.Cog):
             ctx.author, ctx.channel, f"Welcome message changed for role {role_id}."
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="unset")
     async def welcome_message_unset(self, ctx, role_id: int = 0):
         """Set verification message to default for your guild or a role."""
@@ -563,7 +566,7 @@ class Verify(commands.Cog):
             f"Welcome message set to default for role {role_id}.",
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.SUBMOD)
     @welcome_message.command(name="list")
     async def welcome_message_list(self, ctx):
         """Show verification messages."""
@@ -595,19 +598,19 @@ class Verify(commands.Cog):
             await ctx.send("```" + page + "```")
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.group(name="verification")
     async def verification(self, ctx):
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification.command(name="statistics", aliases=["stats"])
     async def verification_statistics(self, ctx):
         """Filter the data by verify status."""
         # TODO
         pass
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification.command(name="update")
     async def verification_update(
         self, ctx, member: Union[nextcord.Member, int], status: str
@@ -642,12 +645,12 @@ class Verify(commands.Cog):
             ).format(member=utils.text.sanitise(member.display_name)),
         )
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification.group(name="groups")
     async def verification_groups(self, ctx):
         await utils.discord.send_help(ctx)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification_groups.command(name="list")
     async def verification_groups_list(self, ctx):
         """Display list of all verification groups."""
@@ -665,7 +668,7 @@ class Verify(commands.Cog):
             )
         await ctx.reply(embed=embed)
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification_groups.command(name="template")
     async def verification_groups_template(self, ctx):
         """Export template for verification groups."""
@@ -704,7 +707,7 @@ class Verify(commands.Cog):
         )
         file.close()
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification_groups.command(name="export")
     async def verification_groups_export(self, ctx):
         """Export current verification groups."""
@@ -733,7 +736,7 @@ class Verify(commands.Cog):
         file.close()
         await guild_log.info(ctx.author, ctx.channel, "Verification groups exported.")
 
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @verification_groups.command(name="import")
     async def verification_groups_import(self, ctx):
         """Import new verification groups. This fully replaces old data."""
