@@ -409,6 +409,7 @@ class Verify(commands.Cog):
         )
         await utils.discord.delete_message(ctx.message)
 
+    @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
     @commands.command()
     async def groupstrip(self, ctx, *members: Union[nextcord.Member, int]):
@@ -465,6 +466,7 @@ class Verify(commands.Cog):
             f"stripped {removed_dc} members with groupstrip.",
         )
 
+    @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def grouprolestrip(self, ctx, role: nextcord.Role, count: int = None):
