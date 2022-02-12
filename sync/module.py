@@ -18,14 +18,14 @@ class Sync(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @check.acl2(check.ACLevel.MOD)
+    @check.acl2(check.ACLevel.EVERYONE)
     @commands.group(name="sync")
     async def sync(self, ctx):
         """Synchronize your roles with main server."""
         await utils.discord.send_help(ctx)
 
     @commands.guild_only()
-    @check.acl2(check.ACLevel.MOD)
+    @check.acl2(check.ACLevel.EVERYONE)
     @sync.command(name="me")
     async def sync_me(self, ctx):
         """Synchronize your roles with main server."""
