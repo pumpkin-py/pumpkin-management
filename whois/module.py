@@ -4,7 +4,15 @@ import nextcord
 from nextcord.ext import commands
 
 from pie import check, i18n, logger, utils
-from pie.acl.database import ACL_group
+
+try:
+    from pie.acl.database import ACL_group
+except Exception:
+    ACL_group = None
+try:
+    from pie.acl.database import ACLevelMappping
+except Exception:
+    ACLevelMappping = None
 from ..verify.database import VerifyMember
 from ..verify.enums import VerifyStatus
 
@@ -18,13 +26,20 @@ class Whois(commands.Cog):
         self.bot = bot
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def roleinfo(self, ctx, role: nextcord.Role):
         """Display role information."""
-        acl_group: Optional[ACL_group] = ACL_group.get_by_role(
-            guild_id=ctx.guild.id, role_id=role.id
-        )
+        if ACL_group is not None:
+            acl_group: Optional[ACL_group] = ACL_group.get_by_role(
+                guild_id=ctx.guild.id, role_id=role.id
+            )
+        else:
+            acl_group = None
+        if ACLevelMappping is not None:
+            acl_mapping = ACLevelMappping.get(ctx.guild.id, role.id)
+        else:
+            acl_mapping = None
 
         embed = utils.discord.create_embed(
             author=ctx.author,
@@ -44,10 +59,16 @@ class Whois(commands.Cog):
                 name=_(ctx, "ACL group"),
                 value=acl_group.name,
             )
+        if acl_mapping is not None:
+            embed.add_field(
+                name=_(ctx, "Mapping to ACLevel"),
+                value=acl_mapping.level.name,
+                inline=False,
+            )
         await ctx.reply(embed=embed)
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def channelinfo(self, ctx, channel: nextcord.TextChannel):
         """Display channel information."""
@@ -94,7 +115,7 @@ class Whois(commands.Cog):
         await ctx.reply(embed=embed)
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def whois(self, ctx, member: Union[nextcord.Member, int]):
         """See database info on member."""
@@ -121,7 +142,7 @@ class Whois(commands.Cog):
         await guild_log.info(ctx.author, ctx.channel, f"Whois lookup for {member}.")
 
     @commands.guild_only()
-    @commands.check(check.acl)
+    @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def rwhois(self, ctx, address: str):
         db_member = VerifyMember.get_by_address(ctx.guild.id, address)
