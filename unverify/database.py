@@ -1,15 +1,12 @@
 from __future__ import annotations
 
-from datetime import datetime
-
 import enum
+from datetime import datetime
+from typing import Dict, List, Optional
+
 import nextcord
-from typing import Optional, List, Dict
-
-from sqlalchemy import ARRAY, Column, Integer, String, DateTime, BigInteger, Enum
-from sqlalchemy import or_
-
 from pie.database import database, session
+from sqlalchemy import BigInteger, Column, DateTime, Enum, Integer, String, or_
 
 
 class UnverifyStatus(enum.Enum):
@@ -24,12 +21,12 @@ class UnverifyType(enum.Enum):
     unverify: str = "Unverify"
 
 
-class GuildConfig(database.base):
+class UnverifyGuildConfig(database.base):
     """Represents a cofiguration of a guild.
 
     Attributes:
         guild_id: ID of the guild.
-        unverify_role: ID of the Role that unverified users get.
+        unverify_role_id: ID of the Role that unverified users get.
     """
 
     __tablename__ = "unverify_guild_config"
@@ -38,7 +35,7 @@ class GuildConfig(database.base):
     unverify_role_id = Column(BigInteger)
 
     @staticmethod
-    def set(guild: nextcord.Guild, unverify_role: nextcord.Role) -> GuildConfig:
+    def set(guild: nextcord.Guild, unverify_role: nextcord.Role) -> UnverifyGuildConfig:
         """Updates the Guild Config item. Creates if not already present
 
         Args:
@@ -48,17 +45,15 @@ class GuildConfig(database.base):
         Returns:
             Added/Updated config object
         """
-        query = session.query(GuildConfig).filter_by(guild_id=guild.id).one_or_none()
-        if query is not None:
-            query.unverify_role_id = unverify_role
-        else:
-            query = GuildConfig(guild_id=guild.id, unverify_role_id=unverify_role.id)
-            session.add(query)
+        query = UnverifyGuildConfig(
+            guild_id=guild.id, unverify_role_id=unverify_role.id
+        )
+        session.merge(query)
         session.commit()
         return query
 
     @staticmethod
-    def get(guild_id: nextcord.Guild) -> Optional[GuildConfig]:
+    def get(guild: nextcord.Guild) -> Optional[UnverifyGuildConfig]:
         """Retreives the guild configuration
 
         Args:
@@ -67,16 +62,20 @@ class GuildConfig(database.base):
         Returns:
             Config object (if found)
         """
-        return session.query(GuildConfig).filter_by(guild_id=guild_id).one_or_none()
+        return (
+            session.query(UnverifyGuildConfig)
+            .filter_by(guild_id=guild.id)
+            .one_or_none()
+        )
 
     def __repr__(self) -> str:
-        return f'<GuildConfig guild_id="{self.guild_id}" unverify_role_id="{self.unverify_role_id}">'
+        return f'<UnverifyGuildConfig guild_id="{self.guild_id}" unverify_role_id="{self.unverify_role_id}">'
 
     def dump(self) -> Dict:
-        """Dumps GuildConfig into a dictionary.
+        """Dumps UnverifyGuildConfig into a dictionary.
 
         Returns:
-            The GuildConfig as a dictionary.
+            The UnverifyGuildConfig as a dictionary.
         """
         return {"guild_id": self.guild_id, "unverify_role_id": self.unverify_role_id}
 
@@ -96,7 +95,7 @@ class UnverifyItem(database.base):
         channels_to_remove: List of GuildChannel IDs to remove after the unverify ends.
         reason: Reason of the unverify.
         status: Status of the unverify.
-        type: Type of the unverify.
+        unverify_type: Type of the unverify.
     """
 
     __tablename__ = "unverify_table"
@@ -104,15 +103,54 @@ class UnverifyItem(database.base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
     user_id = Column(BigInteger)
-    start_time = Column(DateTime(timezone=True))
-    end_time = Column(DateTime(timezone=True))
-    last_check = Column(DateTime(timezone=True))
-    roles_to_return = Column(ARRAY(BigInteger))
-    channels_to_return = Column(ARRAY(BigInteger))
-    channels_to_remove = Column(ARRAY(BigInteger))
+    start_time = Column(DateTime(timezone=False))
+    end_time = Column(DateTime(timezone=False))
+    last_check = Column(DateTime(timezone=False))
+    csv_roles_to_return = Column(String)
+    csv_channels_to_return = Column(String)
+    csv_channels_to_remove = Column(String)
     reason = Column(String)
     status = Column(Enum(UnverifyStatus), default=UnverifyStatus.waiting)
-    type = Column(Enum(UnverifyType))
+    unverify_type = Column(Enum(UnverifyType))
+
+    @property
+    def roles_to_return(self) -> List[int]:
+        lis = (
+            [int(role_id) for role_id in self.csv_roles_to_return.split(", ")]
+            if self.csv_roles_to_return != ""
+            else []
+        )
+        return lis
+
+    @property
+    def channels_to_return(self) -> List[int]:
+        lis = (
+            [int(channel_id) for channel_id in self.csv_channels_to_return.split(", ")]
+            if self.csv_channels_to_return != ""
+            else []
+        )
+        return lis
+
+    @property
+    def channels_to_remove(self) -> List[int]:
+        lis = (
+            [int(channel_id) for channel_id in self.csv_channels_to_remove.split(", ")]
+            if self.csv_channels_to_remove != ""
+            else []
+        )
+        return lis
+
+    @roles_to_return.setter
+    def roles_to_return(self, ids):
+        self.csv_roles_to_return = ", ".join(map(str, ids))
+
+    @channels_to_return.setter
+    def channels_to_return(self, ids):
+        self.csv_channels_to_return = ", ".join(map(str, ids))
+
+    @channels_to_remove.setter
+    def channels_to_remove(self, ids):
+        self.csv_channels_to_remove = ", ".join(map(str, ids))
 
     @staticmethod
     def add(
@@ -122,7 +160,7 @@ class UnverifyItem(database.base):
         channels_to_return: List[nextcord.abc.GuildChannel],
         channels_to_remove: List[nextcord.abc.GuildChannel],
         reason: str,
-        type: UnverifyType,
+        unverify_type: UnverifyType,
     ) -> UnverifyItem:
         """Creates a new UnverifyItem in the database.
 
@@ -133,7 +171,7 @@ class UnverifyItem(database.base):
             channels_to_return: List of GuildChannels to return after the unverify ends.
             channels_to_remove: List of GuildChannels to remove after the unverify ends.
             reason: Reason of the unverify.
-            type: Type of the unverify.
+            unverify_type: Type of the unverify.
 
         Raises:
             ValueError: End time already passed or Member is already unverified.
@@ -182,7 +220,7 @@ class UnverifyItem(database.base):
             channels_to_return=channels_to_return_ids,
             channels_to_remove=channels_to_remove_ids,
             reason=reason,
-            type=type,
+            unverify_type=unverify_type,
         )
         session.add(added)
         session.commit()
@@ -200,14 +238,14 @@ class UnverifyItem(database.base):
     def get_member(
         member: nextcord.Member,
         status: UnverifyStatus = None,
-        type: UnverifyType = None,
+        unverify_type: UnverifyType = None,
     ) -> Optional[List[UnverifyItem]]:
         """Retreives UnverifyItems filtered by member and optionally by status and type.
 
         Args:
             member: The unverified member.
             status: Status of the unverify. Defaults to None.
-            type: Type of the unverify. Defaults to None.
+            unverify_type: Type of the unverify. Defaults to None.
 
         Returns:
             :class:`List[UnverifyItem]`
@@ -217,8 +255,8 @@ class UnverifyItem(database.base):
         )
         if status is not None:
             query = query.filter_by(status=status)
-        if type is not None:
-            query = query.filter_by(type=type)
+        if unverify_type is not None:
+            query = query.filter_by(unverify_type=unverify_type)
 
         return query.all()
 
@@ -240,7 +278,7 @@ class UnverifyItem(database.base):
     @staticmethod
     def get_items(
         guild: nextcord.Guild = None,
-        type: UnverifyType = None,
+        unverify_type: UnverifyType = None,
         status: UnverifyStatus = None,
         max_end_time: datetime = None,
         min_last_check: datetime = None,
@@ -250,7 +288,7 @@ class UnverifyItem(database.base):
 
         Args:
             guild: Guild whose items are to be returned.
-            type: Type of the unverify. Defaults to None.
+            unverify_type: Type of the unverify. Defaults to None.
             status: Status of the unverify. Defaults to None.
             max_end_time: Status of the unverify. Defaults to None.
 
@@ -261,8 +299,8 @@ class UnverifyItem(database.base):
 
         if guild is not None:
             query = query.filter_by(guild_id=guild.id)
-        if type is not None:
-            query = query.filter_by(type=type)
+        if unverify_type is not None:
+            query = query.filter_by(unverify_type=unverify_type)
         if status is not None:
             query = query.filter_by(status=status)
         if max_end_time is not None:
@@ -299,7 +337,7 @@ class UnverifyItem(database.base):
             f'user_id="{self.user_id}" start_time="{self.start_time}" end_time="{self.end_time}" '
             f'roles_to_return="{self.roles_to_return}" channels_to_return="{self.channels_to_return}" '
             f'channels_to_remove="{self.channels_to_remove}" reason="{self.reason}" status="{self.status}" '
-            f'last_check="{self.last_check}" type="{self.type}">'
+            f'last_check="{self.last_check}" unverify_type="{self.unverify_type}">'
         )
 
     def dump(self) -> Dict:
@@ -314,12 +352,12 @@ class UnverifyItem(database.base):
             "user_id": self.user_id,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "roles_to_return": self.roles_to_return,
+            "roles_to_return": f"[{self.roles_to_return}]",
             "channels_to_return": self.channels_to_return,
             "channels_to_remove": self.channels_to_remove,
             "reason": self.reason,
             "status": self.status,
-            "type": self.type,
+            "unverify_type": self.unverify_type,
         }
 
     def save(self):
