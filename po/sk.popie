@@ -19,6 +19,12 @@ msgstr
 msgid Unknown author
 msgstr
 
+msgid Please use either a reply or provide a number of messages to delete. Not both
+msgstr Prosím použi odpoveď na správu, alebo počet správ na zmazanie. Nie oboje.
+
+msgid Deleted {deleted} message(s)
+msgstr {deleted} správ(a) zmazaná.
+
 msgid React2role functionality is not enabled on this server.
 msgstr React2role funkcionalita nie je na tomto serveri zapnutá.
 
