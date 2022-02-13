@@ -29,7 +29,7 @@ class UnverifyGuildConfig(database.base):
         unverify_role_id: ID of the Role that unverified users get.
     """
 
-    __tablename__ = "unverify_guild_config"
+    __tablename__ = "mgmt_unverify_guild_config"
 
     guild_id = Column(BigInteger, primary_key=True, autoincrement=False)
     unverify_role_id = Column(BigInteger)
@@ -98,7 +98,7 @@ class UnverifyItem(database.base):
         unverify_type: Type of the unverify.
     """
 
-    __tablename__ = "unverify_table"
+    __tablename__ = "mgmt_unverify_table"
 
     idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
