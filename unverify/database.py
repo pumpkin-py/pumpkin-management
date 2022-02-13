@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 import nextcord
 from pie.database import database, session
-from sqlalchemy import ARRAY, BigInteger, Column, DateTime, Enum, Integer, String, or_
+from sqlalchemy import BigInteger, Column, DateTime, Enum, Integer, String, or_
 
 
 class UnverifyStatus(enum.Enum):
@@ -114,12 +114,51 @@ class UnverifyItem(database.base):
     start_time = Column(DateTime(timezone=False))
     end_time = Column(DateTime(timezone=False))
     last_check = Column(DateTime(timezone=False))
-    roles_to_return = Column(ARRAY(BigInteger))
-    channels_to_return = Column(ARRAY(BigInteger))
-    channels_to_remove = Column(ARRAY(BigInteger))
+    csv_roles_to_return = Column(String)
+    csv_channels_to_return = Column(String)
+    csv_channels_to_remove = Column(String)
     reason = Column(String)
     status = Column(Enum(UnverifyStatus), default=UnverifyStatus.waiting)
     unverify_type = Column(Enum(UnverifyType))
+
+    @property
+    def roles_to_return(self) -> List[int]:
+        lis = (
+            [int(role_id) for role_id in self.csv_roles_to_return.split(", ")]
+            if self.csv_roles_to_return != ""
+            else []
+        )
+        return lis
+
+    @property
+    def channels_to_return(self) -> List[int]:
+        lis = (
+            [int(channel_id) for channel_id in self.csv_channels_to_return.split(", ")]
+            if self.csv_channels_to_return != ""
+            else []
+        )
+        return lis
+
+    @property
+    def channels_to_remove(self) -> List[int]:
+        lis = (
+            [int(channel_id) for channel_id in self.csv_channels_to_remove.split(", ")]
+            if self.csv_channels_to_remove != ""
+            else []
+        )
+        return lis
+
+    @roles_to_return.setter
+    def roles_to_return(self, ids):
+        self.csv_roles_to_return = ", ".join(map(str, ids))
+
+    @channels_to_return.setter
+    def channels_to_return(self, ids):
+        self.csv_channels_to_return = ", ".join(map(str, ids))
+
+    @channels_to_remove.setter
+    def channels_to_remove(self, ids):
+        self.csv_channels_to_remove = ", ".join(map(str, ids))
 
     @staticmethod
     def add(
@@ -321,7 +360,7 @@ class UnverifyItem(database.base):
             "user_id": self.user_id,
             "start_time": self.start_time,
             "end_time": self.end_time,
-            "roles_to_return": self.roles_to_return,
+            "roles_to_return": f"[{self.roles_to_return}]",
             "channels_to_return": self.channels_to_return,
             "channels_to_remove": self.channels_to_remove,
             "reason": self.reason,
