@@ -19,11 +19,29 @@ msgstr Komentář odebrán.
 msgid Unknown author
 msgstr Neznámý autor.
 
-msgid Please use either a reply or provide a number of messages to delete. Not both
+msgid Please use either a reply or provide a number of messages to delete. Not both.
 msgstr Prosím použij odpověď na zprávu, nebo počet zpráv ke smazání. Ne obojí.
 
+msgid Confirm delete.
+msgstr Potvrzení smazání.
+
+msgid Delete messages after
+msgstr Smazat zprávy po
+
+msgid Confirmation timed out.
+msgstr Čas na potvrzení vypršel.
+
+msgid Aborted.
+msgstr Akce zrušena.
+
+msgid Number of messages to delete
+msgstr Počet zpráv ke smazání
+
+msgid Please use either a reply or provide a number of messages to delete.
+msgstr Prosím použij odpověď na zprávu, nebo počet zpráv ke smazání.
+
 msgid Deleted {deleted} message(s)
-msgstr {deleted} zpráv(a) smazána.
+msgstr Smazáno {deleted} zpráv.
 
 msgid React2role functionality is not enabled on this server.
 msgstr React2role funkcionalita není na tomto serveru zapnutá.
