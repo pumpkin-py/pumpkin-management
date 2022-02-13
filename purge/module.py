@@ -96,6 +96,12 @@ class Purge(commands.Cog):
                 else:
                     await ctx.send(_(ctx, "Aborted."))
                     return
+            else:
+                deleted = await channel.purge(
+                    limit=count,
+                    before=ctx.message.created_at,
+                    check=self._not_pinned,
+                )
 
         else:
             await ctx.reply(
