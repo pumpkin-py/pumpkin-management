@@ -3,21 +3,18 @@ from __future__ import annotations
 import asyncio
 import contextlib
 from datetime import datetime, timedelta
+from typing import List, Optional, Tuple
 
-from typing import Optional, List, Tuple
 import dateutil.parser
-
 import nextcord
+import pie.database.config
 from nextcord import Guild, Member
 from nextcord.errors import NotFound
+from nextcord.ext import commands, tasks
 from nextcord.ext.commands.bot import Bot
-from nextcord.ext import tasks, commands
-
-import pie.database.config
 from pie import check, i18n, logger, utils
 
-from .database import UnverifyStatus, UnverifyType, UnverifyItem, GuildConfig
-
+from .database import UnverifyGuildConfig, UnverifyItem, UnverifyStatus, UnverifyType
 
 _ = i18n.Translator("modules/mgmt").translate
 bot_log = logger.Bot.logger()
@@ -174,6 +171,7 @@ class Unverify(commands.Cog):
             return
 
         now = datetime.now()
+
         if item.end_time > now:
             duration = item.end_time - datetime.now()
             duration_in_s = duration.total_seconds()
@@ -187,7 +185,7 @@ class Unverify(commands.Cog):
         await self._return_channels(member, item)
         await self._remove_temp_channels(member, item)
 
-        config = GuildConfig.get(guild.id)
+        config = UnverifyGuildConfig.get(guild=guild)
         unverify_role = nextcord.utils.get(guild.roles, id=config.unverify_role_id)
         if unverify_role is not None:
             try:
@@ -226,12 +224,14 @@ class Unverify(commands.Cog):
         item.save()
 
     @staticmethod
-    async def _remove_roles(member: Member, type: UnverifyType) -> List[nextcord.Role]:
+    async def _remove_roles(
+        member: Member, unverify_type: UnverifyType
+    ) -> List[nextcord.Role]:
         guild = member.guild
         removed_roles = []
         for role in member.roles:
             try:
-                await member.remove_roles(role, reason=type.value, atomic=True)
+                await member.remove_roles(role, reason=unverify_type.value, atomic=True)
                 removed_roles.append(role)
             except NotFound:
                 # The role got deleted or someone tried to unverify a bot.
@@ -244,11 +244,13 @@ class Unverify(commands.Cog):
                     + "Insufficient permissions.",
                 )
 
-        config = GuildConfig.get(guild.id)
+        config = UnverifyGuildConfig.get(guild=guild)
         unverify_role = nextcord.utils.get(guild.roles, id=config.unverify_role_id)
         if unverify_role is not None:
             try:
-                await member.add_roles(unverify_role, reason=type.value, atomic=True)
+                await member.add_roles(
+                    unverify_role, reason=unverify_type.value, atomic=True
+                )
             except nextcord.errors.Forbidden:
                 await guild_log.warning(
                     None,
@@ -267,7 +269,7 @@ class Unverify(commands.Cog):
     @staticmethod
     async def _remove_or_keep_channels(
         member: Member,
-        type: UnverifyType,
+        unverify_type: UnverifyType,
         channels_to_keep: List[nextcord.abc.GuildChannel],
     ) -> Tuple[List[nextcord.abc.GuildChannel], List[nextcord.abc.GuildChannel]]:
         removed_channels = []
@@ -288,7 +290,7 @@ class Unverify(commands.Cog):
                     user_overw = nextcord.PermissionOverwrite(read_messages=True)
                     try:
                         await channel.set_permissions(
-                            member, overwrite=user_overw, reason=type.value
+                            member, overwrite=user_overw, reason=unverify_type.value
                         )
                         added_channels.append(channel)
                     except PermissionError:
@@ -307,7 +309,7 @@ class Unverify(commands.Cog):
                 user_overw = nextcord.PermissionOverwrite(read_messages=False)
                 try:
                     await channel.set_permissions(
-                        member, overwrite=user_overw, reason=type.value
+                        member, overwrite=user_overw, reason=unverify_type.value
                     )
                     removed_channels.append(channel)
                 except PermissionError:
@@ -324,17 +326,17 @@ class Unverify(commands.Cog):
         member: Member,
         end_time: datetime,
         reason: str,
-        type: UnverifyType,
+        unverify_type: UnverifyType,
         channels_to_keep: List[nextcord.abc.GuildChannel] = None,
     ) -> UnverifyItem:
         result = UnverifyItem.get_member(member=member, status=UnverifyStatus.waiting)
         if result != []:
             raise ValueError
 
-        removed_roles = await self._remove_roles(member, type)
+        removed_roles = await self._remove_roles(member, unverify_type)
         await asyncio.sleep(2)
         removed_channels, added_channels = await self._remove_or_keep_channels(
-            member, type, channels_to_keep
+            member, unverify_type, channels_to_keep
         )
 
         # Avoiding discord Embed troubles
@@ -348,7 +350,7 @@ class Unverify(commands.Cog):
             channels_to_return=removed_channels,
             channels_to_remove=added_channels,
             reason=reason,
-            type=type,
+            unverify_type=unverify_type,
         )
         return result
 
@@ -360,24 +362,54 @@ class Unverify(commands.Cog):
         await utils.discord.send_help(ctx)
 
     @commands.guild_only()
+    @check.acl2(check.ACLevel.SUBMOD)
+    @unverify_.group(name="config")
+    async def unverify_config_(self, ctx):
+        """Pest control config."""
+        await utils.discord.send_help(ctx)
+
+    @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
-    @unverify_.command(name="set")
-    async def unverify_set(self, ctx, unverify_role: nextcord.Role):
+    @unverify_config_.command(name="set")
+    async def unverify_config_set(self, ctx, unverify_role: nextcord.Role):
         """Set configuration of guild that the message was sent from.
 
         Args:
             unverify_role: Role that unverified members get.
         """
-        GuildConfig.set(guild_id=ctx.guild.id, unverify_role_id=unverify_role.id)
+        UnverifyGuildConfig.set(guild=ctx.guild, unverify_role=unverify_role)
 
         await guild_log.info(
             ctx.author, ctx.channel, f"Unverify role was set to {unverify_role.name}."
         )
         await ctx.reply(
             _(ctx, "Unverify role was set to {role_name}.").format(
-                role_name=unverify_role.mention, guild_name=ctx.guild.name
+                role_name=unverify_role.mention
             )
         )
+
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.SUBMOD)
+    @unverify_config_.command(name="get")
+    async def unverify_config_get(self, ctx: commands.Context):
+        """Set configuration of guild that the message was sent from.
+
+        Args:
+            unverify_role: Role that unverified members get.
+        """
+        unverify_guild_config = UnverifyGuildConfig.get(guild=ctx.guild)
+
+        if unverify_guild_config is not None:
+            role = nextcord.utils.get(
+                ctx.guild.roles, id=unverify_guild_config.unverify_role_id
+            )
+            await ctx.reply(
+                _(ctx, "Unverify role is set to {role_name}.").format(
+                    role_name=role.name
+                )
+            )
+        else:
+            await ctx.reply(_(ctx, "Unverify role is not set."))
 
     @check.acl2(check.ACLevel.SUBMOD)
     @unverify_.command(name="user")
@@ -396,6 +428,15 @@ class Unverify(commands.Cog):
             datetime_str: Datetime string Preferably quoted.
             reason: Reason of Unverify. Defaults to None.
         """
+        unverify_guild_config = UnverifyGuildConfig.get(guild=ctx.guild)
+        if unverify_guild_config is None:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "Unverify config is not set for this guild. The administrators need to fix this.",
+                )
+            )
+            return
         try:
             end_time = utils.time.parse_datetime(datetime_str)
         except dateutil.parser.ParserError:
@@ -418,7 +459,7 @@ class Unverify(commands.Cog):
 
         try:
             await self._unverify_member(
-                member, end_time, reason, type=UnverifyType.unverify
+                member, end_time, reason, unverify_type=UnverifyType.unverify
             )
         except ValueError:
             await ctx.reply(
@@ -481,7 +522,7 @@ class Unverify(commands.Cog):
             member,
             ctx.channel,
             f"Member {member.name} ({member.id}) unverified "
-            + f"until {end_time_str}, type {UnverifyType.unverify.value}",
+            + f"until {end_time_str}, unverify_type {UnverifyType.unverify.value}",
         )
 
     @commands.guild_only()
@@ -580,7 +621,9 @@ class Unverify(commands.Cog):
             )
             embed.add_field(name=_(ctx, "End time"), value=str(end_time), inline=True)
             embed.add_field(name=_(ctx, "Status"), value=item.status.value, inline=True)
-            embed.add_field(name=_(ctx, "Type"), value=item.type.value, inline=True)
+            embed.add_field(
+                name=_(ctx, "Type"), value=item.unverify_type.value, inline=True
+            )
             if roles != []:
                 embed.add_field(
                     name=_(ctx, "Roles to return"),
@@ -616,6 +659,15 @@ class Unverify(commands.Cog):
             datetime_str: Until when. Preferably quoted.
             channels: Channels you want to keep.
         """
+        unverify_guild_config = UnverifyGuildConfig.get(guild=ctx.guild)
+        if unverify_guild_config is None:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "Unverify config is not set for this guild. The administrators need to fix this.",
+                )
+            )
+            return
         try:
             end_time = utils.time.parse_datetime(datetime_str)
         except dateutil.parser.ParserError:
@@ -647,7 +699,7 @@ class Unverify(commands.Cog):
                 ctx.message.author,
                 end_time,
                 UnverifyType.selfunverify.value,
-                type=UnverifyType.selfunverify,
+                unverify_type=UnverifyType.selfunverify,
                 channels_to_keep=cleaned_channels,
             )
         except ValueError:
@@ -701,7 +753,7 @@ class Unverify(commands.Cog):
             member,
             ctx.channel,
             f"Member {member.name} ({member.id}) unverified "
-            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
+            + f"until {end_time_str}, unverify_type {UnverifyType.selfunverify.value}",
         )
 
     @commands.guild_only()
@@ -712,6 +764,15 @@ class Unverify(commands.Cog):
 
         Selfunverifies user until the morning.
         """
+        unverify_guild_config = UnverifyGuildConfig.get(guild=ctx.guild)
+        if unverify_guild_config is None:
+            await ctx.reply(
+                _(
+                    ctx,
+                    "Unverify config is not set for this guild. The administrators need to fix this.",
+                )
+            )
+            return
         end_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)
         if end_time < datetime.now():
             end_time = end_time + timedelta(days=1)
@@ -721,7 +782,7 @@ class Unverify(commands.Cog):
                 ctx.message.author,
                 end_time,
                 UnverifyType.selfunverify.value,
-                type=UnverifyType.selfunverify,
+                unverify_type=UnverifyType.selfunverify,
             )
         except ValueError:
             await ctx.reply(
@@ -774,7 +835,7 @@ class Unverify(commands.Cog):
             member,
             ctx.channel,
             f"Member {member.name} ({member.id}) unverified "
-            + f"until {end_time_str}, type {UnverifyType.selfunverify.value}",
+            + f"until {end_time_str}, unverify_type {UnverifyType.selfunverify.value}",
         )
 
 

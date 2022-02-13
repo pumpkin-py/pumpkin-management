@@ -178,6 +178,15 @@ msgstr Tvoje oprávnenia k serveru **{guild_name}** boli navrátené.
 msgid Unverify role was set to {role_name}.
 msgstr Unverify rola bola nastavená na {role_name}.
 
+msgid Unverify role is set to {role_name}.
+msgstr Unverify rola je nastavená na {role_name}.
+
+msgid Unverify role is not set.
+msgstr Unverify rola nie je nastavená.
+
+msgid Unverify config is not set for this guild. The administrators need to fix this.
+msgstr Unverify konfigurácia nie je nastavená pre tento server. Toto musia opraviť administrátori.
+
 msgid I don't know how to parse `{datetime_str}`, please try again.
 msgstr Neviem ako prečítať `{datetime_str}`, prosím skús to znova.
 
