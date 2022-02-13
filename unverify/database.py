@@ -45,18 +45,10 @@ class UnverifyGuildConfig(database.base):
         Returns:
             Added/Updated config object
         """
-        query = (
-            session.query(UnverifyGuildConfig)
-            .filter_by(guild_id=guild.id)
-            .one_or_none()
+        query = UnverifyGuildConfig(
+            guild_id=guild.id, unverify_role_id=unverify_role.id
         )
-        if query is not None:
-            query.unverify_role_id = unverify_role
-        else:
-            query = UnverifyGuildConfig(
-                guild_id=guild.id, unverify_role_id=unverify_role.id
-            )
-            session.add(query)
+        session.merge(query)
         session.commit()
         return query
 
