@@ -1,9 +1,8 @@
 pre-commit
 
 # static analysis
-black==21.9b0
+black==22.1.0
 flake8==4.0.1
-flake8-black==0.2.3
 flake8-print==4.0.0
 flake8-todo==0.7
 
