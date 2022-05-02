@@ -202,7 +202,7 @@ class Verify(commands.Cog):
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Verification e-mail sent with code '{code}'.",
+            "Verification e-mail sent.",
         )
 
         await ctx.send(
@@ -324,10 +324,7 @@ class Verify(commands.Cog):
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
-                (
-                    "Attempted to submit bad code: "
-                    f"`{utils.text.sanitise(code)}` instead of `{db_member.code}`."
-                ),
+                f"Attempted to submit bad code: `{utils.text.sanitise(code)}`.",
             )
             await ctx.send(
                 _(ctx, "{mention} That is not your verification code.").format(
