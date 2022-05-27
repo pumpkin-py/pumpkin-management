@@ -260,7 +260,7 @@ msgid {mention} You have to include your e-mail.
 msgstr {mention} Musíš priložiť svoj email.
 
 msgid {mention} This e-mail cannot be used.
-msgstr Tento email sa nedá použiť.
+msgstr {mention} Tento email sa nedá použiť.
 
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
