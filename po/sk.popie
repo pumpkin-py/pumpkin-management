@@ -296,7 +296,7 @@ msgid {mention} That is not your verification code.
 msgstr {mention} Toto nie je tvoj verifikačný kód.
 
 msgid You have been verified, congratulations!
-msgstr Bol si úspešne verifikovaný, gratulujem!
+msgstr Verifikácia prebehla úspešne, gratulujem!
 
 msgid Member **{name}** has been verified.
 msgstr Užívateľ **{name}** bol verifikovaný.
