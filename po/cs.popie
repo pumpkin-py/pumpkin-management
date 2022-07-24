@@ -352,6 +352,9 @@ msgstr Neplatný verifikační status. Platné možnosti jsou: {options}.
 msgid That member is not in the database.
 msgstr Tento uživatel není v databázi.
 
+msgid Member verification status of **{member}** has been updated to **{status}**.
+msgstr Verifikační status uživatele **{member}** byl aktualizován na **{status}**.
+
 msgid Verification groups
 msgstr Verifikační skupiny
 
