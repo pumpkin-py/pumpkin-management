@@ -381,6 +381,25 @@ class Verify(commands.Cog):
             await ctx.reply(_(ctx, "Something went wrong, contact the moderator team."))
             return
 
+        dialog = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Strip"),
+            description=_(
+                ctx,
+                (
+                    "By clicking the confirm button you will have all your roles removed "
+                    "and your verification will be revoked. "
+                    "You will be able to perform new verification afterwards."
+                ),
+            ),
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        if answer is not True:
+            await ctx.reply(_(ctx, "Stripping aborted."))
+            return
+
         roles = [role for role in ctx.author.roles if role.is_assignable()]
 
         with contextlib.suppress(nextcord.Forbidden):
