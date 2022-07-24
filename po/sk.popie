@@ -304,6 +304,15 @@ msgstr Užívateľ **{name}** bol verifikovaný.
 msgid Something went wrong, contact the moderator team.
 msgstr Niečo sa pokazilo, kontaktuj moderátorov.
 
+msgid Strip
+msgstr
+
+msgid By clicking the confirm button you will have all your roles removed and your verification will be revoked. You will be able to perform new verification afterwards.
+msgstr
+
+msgid Stripping aborted.
+msgstr
+
 msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
 msgstr Boli ste vymazaný z databáze a vaše role boli odstránené. Pre návrat musíte prejsť verifikáciou.
 
