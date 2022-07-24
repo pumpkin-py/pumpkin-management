@@ -659,8 +659,8 @@ class Verify(commands.Cog):
         await ctx.reply(
             _(
                 ctx,
-                f"Member verification status of **{member}** has been updated to **{status}**.",
-            ).format(member=utils.text.sanitise(member.display_name)),
+                "Member verification status of **{member}** has been updated to **{status}**.",
+            ).format(member=utils.text.sanitise(member.display_name), status=status),
         )
 
     @check.acl2(check.ACLevel.MOD)
