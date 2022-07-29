@@ -3,8 +3,8 @@ import shlex
 import tempfile
 from emoji import UNICODE_EMOJI as _UNICODE_EMOJI
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 from pie import check, i18n, logger, utils
 
@@ -97,7 +97,7 @@ class React2Role(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="add")
     async def reaction_channel_add(
-        self, ctx, channel: nextcord.TextChannel, channel_type: str
+        self, ctx, channel: discord.TextChannel, channel_type: str
     ):
         """Add new react2role channel.
 
@@ -142,7 +142,7 @@ class React2Role(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="unlimit")
-    async def reaction_channel_unlimit(self, ctx, channel: nextcord.TextChannel):
+    async def reaction_channel_unlimit(self, ctx, channel: discord.TextChannel):
         """Remove limits on 'role' channel."""
         reaction_channel = ReactionChannel.get(ctx.guild.id, channel.id)
         if reaction_channel is None:
@@ -178,9 +178,9 @@ class React2Role(commands.Cog):
     async def reaction_channel_limits(
         self,
         ctx,
-        channel: nextcord.TextChannel,
-        top: nextcord.Role,
-        bottom: nextcord.Role,
+        channel: discord.TextChannel,
+        top: discord.Role,
+        bottom: discord.Role,
     ):
         """Set top and bottom limits for 'role' channel."""
         reaction_channel = ReactionChannel.get(ctx.guild.id, channel.id)
@@ -217,7 +217,7 @@ class React2Role(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="limit", aliases=["set-limit"])
     async def reaction_channel_limit(
-        self, ctx, channel: nextcord.TextChannel, maximum: int
+        self, ctx, channel: discord.TextChannel, maximum: int
     ):
         """Set role count limit for 'role' channel."""
         reaction_channel = ReactionChannel.get(ctx.guild.id, channel.id)
@@ -255,7 +255,7 @@ class React2Role(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="remove")
-    async def reaction_channel_remove(self, ctx, channel: nextcord.TextChannel):
+    async def reaction_channel_remove(self, ctx, channel: discord.TextChannel):
         """Remove react2role functionality from a channel."""
         reaction_channel = ReactionChannel.get(ctx.guild.id, channel.id)
         if reaction_channel is None:
@@ -284,7 +284,7 @@ class React2Role(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="init-channels")
     async def reaction_channel_init_channels(
-        self, ctx, target: nextcord.TextChannel, *, groups: str
+        self, ctx, target: discord.TextChannel, *, groups: str
     ):
         """Initialise links for react2role functionality.
 
@@ -292,10 +292,10 @@ class React2Role(commands.Cog):
             target: Target text channel that will act as react2role hub.
             groups: List of group channels that will be linked from in this target channel.
         """
-        categories: List[nextcord.CategoryChannel] = []
+        categories: List[discord.CategoryChannel] = []
         channel_count: int = 0
         for name in shlex.split(groups):
-            category = nextcord.utils.get(ctx.guild.categories, name=name)
+            category = discord.utils.get(ctx.guild.categories, name=name)
             if category is None:
                 await ctx.reply(_(ctx, "That category does not exist here."))
                 return
@@ -308,7 +308,7 @@ class React2Role(commands.Cog):
             header_image = helper_utils.generate_header(group.name)
             header_image.save(header_file, "png")
             header_file.seek(0)
-            await target.send(file=nextcord.File(fp=header_file, filename="group.png"))
+            await target.send(file=discord.File(fp=header_file, filename="group.png"))
 
             # send list of channels
             message: List[str] = []
@@ -342,7 +342,7 @@ class React2Role(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
         """Listen for react2role message."""
-        if not isinstance(message.channel, nextcord.TextChannel):
+        if not isinstance(message.channel, discord.TextChannel):
             return
         reaction_channel = ReactionChannel.get(message.guild.id, message.channel.id)
         if reaction_channel is None:
@@ -351,7 +351,7 @@ class React2Role(commands.Cog):
         await self._handle_react2role_message_update(message, reaction_channel)
 
     @commands.Cog.listener()
-    async def on_raw_message_edit(self, payload: nextcord.RawMessageUpdateEvent):
+    async def on_raw_message_edit(self, payload: discord.RawMessageUpdateEvent):
         """Listen for react2role message."""
         reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
         if reaction_channel is None:
@@ -366,7 +366,7 @@ class React2Role(commands.Cog):
         await self._handle_react2role_message_update(message, reaction_channel)
 
     async def _handle_react2role_message_update(
-        self, message: nextcord.Message, reaction_channel: ReactionChannel
+        self, message: discord.Message, reaction_channel: ReactionChannel
     ):
         """Check react2role message for emoji changes."""
         # get react2xxx mapping
@@ -413,7 +413,7 @@ class React2Role(commands.Cog):
 
     async def _get_react2role_message_mapping(
         self,
-        message: nextcord.Message,
+        message: discord.Message,
         reaction_channel: ReactionChannel,
         *,
         announce_warnings: bool,
@@ -503,7 +503,7 @@ class React2Role(commands.Cog):
         return mapping
 
     @commands.Cog.listener()
-    async def on_raw_reaction_add(self, payload: nextcord.RawReactionActionEvent):
+    async def on_raw_reaction_add(self, payload: discord.RawReactionActionEvent):
         reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
         if reaction_channel is None:
             return
@@ -619,7 +619,7 @@ class React2Role(commands.Cog):
         await member.add_roles(role)
 
     @commands.Cog.listener()
-    async def on_raw_reaction_remove(self, payload: nextcord.RawReactionActionEvent):
+    async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
         reaction_channel = ReactionChannel.get(payload.guild_id, payload.channel_id)
         if reaction_channel is None:
             return
@@ -684,5 +684,5 @@ class React2Role(commands.Cog):
         await member.remove_roles(role)
 
 
-def setup(bot) -> None:
-    bot.add_cog(React2Role(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(React2Role(bot))

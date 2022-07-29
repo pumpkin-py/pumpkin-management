@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 from pie import check, i18n, logger, utils
 
 _ = i18n.Translator("modules/mgmt").translate
@@ -15,7 +15,7 @@ class Purge(commands.Cog):
         self.bot = bot
 
     @staticmethod
-    def _not_pinned(message: nextcord.Message) -> bool:
+    def _not_pinned(message: discord.Message) -> bool:
         return not message.pinned
 
     @commands.guild_only()
@@ -30,7 +30,7 @@ class Purge(commands.Cog):
         """
         channel = ctx.channel
         msg = ctx.message
-        if msg.type == nextcord.MessageType.reply:
+        if msg.type == discord.MessageType.reply:
             if count is not None:
                 await ctx.reply(
                     _(
@@ -122,5 +122,5 @@ class Purge(commands.Cog):
         )
 
 
-def setup(bot) -> None:
-    bot.add_cog(Purge(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(Purge(bot))
