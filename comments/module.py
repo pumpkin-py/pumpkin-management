@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import List
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 from pie import check, i18n, logger, utils
 
@@ -28,7 +28,7 @@ class Comments(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
     @comment_.command(name="list")
-    async def comment_list(self, ctx, member: nextcord.Member):
+    async def comment_list(self, ctx, member: discord.Member):
         """List all comments of a user."""
         guild_id = ctx.guild.id
         if not member:
@@ -50,7 +50,7 @@ class Comments(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
     @comment_.command(name="add")
-    async def comment_add(self, ctx, member: nextcord.Member, *, text: str):
+    async def comment_add(self, ctx, member: discord.Member, *, text: str):
         """Add comment to a user."""
         comment = Comment.add(
             ctx.guild.id, ctx.author.id, member.id, utils.text.sanitise(text)
@@ -90,5 +90,5 @@ class Comments(commands.Cog):
         return f"**{author_name}**, {timestamp} (ID {comment.idx}):\n{text}"
 
 
-def setup(bot) -> None:
-    bot.add_cog(Comments(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(Comments(bot))

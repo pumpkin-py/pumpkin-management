@@ -1,7 +1,7 @@
 from typing import Optional, Union
 
-import nextcord
-from nextcord.ext import commands
+import discord
+from discord.ext import commands
 
 from pie import check, i18n, logger, utils
 
@@ -28,7 +28,7 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
-    async def roleinfo(self, ctx, role: nextcord.Role):
+    async def roleinfo(self, ctx, role: discord.Role):
         """Display role information."""
         if ACL_group is not None:
             acl_group: Optional[ACL_group] = ACL_group.get_by_role(
@@ -70,7 +70,7 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
-    async def channelinfo(self, ctx, channel: nextcord.TextChannel):
+    async def channelinfo(self, ctx, channel: discord.TextChannel):
         """Display channel information."""
         if ctx.author not in channel.members:
             ctx.reply(
@@ -85,7 +85,7 @@ class Whois(commands.Cog):
         role_count: int = 0
         user_count: int = 0
         for overwrite in channel.overwrites:
-            if isinstance(overwrite, nextcord.Role):
+            if isinstance(overwrite, discord.Role):
                 role_count += 1
             else:
                 user_count += 1
@@ -117,12 +117,12 @@ class Whois(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
-    async def whois(self, ctx, member: Union[nextcord.Member, int]):
+    async def whois(self, ctx, member: Union[discord.Member, int]):
         """See database info on member."""
-        dc_member: Optional[nextcord.Member] = None
+        dc_member: Optional[discord.Member] = None
         user_id: Optional[int] = None
 
-        if type(member) == nextcord.Member:
+        if type(member) == discord.Member:
             user_id = member.id
             dc_member = member
         elif type(member) == int:
@@ -205,5 +205,5 @@ class Whois(commands.Cog):
         await ctx.reply(embed=embed)
 
 
-def setup(bot) -> None:
-    bot.add_cog(Whois(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(Whois(bot))

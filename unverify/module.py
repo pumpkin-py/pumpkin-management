@@ -6,12 +6,12 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 import dateutil.parser
-import nextcord
+import discord
 import pie.database.config
-from nextcord import Guild, Member
-from nextcord.errors import NotFound
-from nextcord.ext import commands, tasks
-from nextcord.ext.commands.bot import Bot
+from discord import Guild, Member
+from discord.errors import NotFound
+from discord.ext import commands, tasks
+from discord.ext.commands.bot import Bot
 from pie import check, i18n, logger, utils
 
 from .database import UnverifyGuildConfig, UnverifyItem, UnverifyStatus, UnverifyType
@@ -95,11 +95,11 @@ class Unverify(commands.Cog):
     @staticmethod
     async def _return_roles(member: Member, item: UnverifyItem):
         for role_id in item.roles_to_return:
-            role = nextcord.utils.get(member.guild.roles, id=role_id)
+            role = discord.utils.get(member.guild.roles, id=role_id)
             if role is not None:
                 try:
                     await member.add_roles(role, reason="Reverify", atomic=True)
-                except nextcord.errors.Forbidden:
+                except discord.errors.Forbidden:
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -116,14 +116,14 @@ class Unverify(commands.Cog):
     @staticmethod
     async def _return_channels(member: Member, item: UnverifyItem):
         for channel_id in item.channels_to_return:
-            channel = nextcord.utils.get(member.guild.channels, id=channel_id)
+            channel = discord.utils.get(member.guild.channels, id=channel_id)
             if channel is not None:
-                user_overw = nextcord.PermissionOverwrite(read_messages=True)
+                user_overw = discord.PermissionOverwrite(read_messages=True)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason="Reverify"
                     )
-                except nextcord.errors.Forbidden:
+                except discord.errors.Forbidden:
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -141,14 +141,14 @@ class Unverify(commands.Cog):
     @staticmethod
     async def _remove_temp_channels(member: Member, item: UnverifyItem):
         for channel_id in item.channels_to_remove:
-            channel = nextcord.utils.get(member.guild.channels, id=channel_id)
+            channel = discord.utils.get(member.guild.channels, id=channel_id)
             if channel is not None:
-                user_overw = nextcord.PermissionOverwrite(read_messages=None)
+                user_overw = discord.PermissionOverwrite(read_messages=None)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason="Reverify"
                     )
-                except nextcord.errors.Forbidden:
+                except discord.errors.Forbidden:
                     await guild_log.warning(
                         None,
                         member.guild,
@@ -186,11 +186,11 @@ class Unverify(commands.Cog):
         await self._remove_temp_channels(member, item)
 
         config = UnverifyGuildConfig.get(guild=guild)
-        unverify_role = nextcord.utils.get(guild.roles, id=config.unverify_role_id)
+        unverify_role = discord.utils.get(guild.roles, id=config.unverify_role_id)
         if unverify_role is not None:
             try:
                 await member.remove_roles(unverify_role, reason="Reverify", atomic=True)
-            except nextcord.errors.Forbidden:
+            except discord.errors.Forbidden:
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -216,7 +216,7 @@ class Unverify(commands.Cog):
                     utx, "Your access to the guild **{guild_name}** was returned."
                 ).format(guild_name=guild.name)
             )
-        except nextcord.Forbidden:
+        except discord.Forbidden:
             await guild_log.info(
                 None, member.guild, f"Couldn't send reverify info to {member.name}'s DM"
             )
@@ -226,7 +226,7 @@ class Unverify(commands.Cog):
     @staticmethod
     async def _remove_roles(
         member: Member, unverify_type: UnverifyType
-    ) -> List[nextcord.Role]:
+    ) -> List[discord.Role]:
         guild = member.guild
         removed_roles = []
         for role in member.roles:
@@ -236,7 +236,7 @@ class Unverify(commands.Cog):
             except NotFound:
                 # The role got deleted or someone tried to unverify a bot.
                 pass
-            except nextcord.errors.Forbidden:
+            except discord.errors.Forbidden:
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -245,13 +245,13 @@ class Unverify(commands.Cog):
                 )
 
         config = UnverifyGuildConfig.get(guild=guild)
-        unverify_role = nextcord.utils.get(guild.roles, id=config.unverify_role_id)
+        unverify_role = discord.utils.get(guild.roles, id=config.unverify_role_id)
         if unverify_role is not None:
             try:
                 await member.add_roles(
                     unverify_role, reason=unverify_type.value, atomic=True
                 )
-            except nextcord.errors.Forbidden:
+            except discord.errors.Forbidden:
                 await guild_log.warning(
                     None,
                     member.guild,
@@ -270,24 +270,24 @@ class Unverify(commands.Cog):
     async def _remove_or_keep_channels(
         member: Member,
         unverify_type: UnverifyType,
-        channels_to_keep: List[nextcord.abc.GuildChannel],
-    ) -> Tuple[List[nextcord.abc.GuildChannel], List[nextcord.abc.GuildChannel]]:
+        channels_to_keep: List[discord.abc.GuildChannel],
+    ) -> Tuple[List[discord.abc.GuildChannel], List[discord.abc.GuildChannel]]:
         removed_channels = []
         added_channels = []
 
         for channel in member.guild.channels:
-            if isinstance(channel, nextcord.CategoryChannel):
+            if isinstance(channel, discord.CategoryChannel):
                 continue
 
             perms = channel.permissions_for(member)
             try:
                 user_overw = channel.overwrites_for(member)
             except TypeError:
-                user_overw = nextcord.PermissionOverwrite(read_messages=None)
+                user_overw = discord.PermissionOverwrite(read_messages=None)
 
             if channels_to_keep is not None and channel in channels_to_keep:
                 if not perms.read_messages:
-                    user_overw = nextcord.PermissionOverwrite(read_messages=True)
+                    user_overw = discord.PermissionOverwrite(read_messages=True)
                     try:
                         await channel.set_permissions(
                             member, overwrite=user_overw, reason=unverify_type.value
@@ -306,7 +306,7 @@ class Unverify(commands.Cog):
             elif not perms.read_messages:
                 pass
             else:
-                user_overw = nextcord.PermissionOverwrite(read_messages=False)
+                user_overw = discord.PermissionOverwrite(read_messages=False)
                 try:
                     await channel.set_permissions(
                         member, overwrite=user_overw, reason=unverify_type.value
@@ -327,7 +327,7 @@ class Unverify(commands.Cog):
         end_time: datetime,
         reason: str,
         unverify_type: UnverifyType,
-        channels_to_keep: List[nextcord.abc.GuildChannel] = None,
+        channels_to_keep: List[discord.abc.GuildChannel] = None,
     ) -> UnverifyItem:
         result = UnverifyItem.get_member(member=member, status=UnverifyStatus.waiting)
         if result != []:
@@ -371,7 +371,7 @@ class Unverify(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @unverify_config_.command(name="set")
-    async def unverify_config_set(self, ctx, unverify_role: nextcord.Role):
+    async def unverify_config_set(self, ctx, unverify_role: discord.Role):
         """Set configuration of guild that the message was sent from.
 
         Args:
@@ -400,7 +400,7 @@ class Unverify(commands.Cog):
         unverify_guild_config = UnverifyGuildConfig.get(guild=ctx.guild)
 
         if unverify_guild_config is not None:
-            role = nextcord.utils.get(
+            role = discord.utils.get(
                 ctx.guild.roles, id=unverify_guild_config.unverify_role_id
             )
             await ctx.reply(
@@ -416,7 +416,7 @@ class Unverify(commands.Cog):
     async def unverify_user(
         self,
         ctx: commands.Context,
-        member: nextcord.Member,
+        member: discord.Member,
         datetime_str: str,
         *,
         reason: str = None,
@@ -500,7 +500,7 @@ class Unverify(commands.Cog):
                 inline=False,
             )
 
-        with contextlib.suppress(nextcord.Forbidden):
+        with contextlib.suppress(discord.Forbidden):
             await member.send(embed=embed)
 
         end_time_str = utils.time.format_datetime(end_time)
@@ -528,7 +528,7 @@ class Unverify(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
     @unverify_.command(name="pardon")
-    async def unverify_pardon(self, ctx, member: nextcord.Member):
+    async def unverify_pardon(self, ctx, member: discord.Member):
         """Pardon unverified member.
 
         Args:
@@ -595,7 +595,7 @@ class Unverify(commands.Cog):
                 try:
                     user = await self.bot.fetch_user(item.user_id)
                     user_name = f"{user.mention}\n{user.name} ({user.id})"
-                except nextcord.errors.NotFound:
+                except discord.errors.NotFound:
                     user_name = "_(Unknown user)_"
             else:
                 user_name = f"{user.mention}\n{user.name} ({user.id})"
@@ -605,11 +605,11 @@ class Unverify(commands.Cog):
 
             roles = []
             for role_id in item.roles_to_return:
-                role = nextcord.utils.get(guild.roles, id=role_id)
+                role = discord.utils.get(guild.roles, id=role_id)
                 roles.append(role)
             channels = []
             for channel_id in item.channels_to_return:
-                channel = nextcord.utils.get(guild.channels, id=channel_id)
+                channel = discord.utils.get(guild.channels, id=channel_id)
                 channels.append(channel)
 
             embed = utils.discord.create_embed(
@@ -651,7 +651,7 @@ class Unverify(commands.Cog):
         self,
         ctx: commands.Context,
         datetime_str: str,
-        channels: commands.Greedy[nextcord.TextChannel],
+        channels: commands.Greedy[discord.TextChannel],
     ):
         """Unverify self.
 
@@ -732,7 +732,7 @@ class Unverify(commands.Cog):
             inline=False,
         )
 
-        with contextlib.suppress(nextcord.Forbidden):
+        with contextlib.suppress(discord.Forbidden):
             await ctx.message.author.send(embed=embed)
 
         await ctx.reply(
@@ -814,7 +814,7 @@ class Unverify(commands.Cog):
             inline=False,
         )
 
-        with contextlib.suppress(nextcord.Forbidden):
+        with contextlib.suppress(discord.Forbidden):
             await ctx.message.author.send(embed=embed)
 
         await ctx.reply(
@@ -839,5 +839,5 @@ class Unverify(commands.Cog):
         )
 
 
-def setup(bot) -> None:
-    bot.add_cog(Unverify(bot))
+async def setup(bot) -> None:
+    await bot.add_cog(Unverify(bot))
