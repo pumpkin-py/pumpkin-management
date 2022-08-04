@@ -259,11 +259,11 @@ msgstr Kanály k navrácení
 msgid {mention} You have to include your e-mail.
 msgstr {mention} Ke zprávě musíš přiložit svůj e-mail.
 
-msgid {mention} This e-mail cannot be used.
-msgstr {mention} Tento e-mail nejde použít.
-
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.
+
+msgid {mention} This e-mail cannot be used.
+msgstr {mention} Tento e-mail nejde použít.
 
 msgid {mention} This e-mail is already in the database registered under different user account. Login with that account and/or contact the moderator team.
 msgstr {mention} Tento e-mail je už registrovaný jiným uživatelským účtem. Přihlas se jím a/nebo kontaktuj moderátory.
