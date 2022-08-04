@@ -79,6 +79,27 @@ class Verify(commands.Cog):
             )
             return
 
+        if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
+            await guild_log.debug(
+                ctx.author,
+                ctx.channel,
+                (
+                    "Attempted to verify with ID already in database: "
+                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
+                ),
+            )
+            await ctx.send(
+                _(
+                    ctx,
+                    (
+                        "{mention} Your user account is already in the database. "
+                        "Check the e-mail inbox or contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
+                delete_after=120,
+            )
+            return
+
         # Make the address domain case insensitive
         domain_regex: str = r"([^@]+$)"
         domain = re.search(domain_regex, address)
@@ -98,27 +119,6 @@ class Verify(commands.Cog):
                 _(ctx, "{mention} This e-mail cannot be used.").format(
                     mention=ctx.author.mention
                 ),
-                delete_after=120,
-            )
-            return
-
-        if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                (
-                    "Attempted to verify with ID already in database: "
-                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
-                ),
-            )
-            await ctx.send(
-                _(
-                    ctx,
-                    (
-                        "{mention} Your user account is already in the database. "
-                        "Check the e-mail inbox or contact the moderator team."
-                    ),
-                ).format(mention=ctx.author.mention),
                 delete_after=120,
             )
             return
