@@ -337,7 +337,7 @@ class Verify(commands.Cog):
         db_member.status = VerifyStatus.VERIFIED.value
         db_member.save()
 
-        await guild_log.info(ctx.author, ctx.channel, "Verification sucessfull.")
+        await guild_log.info(ctx.author, ctx.channel, "Verification successfull.")
 
         await self._add_roles(ctx.author, db_member)
 
