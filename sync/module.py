@@ -142,7 +142,7 @@ class Sync(commands.Cog):
             )
 
         if satellites:
-            guilds = [self.bot.get_guild(s.guild_id) for s in satellites]
+            guilds = [self.bot.get_guild(s.satellite_id) for s in satellites]
             for link, guild in zip(satellites, guilds):
                 embed.add_field(
                     name=_(ctx, "Satellite of this server"),
