@@ -1,23 +1,23 @@
 msgid Unknown member
-msgstr
+msgstr Neznámy užívateľ
 
 msgid Comments on member **{member_name}**:
-msgstr
+msgstr Komentáre o užívateľovi **{member_name}**:
 
 msgid User does not have any comments yet.
-msgstr
+msgstr Užívateľ zatiaľ nemá žiadne komentáre.
 
 msgid Comment successfully added.
-msgstr
+msgstr Komentár úspešne pridaný.
 
 msgid Comment {idx} not found.
-msgstr
+msgstr Komentár {idx} nebol nájdený.
 
 msgid Comment removed.
-msgstr
+msgstr Komentár odobraný.
 
 msgid Unknown author
-msgstr
+msgstr Neznámy autor.
 
 msgid Please use either a reply or provide a number of messages to delete. Not both.
 msgstr Prosím použi odpoveď na správu, alebo počet správ na zmazanie. Nie oboje.
@@ -305,13 +305,13 @@ msgid Something went wrong, contact the moderator team.
 msgstr Niečo sa pokazilo, kontaktuj moderátorov.
 
 msgid Strip
-msgstr
+msgstr Strip
 
 msgid By clicking the confirm button you will have all your roles removed and your verification will be revoked. You will be able to perform new verification afterwards.
-msgstr
+msgstr Kliknutím na potvrdzovacie tlačidlo ti budú odobrané všetky role a tvoja verifikácia bude revokovaná. Po dokončení sa budeš môcť verifikovať znova.
 
 msgid Stripping aborted.
-msgstr
+msgstr Akcia nebola dokončená.
 
 msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
 msgstr Boli ste vymazaný z databáze a vaše role boli odstránené. Pre návrat musíte prejsť verifikáciou.
@@ -332,19 +332,19 @@ msgid Role **{role}** has {real_count} members, not {count}. Try again.
 msgstr Rola **{role}** má {real_count} užívateľov, nie {count}. Skús to znova.
 
 msgid Argument `text` must not be empty.
-msgstr
+msgstr Argument `text` nemôže byť prázdny.
 
 msgid Welcome message has been set for role {role}.
-msgstr
+msgstr Uvítacia správa bola nastavený pre rolu {role}.
 
 msgid Welcome message has been set do default for role {role}.
-msgstr
+msgstr Uvitácia správa bola nastavená na predvolenú pre rolu {role}.
 
 msgid Role
 msgstr Rola
 
 msgid Message to send
-msgstr
+msgstr Správa k odoslaniu
 
 msgid Invalid verification status. Available options are: {options}.
 msgstr Neplatný verifikačný status. Platné možnosti sú: {options}.
@@ -353,7 +353,7 @@ msgid That member is not in the database.
 msgstr Tento užívateľ nie je v databáze.
 
 msgid Member verification status of **{member}** has been updated to **{status}**.
-msgstr
+msgstr Verifikačný statu užívateľa **{member}** bol aktualizovaný na **{status}**.
 
 msgid Verification groups
 msgstr Verifikačné skupiny
