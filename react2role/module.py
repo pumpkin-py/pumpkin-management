@@ -1,7 +1,7 @@
 from typing import List
 import shlex
-import tempfile
 from emoji import UNICODE_EMOJI as _UNICODE_EMOJI
+from io import BytesIO
 
 import discord
 from discord.ext import commands
@@ -284,36 +284,45 @@ class React2Role(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @reaction_channel.command(name="init-channels")
     async def reaction_channel_init_channels(
-        self, ctx, target: discord.TextChannel, *, groups: str
+        self,
+        ctx,
+        target: discord.TextChannel,
+        *,
+        channel_groups: str,
     ):
         """Initialise links for react2role functionality.
 
         Args:
             target: Target text channel that will act as react2role hub.
-            groups: List of group channels that will be linked from in this target channel.
+            channel_groups: Space separated list of channel groups.
         """
         categories: List[discord.CategoryChannel] = []
         channel_count: int = 0
-        for name in shlex.split(groups):
+        for name in shlex.split(channel_groups):
             category = discord.utils.get(ctx.guild.categories, name=name)
             if category is None:
-                await ctx.reply(_(ctx, "That category does not exist here."))
+                await ctx.reply(
+                    _(ctx, "Category **{category}** could not be found.").format(
+                        category=utils.text.sanitise(name)
+                    )
+                )
                 return
             categories.append(category)
 
-        for group in categories:
-            channel_count += len(group.text_channels)
+        for category in categories:
+            channel_count += len(category.text_channels)
             # send header
-            header_file = tempfile.TemporaryFile()
-            header_image = helper_utils.generate_header(group.name)
+            header_file = BytesIO()
+            header_image = helper_utils.generate_header(category.name)
             header_image.save(header_file, "png")
             header_file.seek(0)
-            await target.send(file=discord.File(fp=header_file, filename="group.png"))
+            file = discord.File(fp=header_file, filename="category.png")
+            await target.send(file=file)
 
             # send list of channels
             message: List[str] = []
             for i, channel in enumerate(
-                sorted(group.text_channels, key=lambda ch: ch.name)
+                sorted(category.text_channels, key=lambda ch: ch.name)
             ):
                 if i > 9 and i % 10 == 0:
                     await target.send("\n".join(message))

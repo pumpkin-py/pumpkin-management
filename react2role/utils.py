@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Tuple
 
 from PIL import Image, ImageFont, ImageDraw
@@ -38,7 +39,8 @@ def generate_header(
     line_thickness: int = 5,
 ) -> Image:
     image = Image.new("RGBA", (width, height), background)
-    font = ImageFont.truetype("modules/mgmt/channels/font.pfb", 90)
+    font_path = Path(__file__).parent / "font.pfb"
+    font = ImageFont.truetype(str(font_path), 90)
     draw = ImageDraw.Draw(image)
 
     if lines:

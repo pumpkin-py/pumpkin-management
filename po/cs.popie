@@ -91,8 +91,8 @@ msgstr Počet rolí pro #{channel} byl nastaven na **{limit}**.
 msgid {type} functionality has been removed from **#{channel}**.
 msgstr {type} funkcionalita byla z **#{channel}** odstraněna.
 
-msgid That category does not exist here.
-msgstr Tato kategorie tady neexistuje.
+msgid Category **{category}** could not be found.
+msgstr Kategorie **{category}** tady neexistuje.
 
 msgid Processed {channels} channels in {groups} channel groups.
 msgstr Zpracováno {channels} kanálů v {groups} skupinách.
