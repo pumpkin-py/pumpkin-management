@@ -448,9 +448,11 @@ class React2Role(commands.Cog):
         ctx.guild = message.guild
 
         for i, line in enumerate(content, 1):
-            line_tokens = shlex.split(line)
+            line_tokens = line.split(" ")
             if len(line_tokens) < 2:
-                log_messages.append(f"Line {i} does not contain any mapping.")
+                log_messages.append(
+                    f"Line {i} of message {message.id} does not contain any mapping."
+                )
                 continue
 
             emoji_name: str = line_tokens[0]
@@ -465,7 +467,9 @@ class React2Role(commands.Cog):
                     emoji = emoji_name
 
             if emoji is None:
-                log_messages.append(f"Line {i} does not start with emoji.")
+                log_messages.append(
+                    f"Line {i} of message {message.id} does not start with emoji."
+                )
                 continue
 
             if reaction_channel.channel_type == ReactionChannelType.ROLE:
@@ -485,8 +489,8 @@ class React2Role(commands.Cog):
                     None,
                     message.channel,
                     (
-                        f"React2Role error, "
-                        f"line {i} does does not have valid {target_name} "
+                        f"React2Role error, line {i} of message {message.id} "
+                        f"does does not have valid {target_name} "
                         f"after the emoji '{emoji}': '{name}' not found."
                     ),
                 )
@@ -496,7 +500,8 @@ class React2Role(commands.Cog):
                 await guild_log.error(
                     None,
                     message.channel,
-                    f"React2Role error, line {i} contains duplicate emoji {emoji}.",
+                    f"React2Role error, line {i} of message {message.id}"
+                    f" contains duplicate emoji {emoji}.",
                 )
                 return
 
