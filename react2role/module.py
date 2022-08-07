@@ -547,6 +547,11 @@ class React2Role(commands.Cog):
         if reaction_channel.channel_type == ReactionChannelType.CHANNEL:
             channel = mapping[emoji]
             await channel.set_permissions(member, view_channel=True)
+            await guild_log.debug(
+                member,
+                message.channel,
+                f"Adding permission to view {channel.name} ({channel.id}).",
+            )
             return
 
         utx = i18n.TranslationContext(member.guild.id, member.id)
@@ -631,6 +636,11 @@ class React2Role(commands.Cog):
             return
 
         await member.add_roles(role)
+        await guild_log.debug(
+            member,
+            message.channel,
+            f"Adding role {role.name} ({role.id}).",
+        )
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload: discord.RawReactionActionEvent):
@@ -663,6 +673,11 @@ class React2Role(commands.Cog):
         if reaction_channel.channel_type == ReactionChannelType.CHANNEL:
             channel = mapping[emoji]
             await channel.set_permissions(member, overwrite=None)
+            await guild_log.debug(
+                member,
+                message.channel,
+                f"Removing permission to view {channel.name} ({channel.id}).",
+            )
             return
 
         utx = i18n.TranslationContext(member.guild.id, member.id)
@@ -696,6 +711,11 @@ class React2Role(commands.Cog):
             return
 
         await member.remove_roles(role)
+        await guild_log.debug(
+            member,
+            message.channel,
+            f"Removing role {role.name} ({role.id}).",
+        )
 
 
 async def setup(bot) -> None:
