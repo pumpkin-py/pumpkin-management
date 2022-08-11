@@ -316,6 +316,12 @@ msgstr Akce nebyla dokončena.
 msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
 msgstr Byli jste vymazáni z databáze a byly vám odebrány role. Pro návrat musíte znovu projít verifikací.
 
+msgid Group strip
+msgstr
+
+msgid **{count}** mentioned users will lose all their roles and their verification will be revoked. They will not be notified about this. Do you want to continue?
+msgstr
+
 msgid Member **{member_id}** (<@{member_id}>) has no roles.
 msgstr Člen **{member_id}** (<@{member_id}>) nemá žádné role.
 
@@ -325,11 +331,11 @@ msgstr Člen **{member_id}** (<@{member_id}>) nebyl nalezen.
 msgid **{db}** database entries have been removed, **{dc}** users have been stripped.
 msgstr **{db}** záznamů bylo odstraněno z databáze, **{dc}** uživatelům byly odebrány role.
 
-msgid If you really want to strip **{count}** users with role **{role}**, add the member count as a second argument.
-msgstr Pokud opravdu chceš odebrat **{count}** uživatelů s rolí **{role}**, přidej jejich počet jako druhý argument.
+msgid Role based strip
+msgstr
 
-msgid Role **{role}** has {real_count} members, not {count}. Try again.
-msgstr Role **{role}** má {real_count} uživatelů, ne {count}. Zkus to znovu.
+msgid **{count}** members with role **{role}** will lose all their roles and their verification will be revoked. They will not be notified about this. Do you want to continue?
+msgstr
 
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nesmí být prázdný.

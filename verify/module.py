@@ -434,6 +434,25 @@ class Verify(commands.Cog):
         removed_db: int = 0
         removed_dc: int = 0
 
+        dialog = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Group strip"),
+            description=_(
+                ctx,
+                (
+                    "**{count}** mentioned users will lose all their roles and their "
+                    "verification will be revoked. They will not be notified about this. "
+                    "Do you want to continue?"
+                ),
+            ).format(count=len(members)),
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        if answer is not True:
+            await ctx.reply(_(ctx, "Stripping aborted."))
+            return
+
         async with ctx.typing():
             for member in members:
                 if isinstance(member, int):
@@ -485,32 +504,29 @@ class Verify(commands.Cog):
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
-    async def grouprolestrip(self, ctx, role: discord.Role, count: int = None):
+    async def grouprolestrip(self, ctx, role: discord.Role):
         """Remove all roles and reset verification status to None
         from all the users that have given role. Users are not notified
         about this.
         """
-        if count is None:
-            await ctx.reply(
-                _(
-                    ctx,
-                    (
-                        "If you really want to strip **{count}** users with role **{role}**, "
-                        "add the member count as a second argument."
-                    ),
-                ).format(count=len(role.members), role=role.name)
-            )
-            return
 
-        if count != len(role.members):
-            await ctx.reply(
-                _(
-                    ctx,
-                    (
-                        "Role **{role}** has {real_count} members, not {count}. Try again."
-                    ),
-                ).format(role=role.name, real_count=len(role.members), count=count)
-            )
+        dialog = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Role based strip"),
+            description=_(
+                ctx,
+                (
+                    "**{count}** members with role **{role}** will lose all their roles "
+                    "and their verification will be revoked. They will not be notified "
+                    "about this. Do you want to continue?"
+                ),
+            ).format(role=role.name, count=len(role.members)),
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        if answer is not True:
+            await ctx.reply(_(ctx, "Stripping aborted."))
             return
 
         removed_db: int = 0
