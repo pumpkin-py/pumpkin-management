@@ -203,6 +203,11 @@ class VerifyMember(database.base):
         )
         return query
 
+    @classmethod
+    def get_all(cls, guild_id: int) -> List[VerifyMember]:
+        """Get members with e-mail containing given regex filter."""
+        return session.query(cls).filter_by(guild_id=guild_id).all()
+
     @staticmethod
     def remove(guild_id: int, user_id: int) -> int:
         """Remove member from database."""
