@@ -1035,13 +1035,23 @@ class Verify(commands.Cog):
             SMTP_ADDRESS, SMTP_PASSWORD
         ) as mailbox:
             messages = [
-                m for m in mailbox.fetch(imap_tools.AND(seen=False), mark_seen=False)
+                m
+                for m in mailbox.fetch(
+                    imap_tools.AND(seen=False),
+                    mark_seen=False,
+                )
             ]
             mark_as_read: List = []
 
             for m in messages:
-                # TODO Can we count on this?
-                if "Undelivered" not in m.subject:
+                has_delivery_status: bool = False
+
+                for part in m.obj.walk():
+                    if part.get_content_type() == "message/delivery-status":
+                        has_delivery_status = True
+                        break
+
+                if not has_delivery_status:
                     continue
 
                 rfc_message = m.obj.as_string()
