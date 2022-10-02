@@ -1,6 +1,6 @@
 from typing import List
 import shlex
-from emoji import UNICODE_EMOJI as _UNICODE_EMOJI
+from emoji import EMOJI_DATA
 from io import BytesIO
 
 import discord
@@ -10,9 +10,6 @@ from pie import check, i18n, logger, utils
 
 from . import utils as helper_utils
 from .database import ReactionChannel, ReactionChannelType
-
-UNICODE_EMOJI = _UNICODE_EMOJI["en"]
-del _UNICODE_EMOJI
 
 _ = i18n.Translator("modules/mgmt").translate
 guild_log = logger.Guild.logger()
@@ -463,7 +460,7 @@ class React2Role(commands.Cog):
                 emoji = await commands.EmojiConverter().convert(ctx, emoji_name)
             except commands.EmojiNotFound:
                 # try to check if the string is emoji
-                if emoji_name in UNICODE_EMOJI:
+                if emoji_name in EMOJI_DATA:
                     emoji = emoji_name
 
             if emoji is None:
