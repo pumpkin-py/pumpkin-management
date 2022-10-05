@@ -80,15 +80,15 @@ class Verify(commands.Cog):
             return
 
         # Check if user is in database
-        if self._member_exists(ctx, address):
+        if await self._member_exists(ctx, address):
             return
 
         # Check if address is in use
-        if self._address_exists(ctx, address):
+        if await self._address_exists(ctx, address):
             return
 
         # Check if address is supported
-        if not self._is_supported_address(ctx, address):
+        if not await self._is_supported_address(ctx, address):
             return
 
         code: str = self._generate_code()
@@ -773,17 +773,14 @@ class Verify(commands.Cog):
 
     #
 
-    def _member_exists(self, ctx, address):
-        """Checks if VerifyMember exists in database.
-        If the member exists, function logs the information
-        and sends response to the user.
+    async def _member_exists(self, ctx: commands.Context, address: str):
+        """Check if VerifyMember exists in database.
 
-        Args:
-            ctx: Commands context
-            address: Member's address
+        If the member exists, the event is logged and a response is
+        sent to the user.
 
-        Returns:
-            True if member exists, False otherwise
+        :param ctx: Command context
+        :param address: Supplied e-mail address
         """
         if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
             await guild_log.debug(
@@ -808,17 +805,14 @@ class Verify(commands.Cog):
 
         return False
 
-    def _address_exists(self, ctx, address):
-        """Checks if address exists in database
-        If the adress exists, function logs the information
-        and sends response to the user.
+    async def _address_exists(self, ctx: commands.Context, address: str):
+        """Check if member's e-mail exists in database.
 
-        Args:
-            ctx: Commands context
-            address: Member's address
+        If the e-mail exists, the event is logged and a response is
+        sent to the user.
 
-        Returns:
-            True if address exists, False otherwise
+        :param ctx: Command context
+        :param address: Supplied e-mail address
         """
         if (
             db_member := VerifyMember.get_by_address(ctx.guild.id, address)
@@ -854,17 +848,14 @@ class Verify(commands.Cog):
 
         return False
 
-    def _is_supported_address(self, ctx, address):
-        """Checks if the address has any verify groups.
-        If the address is not supported, function logs this
-        and sends response to the user.
+    async def _is_supported_address(self, ctx: commands.Context, address: str):
+        """Check if the address has any verify groups.
 
-        Args:
-            ctx: Commands context
-            address: Member address
+        If the address is not supported, the event is logged and a response is
+        sent to the user.
 
-        Returns:
-            True if address is supported, False otherwise
+        :param ctx: Command context
+        :param address: Supplied e-mail address
         """
         # Make the address domain case insensitive
         domain_regex: str = r"([^@]+$)"
