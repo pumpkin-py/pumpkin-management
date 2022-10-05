@@ -259,18 +259,6 @@ msgstr Kanály na vrátenie
 msgid {mention} You have to include your e-mail.
 msgstr {mention} Musíš priložiť svoj email.
 
-msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
-msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
-
-msgid {mention} This e-mail cannot be used.
-msgstr {mention} Tento email sa nedá použiť.
-
-msgid {mention} This e-mail is already in the database registered under different user account. Login with that account and/or contact the moderator team.
-msgstr {mention} Tento e-mail je už zaregistrovaný na inom užívateľskom účte. Prihlas sa jím a/alebo kontaktuj moderátorov.
-
-msgid {mention} An error has occured while sending the code. Contact the moderator team.
-msgstr {mention} Pri posielaní kódu nastala chyba. Kontaktuj moderátorov.
-
 msgid {mention} I've sent you the verification code to the submitted e-mail.
 msgstr {mention} Na zadaný email ti bol poslaný verifikačný kód.
 
@@ -385,6 +373,15 @@ msgstr Tvoj JSON súbor obsahuje chyby.
 msgid I've imported **{count}** verification groups. Old groups have been backed up above.
 msgstr Bolo importovaných **{count}** verifikačných skupín. Staré skupiny boli zálohované vyššie.
 
+msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
+msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
+
+msgid {mention} This e-mail is already in the database registered under different user account. Login with that account and/or contact the moderator team.
+msgstr {mention} Tento e-mail je už zaregistrovaný na inom užívateľskom účte. Prihlas sa jím a/alebo kontaktuj moderátorov.
+
+msgid {mention} This e-mail cannot be used.
+msgstr {mention} Tento email sa nedá použiť.
+
 msgid Your verification e-mail for Discord server {guild_name} is {code}.
 msgstr Tvoj verifikačný e-mail pre Discord server {guild_name} je {code}.
 
@@ -396,6 +393,9 @@ msgstr {prefix}submit {code}
 
 msgid to the channel named #{channel}.
 msgstr do kanála #{channel}.
+
+msgid {mention} An error has occured while sending the code. Contact the moderator team.
+msgstr {mention} Pri posielaní kódu nastala chyba. Kontaktuj moderátorov.
 
 msgid Member count
 msgstr Počet užívateľov

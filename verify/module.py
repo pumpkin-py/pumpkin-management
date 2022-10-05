@@ -79,80 +79,16 @@ class Verify(commands.Cog):
             )
             return
 
-        if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
-            await guild_log.debug(
-                ctx.author,
-                ctx.channel,
-                (
-                    "Attempted to verify with ID already in database: "
-                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
-                ),
-            )
-            await ctx.send(
-                _(
-                    ctx,
-                    (
-                        "{mention} Your user account is already in the database. "
-                        "Check the e-mail inbox or contact the moderator team."
-                    ),
-                ).format(mention=ctx.author.mention),
-                delete_after=120,
-            )
+        # Check if user is in database
+        if self._member_exists(ctx, address):
             return
 
-        # Make the address domain case insensitive
-        domain_regex: str = r"([^@]+$)"
-        domain = re.search(domain_regex, address)
-        if domain is not None:
-            address = re.sub(domain_regex, domain.group(0).lower(), address)
-
-        groups: List[VerifyGroup] = self._map_address_to_groups(
-            ctx.guild.id, ctx.author.id, address, include_wildcard=False
-        )
-        if not len(groups):
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                f"Attempted to verify with unsupported address '{address}'.",
-            )
-            await ctx.send(
-                _(ctx, "{mention} This e-mail cannot be used.").format(
-                    mention=ctx.author.mention
-                ),
-                delete_after=120,
-            )
+        # Check if address is in use
+        if self._address_exists(ctx, address):
             return
 
-        if (
-            db_member := VerifyMember.get_by_address(ctx.guild.id, address)
-        ) is not None:
-            dc_member: Optional[discord.User] = self.bot.get_user(db_member.user_id)
-            dc_member_str: str = (
-                f"'{utils.text.sanitise(dc_member.name)}' ({db_member.user_id})"
-                if dc_member is not None
-                else f"ID '{db_member.user_id}'"
-            )
-            await guild_log.info(
-                ctx.author,
-                ctx.channel,
-                (
-                    "Attempted to verify with address associated with different user: "
-                    f"'{address}' is registered to account {dc_member_str} "
-                    f"with status '{VerifyStatus(db_member.status).name}'."
-                ),
-            )
-
-            await ctx.send(
-                _(
-                    ctx,
-                    (
-                        "{mention} This e-mail is already in the database "
-                        "registered under different user account. "
-                        "Login with that account and/or contact the moderator team."
-                    ),
-                ).format(mention=ctx.author.mention),
-                delete_after=120,
-            )
+        # Check if address is supported
+        if not self._is_supported_address(ctx, address):
             return
 
         code: str = self._generate_code()
@@ -168,36 +104,10 @@ class Verify(commands.Cog):
             ctx.author, ctx.channel, address, code
         )
 
-        try:
-            self._send_email(message)
-        except smtplib.SMTPException as exc:
-            await bot_log.warning(
-                ctx.author,
-                ctx.channel,
-                "Could not send verification e-mail, trying again.",
-                exception=exc,
-            )
+        email_sent = await self._send_email(ctx, message)
 
-            try:
-                self._send_email(message)
-            except smtplib.SMTPException as exc:
-                await bot_log.error(
-                    ctx.author,
-                    ctx.channel,
-                    "Could not send verification e-mail.",
-                    exception=exc,
-                )
-                await ctx.send(
-                    _(
-                        ctx,
-                        (
-                            "{mention} An error has occured while sending the code. "
-                            "Contact the moderator team."
-                        ),
-                    ).format(mention=ctx.author.mention),
-                    delete_after=120,
-                )
-                return
+        if not email_sent:
+            return
 
         await guild_log.info(
             ctx.author,
@@ -863,6 +773,124 @@ class Verify(commands.Cog):
 
     #
 
+    def _member_exists(self, ctx, address):
+        """Checks if VerifyMember exists in database.
+        If the member exists, function logs the information
+        and sends response to the user.
+
+        Args:
+            ctx: Commands context
+            address: Member's address
+
+        Returns:
+            True if member exists, False otherwise
+        """
+        if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
+            await guild_log.debug(
+                ctx.author,
+                ctx.channel,
+                (
+                    "Attempted to verify with ID already in database: "
+                    f"'{utils.text.sanitise(address, tag_escape=False)}'."
+                ),
+            )
+            await ctx.send(
+                _(
+                    ctx,
+                    (
+                        "{mention} Your user account is already in the database. "
+                        "Check the e-mail inbox or contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
+                delete_after=120,
+            )
+            return True
+
+        return False
+
+    def _address_exists(self, ctx, address):
+        """Checks if address exists in database
+        If the adress exists, function logs the information
+        and sends response to the user.
+
+        Args:
+            ctx: Commands context
+            address: Member's address
+
+        Returns:
+            True if address exists, False otherwise
+        """
+        if (
+            db_member := VerifyMember.get_by_address(ctx.guild.id, address)
+        ) is not None:
+            dc_member: Optional[discord.User] = self.bot.get_user(db_member.user_id)
+            dc_member_str: str = (
+                f"'{utils.text.sanitise(dc_member.name)}' ({db_member.user_id})"
+                if dc_member is not None
+                else f"ID '{db_member.user_id}'"
+            )
+            await guild_log.info(
+                ctx.author,
+                ctx.channel,
+                (
+                    "Attempted to verify with address associated with different user: "
+                    f"'{address}' is registered to account {dc_member_str} "
+                    f"with status '{VerifyStatus(db_member.status).name}'."
+                ),
+            )
+
+            await ctx.send(
+                _(
+                    ctx,
+                    (
+                        "{mention} This e-mail is already in the database "
+                        "registered under different user account. "
+                        "Login with that account and/or contact the moderator team."
+                    ),
+                ).format(mention=ctx.author.mention),
+                delete_after=120,
+            )
+            return True
+
+        return False
+
+    def _is_supported_address(self, ctx, address):
+        """Checks if the address has any verify groups.
+        If the address is not supported, function logs this
+        and sends response to the user.
+
+        Args:
+            ctx: Commands context
+            address: Member address
+
+        Returns:
+            True if address is supported, False otherwise
+        """
+        # Make the address domain case insensitive
+        domain_regex: str = r"([^@]+$)"
+        domain = re.search(domain_regex, address)
+        if domain is not None:
+            address = re.sub(domain_regex, domain.group(0).lower(), address)
+
+        groups: List[VerifyGroup] = self._map_address_to_groups(
+            ctx.guild.id, ctx.author.id, address, include_wildcard=False
+        )
+        if not len(groups):
+            await guild_log.info(
+                ctx.author,
+                ctx.channel,
+                f"Attempted to verify with unsupported address '{address}'.",
+            )
+            await ctx.send(
+                _(ctx, "{mention} This e-mail cannot be used.").format(
+                    mention=ctx.author.mention
+                ),
+                delete_after=120,
+            )
+            return False
+
+        return True
+
     def _map_address_to_groups(
         self,
         guild_id: int,
@@ -985,12 +1013,43 @@ class Verify(commands.Cog):
 
         return message
 
-    def _send_email(self, message: MIMEMultipart) -> None:
+    async def _send_email(
+        self, ctx, message: MIMEMultipart, retry: bool = True
+    ) -> None:
         """Send the verification e-mail."""
-        with smtplib.SMTP_SSL(SMTP_SERVER) as server:
-            server.ehlo()
-            server.login(SMTP_ADDRESS, SMTP_PASSWORD)
-            server.send_message(message)
+        try:
+            with smtplib.SMTP_SSL(SMTP_SERVER) as server:
+                server.ehlo()
+                server.login(SMTP_ADDRESS, SMTP_PASSWORD)
+                server.send_message(message)
+                return True
+        except smtplib.SMTPException as exc:
+            if retry:
+                await bot_log.warning(
+                    ctx.author,
+                    ctx.channel,
+                    "Could not send verification e-mail, trying again.",
+                    exception=exc,
+                )
+                return await self._send_email(ctx, message, False)
+            else:
+                await bot_log.error(
+                    ctx.author,
+                    ctx.channel,
+                    "Could not send verification e-mail.",
+                    exception=exc,
+                )
+                await ctx.send(
+                    _(
+                        ctx,
+                        (
+                            "{mention} An error has occured while sending the code. "
+                            "Contact the moderator team."
+                        ),
+                    ).format(mention=ctx.author.mention),
+                    delete_after=120,
+                )
+                return False
 
     async def _add_roles(self, member: discord.Member, db_member: VerifyMember):
         """Add roles to the member."""

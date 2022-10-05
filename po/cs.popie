@@ -259,18 +259,6 @@ msgstr Kanály k navrácení
 msgid {mention} You have to include your e-mail.
 msgstr {mention} Ke zprávě musíš přiložit svůj e-mail.
 
-msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
-msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.
-
-msgid {mention} This e-mail cannot be used.
-msgstr {mention} Tento e-mail nejde použít.
-
-msgid {mention} This e-mail is already in the database registered under different user account. Login with that account and/or contact the moderator team.
-msgstr {mention} Tento e-mail je už registrovaný jiným uživatelským účtem. Přihlas se jím a/nebo kontaktuj moderátory.
-
-msgid {mention} An error has occured while sending the code. Contact the moderator team.
-msgstr {mention} Při posílání kódu nastala chyba. Kontaktuj moderátory.
-
 msgid {mention} I've sent you the verification code to the submitted e-mail.
 msgstr {mention} Na zadaný e-mail ti byl poslán verifikační kód.
 
@@ -385,6 +373,15 @@ msgstr Tvůj JSON soubor obsahuje chyby.
 msgid I've imported **{count}** verification groups. Old groups have been backed up above.
 msgstr Bylo importováno **{count}** verifikačních skupin. Staré skupiny byly zálohovány výše.
 
+msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
+msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.
+
+msgid {mention} This e-mail is already in the database registered under different user account. Login with that account and/or contact the moderator team.
+msgstr {mention} Tento e-mail je už registrovaný jiným uživatelským účtem. Přihlas se jím a/nebo kontaktuj moderátory.
+
+msgid {mention} This e-mail cannot be used.
+msgstr {mention} Tento e-mail nejde použít.
+
 msgid Your verification e-mail for Discord server {guild_name} is {code}.
 msgstr Tvůj verifikační e-mail pro Discord server {guild_name} je {code}.
 
@@ -396,6 +393,9 @@ msgstr {prefix}submit {code}
 
 msgid to the channel named #{channel}.
 msgstr do kanálu #{channel}.
+
+msgid {mention} An error has occured while sending the code. Contact the moderator team.
+msgstr {mention} Při posílání kódu nastala chyba. Kontaktuj moderátory.
 
 msgid Member count
 msgstr Počet členů
