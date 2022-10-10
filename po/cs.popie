@@ -328,14 +328,23 @@ msgstr
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nesmí být prázdný.
 
-msgid Welcome message has been set for role {role}.
+msgid Role {role} not found in verify configuration!
+msgstr Role {role} nebyla nalezena v konfiguraci verifikačních skupin!
+
+msgid Message has been set for group {role}.
 msgstr Uvítací zpráva byla nastavena pro roli {role}.
 
-msgid Welcome message has been set do default for role {role}.
-msgstr Uvítací zpráva byla nastavena na výchozí pro roli {role}.
+msgid Welcome message has been set do default for group {role}.
+msgstr Uvítací zpráva byla resetována pro roli {role}.
 
-msgid Role
-msgstr Role
+msgid Server default
+msgstr Výchozí pro server
+
+msgid Role ID
+msgstr ID role
+
+msgid Group name
+msgstr Jméno skupiny
 
 msgid Message to send
 msgstr Zpráva k odeslání
@@ -351,6 +360,9 @@ msgstr Verifikační status uživatele **{member}** byl aktualizován na **{stat
 
 msgid Verification groups
 msgstr Verifikační skupiny
+
+msgid Role
+msgstr Role
 
 msgid Regex
 msgstr Regex

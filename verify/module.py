@@ -251,23 +251,24 @@ class Verify(commands.Cog):
 
         await self._add_roles(ctx.author, db_member)
 
-        config = VerifyMessage.get(ctx.guild.id, 0)
+        config_message = None
         roles = self._map_address_to_groups(
             ctx.guild.id, ctx.author.id, db_member.address
         )
         for role in roles:
             # searching for role override
-            config = VerifyMessage.get(ctx.guild.id, role.role_id)
-            if config is not None:
+            config_message = VerifyMessage.get(ctx.guild.id, role.role_id)
+            if config_message is not None:
                 break
-
-        if not config:
+        if not config_message:
+            config_message = VerifyMessage.get(ctx.guild.id, 0)
+        if not config_message:
             await utils.discord.send_dm(
                 ctx.author,
                 _(ctx, "You have been verified, congratulations!"),
             )
         else:
-            await utils.discord.send_dm(ctx.author, config.message)
+            await utils.discord.send_dm(ctx.author, config_message.message)
 
         await ctx.send(
             _(ctx, "Member **{name}** has been verified.").format(
@@ -478,36 +479,53 @@ class Verify(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="set")
-    async def welcome_message_set(self, ctx, role_id: int, *, text):
+    async def welcome_message_set(self, ctx, role: Union[discord.Role, int], *, text):
         """Set post verification message for your guild or a role.
-        Insert role_id of a verify group, 0 for server default"""
+        Insert role of a verify group, 0 for server default"""
         if text == "":
             ctx.reply(_(ctx, "Argument `text` must not be empty."))
             return
+        if isinstance(role, discord.Role):
+            verify_role = VerifyGroup.get_by_role(ctx.guild.id, role.id)
+            role_id = verify_role.role_id
+            if not role:
+                await ctx.reply(
+                    _(ctx, "Role {role} not found in verify configuration!").format(
+                        role=role
+                    )
+                )
+                return
+        else:
+            role_id = role
         VerifyMessage.set(ctx.guild.id, role_id, text)
         await ctx.reply(
-            _(ctx, "Welcome message has been set for role {role}.").format(
-                role=role_id if role_id != 0 else "(server)"
-            )
+            _(
+                ctx,
+                "Message has been set for group {role}.",
+            ).format(role=_(ctx, "(Guild)") if role_id == 0 else role)
         )
         await guild_log.info(
-            ctx.author, ctx.channel, f"Welcome message changed for role {role_id}."
+            ctx.author, ctx.channel, f"Welcome message changed for group {role}."
         )
 
     @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="unset")
-    async def welcome_message_unset(self, ctx, role_id: int = 0):
+    async def welcome_message_unset(self, ctx, role: Union[discord.Role, int] = 0):
         """Set verification message to default for your guild or a role."""
+        if isinstance(role, discord.Role):
+            role_id = role.id
+        else:
+            role_id = role
         VerifyMessage.unset(ctx.guild.id, role_id)
         await ctx.reply(
-            _(ctx, "Welcome message has been set do default for role {role}.").format(
-                role=role_id if role_id != 0 else "(server)"
+            _(ctx, "Welcome message has been set do default for group {role}.").format(
+                role=_(ctx, "(Guild)") if role_id == 0 else role
             )
         )
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Welcome message set to default for role {role_id}.",
+            f"Welcome message set to default for group {role}.",
         )
 
     @check.acl2(check.ACLevel.SUBMOD)
@@ -517,24 +535,31 @@ class Verify(commands.Cog):
 
         class Item:
             def __init__(self, group: VerifyGroup):
-                config = VerifyMessage.get(ctx.guild.id, group.role_id)
-                print(config)
-                self.role = str(group.name) + " " + str(group.role_id)
-                self.message = (
-                    config.message
-                    if config is not None
-                    else _(ctx, "You have been verified, congratulations!")
-                )
+                verify_message_obj = VerifyMessage.get(ctx.guild.id, group.role_id)
+                self.role_id = group.role_id
+                self.group_name = group.name
+                self.message = getattr(verify_message_obj, "message", None)
 
-        server_group = VerifyGroup()
-        server_group.role_id = 0
-        groups = [Item(server_group)]
-        groups[0].role = "-"
-        groups.extend([Item(group) for group in VerifyGroup.get_all(ctx.guild.id)])
+        server_group = Item(VerifyGroup())
+        server_group.group_name = _(ctx, "Server default")
+        server_group.role_id = "-"
+        server_group.message = getattr(
+            VerifyMessage.get(ctx.guild.id, 0), "message", None
+        )
+        if not server_group.message:
+            server_group.message = _(ctx, "You have been verified, congratulations!")
+        groups = [server_group]
+        configured_groups = [Item(group) for group in VerifyGroup.get_all(ctx.guild.id)]
+        configured_groups = filter(
+            lambda x: True if x.role_id > 0 and x.message is not None else False,
+            configured_groups,
+        )
+        groups.extend(configured_groups)
         table: List[str] = utils.text.create_table(
             groups,
             header={
-                "role": _(ctx, "Role"),
+                "role_id": _(ctx, "Role ID"),
+                "group_name": _(ctx, "Group name"),
                 "message": _(ctx, "Message to send"),
             },
         )
