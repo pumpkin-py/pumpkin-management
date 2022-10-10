@@ -12,7 +12,7 @@ from discord import Guild, Member
 from discord.errors import NotFound
 from discord.ext import commands, tasks
 from discord.ext.commands.bot import Bot
-from pie import check, i18n, logger, utils
+from pie import check, i18n, logger, utils, acl
 
 from .database import UnverifyGuildConfig, UnverifyItem, UnverifyStatus, UnverifyType
 
@@ -436,6 +436,11 @@ class Unverify(commands.Cog):
                     "Unverify config is not set for this guild. The administrators need to fix this.",
                 )
             )
+            return
+        banner_acl_level = acl.map_member_to_ACLevel(bot=self.bot, member=ctx.author)
+        banned_acl_level = acl.map_member_to_ACLevel(bot=self.bot, member=member)
+        if banned_acl_level >= banner_acl_level:
+            await ctx.reply(_(ctx, "Cannot unverify member with higher or equal role!"))
             return
         try:
             end_time = utils.time.parse_datetime(datetime_str)
