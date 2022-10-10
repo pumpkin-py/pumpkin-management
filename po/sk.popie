@@ -205,6 +205,9 @@ msgstr Unverify rola nie je nastavená.
 msgid Unverify config is not set for this guild. The administrators need to fix this.
 msgstr Unverify konfigurácia nie je nastavená pre tento server. Toto musia opraviť administrátori.
 
+msgid Cannot unverify member with higher or equal role!
+msgstr
+
 msgid I don't know how to parse `{datetime_str}`, please try again.
 msgstr Neviem ako prečítať `{datetime_str}`, prosím skús to znova.
 
