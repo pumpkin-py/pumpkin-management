@@ -1,130 +1,166 @@
 from __future__ import annotations
 
 import datetime
+import enum
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, String
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Enum,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+)
+from sqlalchemy.orm import relationship
 
 from pie.database import database, session
 
-from .enums import VerifyStatus
+
+class VerifyStatus(enum.Enum):
+    NONE = 0
+    PENDING = 1
+    VERIFIED = 2
+    BANNED = -1
+
+
+class VerifyRule(database.base):
+    """Verify rules for assigning rules to groups and sending correct
+    message.
+
+    The name must be unique per guild, as it's used to assign the right
+    rule to each mapping during import.
+
+    :param idx: Unique ID used as foreign key.
+    :param name: Name of the rule.
+    :param guild_id: Guild ID.
+    :param groups: List of groups assigned to user.
+    :param message: Message sent to the user.
+    """
+
+    __tablename__ = "mgmt_verify_rules"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "name",
+            "guild_id",
+            name="name_guild_id_unique",
+        ),
+    )
+
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    guild_id = Column(BigInteger)
+    groups = relationship(lambda: VerifyGroup, back_populates="rule")
+    message = relationship(lambda: VerifyMessage)
+
+    def __repr__(self) -> str:
+        return (
+            f'<VerifyRule idx="{self.idx}" name="{self.name}" '
+            f'guild_id="{self.guild_id}" groups="{self.groups}" '
+            f'message="{self.message}">'
+        )
+
+    def dump(self) -> dict:
+        return {
+            "idx": self.idx,
+            "name": self.name,
+            "guild_id": self.guild_id,
+            "groups": self.groups,
+            "message": self.message,
+        }
 
 
 class VerifyGroup(database.base):
-    """Verify group.
+    """Acts as discord role list for VerifyRule.
 
-    Groups map e-mail domains to roles.
-    To add some role everytime set the :attr:`role_id` parameter to ``0``.
-    To block some domain from being used set the :attr:`role_id` parameter to ``-1``.
-
-    When imported, old groups are deleted and the new ones are added one-by-one:
-    ordering matters.
+    :param rule_id: ID of the rule.
+    :param role_id: ID of Discord role to assign.
+    :param guild_id: Guild ID.
+    :param rule: Back reference to VerifyRule.
     """
 
     __tablename__ = "mgmt_verify_groups"
 
-    idx = Column(Integer, primary_key=True, autoincrement=True)
+    rule_id = Column(
+        Integer,
+        ForeignKey("mgmt_verify_rules.idx", ondelete="CASCADE"),
+        primary_key=True,
+    )
+    role_id = Column(BigInteger, primary_key=True)
     guild_id = Column(BigInteger)
-    name = Column(String)
-    role_id = Column(BigInteger)
-    regex = Column(String)
-
-    @staticmethod
-    def add(guild_id: int, name: str, role_id: int, regex: str) -> VerifyGroup:
-        """Add new verify group.
-
-        :return: New group.
-        """
-        group = VerifyGroup(
-            guild_id=guild_id,
-            name=name,
-            role_id=role_id,
-            regex=regex,
-        )
-
-        session.add(group)
-        session.commit()
-
-        return group
-
-    @staticmethod
-    def get_by_name(guild_id: int, name: str) -> Optional[VerifyGroup]:
-        """Get verify group by its name."""
-        query = (
-            session.query(VerifyGroup)
-            .filter_by(
-                guild_id=guild_id,
-                name=name,
-            )
-            .one_or_none()
-        )
-        return query
-
-    @staticmethod
-    def get_by_role(guild_id: int, role_id: int) -> Optional[VerifyGroup]:
-        """Get verify group by its role."""
-        query = (
-            session.query(VerifyGroup)
-            .filter_by(
-                guild_id=guild_id,
-                role_id=role_id,
-            )
-            .one_or_none()
-        )
-        return query
-
-    @staticmethod
-    def get_all(guild_id: int) -> List[VerifyGroup]:
-        """Get all verify groups in the guild.
-
-        :param guild_id: Guild ID.
-        :return: List of guild groups.
-        """
-        query = session.query(VerifyGroup).filter_by(guild_id=guild_id).all()
-        return query
-
-    @staticmethod
-    def remove(guild_id: int, name: str) -> int:
-        """Remove existing verify group.
-
-        :param guild_id: Guild ID.
-        :param name: Group name.
-        :return: Number of deleted groups, always ``0`` or ``1``.
-        """
-        query = (
-            session.query(VerifyGroup)
-            .filter_by(
-                guild_id=guild_id,
-                name=name,
-            )
-            .delete()
-        )
-        session.commit()
-        return query
-
-    @staticmethod
-    def remove_all(guild_id: int) -> int:
-        """Remove all existing verify groups.
-
-        :param guild_id: Guild ID.
-        :return: Number of deleted groups.
-        """
-        query = session.query(VerifyGroup).filter_by(guild_id=guild_id).delete()
-        session.commit()
-        return query
+    rule = relationship(lambda: VerifyRule, back_populates="groups")
 
     def __repr__(self) -> str:
         return (
-            f'<VerifyGroup idx="{self.idx}" guild_id="{self.guild_id}" '
-            f'name="{self.name}" role_id="{self.role_id}" regex="{self.regex}">'
+            f'<VerifyGroup rule_id="{self.rule_id}" '
+            f'role_id="{self.role_id}" guild_id="{self.guild_id}" '
+            f'rule="{self.rule}">'
+        )
+
+    def dump(self) -> dict:
+        return {
+            "rule_id": self.rule_id,
+            "role_id": self.role_id,
+            "guild_id": self.guild_id,
+            "rule": self.rule,
+        }
+
+
+class VerifyMapping(database.base):
+    """Verify mapping rules to users.
+
+    Maps username and domain (representing user or user groups) to Verify rules.
+    The algorithm looks first if theres combination of username and domain.
+    If the combination is not found, it tries to look only for domain (username == "").
+    If the domain is not found, it looks for default mapping (username == "" and domain == "").
+    If there are no records found, the user is not allowed to verify.
+
+    To block some user / domain, set blocked to True.
+
+    To add default rule for domain, add record with username = "" and domain = "someValue.xy"
+    To add default rule for all domains, add record with username = "" and domain = ""
+
+    When imported, this DB is wiped.
+
+    :param guild_id: ID of guild that owns the mapping.
+    :param rule_id: ID of rule to assign groups and send message.
+    :param username: Part of email before @ (empty string to act as default value).
+    :param domain: Part of email after @ (empty string to act as default value).
+    :param blocked: If combination is blocked from verification (default = False).
+    :param rule: Relationship with :class:`VerifyRule` based on rule_id.
+    """
+
+    __tablename__ = "mgmt_verify_mapping"
+
+    guild_id = Column(BigInteger, primary_key=True)
+    rule_id = Column(
+        Integer,
+        ForeignKey("mgmt_verify_rules.idx", ondelete="CASCADE"),
+    )
+    username = Column(String, primary_key=True)
+    domain = Column(String, primary_key=True)
+    blocked = Column(Boolean, default=False)
+    rule = relationship(lambda: VerifyRule)
+
+    def __repr__(self) -> str:
+        return (
+            f'<VerifyMapping guild_id="{self.guild_id}" rule_id="{self.rule_id}" '
+            f'username="{self.username}" domain="{self.domain}" '
+            f'blocked="{self.blocked}" rule="{self.rule}">'
         )
 
     def dump(self) -> dict:
         return {
             "guild_id": self.guild_id,
-            "name": self.name,
-            "role_id": self.role_id,
-            "regex": self.regex,
+            "rule_id": self.rule_id,
+            "username": self.username,
+            "domain": self.domain,
+            "blocked": self.blocked,
+            "rule": self.rule,
         }
 
 
@@ -135,18 +171,31 @@ class VerifyMember(database.base):
     :param user_id: Member ID.
     :param address: E-mail address.
     :param code: Verification code.
-    :param status: Numeric representation of :class:`VerifyStatus`.
+    :param status: Verify status represented by enum :class:`VerifyStatus`.
     :param timestamp: Creation timestamp.
     """
 
     __tablename__ = "mgmt_verify_members"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "guild_id",
+            "user_id",
+            name="guild_id_user_id_unique",
+        ),
+        UniqueConstraint(
+            "guild_id",
+            "address",
+            name="guild_id_address_unique",
+        ),
+    )
 
     idx = Column(Integer, primary_key=True, autoincrement=True)
     guild_id = Column(BigInteger)
     user_id = Column(BigInteger)
     address = Column(String)
     code = Column(String)
-    status = Column(Integer)
+    status = Column(Enum(VerifyStatus))
     timestamp = Column(DateTime)
 
     @staticmethod
@@ -168,7 +217,7 @@ class VerifyMember(database.base):
             user_id=user_id,
             address=address,
             code=code,
-            status=status.value,
+            status=status,
             timestamp=datetime.datetime.now(),
         )
 
@@ -239,7 +288,7 @@ class VerifyMember(database.base):
         return (
             f'<VerifyMember idx="{self.idx}" '
             f'guild_id="{self.guild_id}" user_id="{self.user_id}" '
-            f'code="{self.code}" status="{VerifyStatus(self.status)}">'
+            f'code="{self.code}" status="{self.status}">'
         )
 
     def dump(self) -> dict:
@@ -247,62 +296,49 @@ class VerifyMember(database.base):
             "guild_id": self.guild_id,
             "user_id": self.user_id,
             "code": self.code,
-            "status": VerifyStatus(self.status),
+            "status": self.status,
         }
 
 
 class VerifyMessage(database.base):
+    """Maps messages to rules, but allows default message
+    for guild.
 
-    __tablename__ = "mgmt_verify_message"
+    IDX is necessary as primary key to allow Null values in rule_id.
+
+    :param idx: Artificial PK.
+    :param rule_id: ID of rule message bellongs to (None if default).
+    :param guild_id: Guild ID.
+    :param message: Text of the message.
+    """
+
+    __tablename__ = "mgmt_verify_messages"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "rule_id",
+            "guild_id",
+            name="rule_id_guild_id_unique",
+        ),
+    )
 
     idx = Column(Integer, primary_key=True, autoincrement=True)
-    role_id = Column(BigInteger)  # Discord role id or 0 for guild default
+    rule_id = Column(
+        Integer, ForeignKey("mgmt_verify_rules.idx", ondelete="CASCADE"), nullable=True
+    )
     guild_id = Column(BigInteger)
     message = Column(String)
-
-    @staticmethod
-    def get(guild_id: int, role_id: int = 0) -> Optional[VerifyMessage]:
-        return (
-            session.query(VerifyMessage)
-            .filter_by(role_id=role_id, guild_id=guild_id)
-            .one_or_none()
-        )
-
-    @staticmethod
-    def set(guild_id: int, role_id: int, message: str) -> VerifyMessage:
-        config = (
-            session.query(VerifyMessage)
-            .filter_by(guild_id=guild_id, role_id=role_id)
-            .one_or_none()
-        )
-        if not config:
-            config = VerifyMessage(role_id=role_id, guild_id=guild_id, message=message)
-            session.add(config)
-        else:
-            config.message = message
-        session.commit()
-        return config
-
-    @staticmethod
-    def unset(guild_id: int, role_id: int) -> int:
-        query = (
-            session.query(VerifyMessage)
-            .filter_by(guild_id=guild_id, role_id=role_id)
-            .delete()
-        )
-        session.commit()
-        return query
 
     def __repr__(self) -> str:
         return (
             f'<VerifyMessage idx="{self.idx}" '
-            f'role_id="{self.role_id}" guild_id="{self.guild_id}" '
+            f'rule_id="{self.rule_id}" guild_id="{self.guild_id}" '
             f'message="{self.message}">'
         )
 
     def dump(self) -> dict:
         return {
-            "role_id": self.role_id,
+            "rule_id": self.rule_id,
             "guild_id": self.guild_id,
             "message": self.message,
         }
