@@ -52,14 +52,12 @@ class Comments(commands.Cog):
     @comment_.command(name="add")
     async def comment_add(self, ctx, member: discord.Member, *, text: str):
         """Add comment to a user."""
-        comment = Comment.add(
-            ctx.guild.id, ctx.author.id, member.id, utils.text.sanitise(text)
-        )
+        Comment.add(ctx.guild.id, ctx.author.id, member.id, utils.text.sanitise(text))
         await ctx.reply(_(ctx, "Comment successfully added."))
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Comment {comment.idx} on user {member.id} added.",
+            f"Added comment to user {member.id} ({member.name}).",
         )
 
     @commands.guild_only()
