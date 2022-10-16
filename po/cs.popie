@@ -286,6 +286,9 @@ msgstr {mention} Nejsi ve verifikační fázi. Kontaktuj moderátory.
 msgid {mention} That is not your verification code.
 msgstr {mention} To není tvůj verifikační kód.
 
+msgid Could not assign roles. Please contact moderator team.
+msgstr Nelze přiřadit role. Prosím kontaktuj moderátory.
+
 msgid You have been verified, congratulations!
 msgstr Verifikace proběhla úspěšně, gratuluji!
 
@@ -331,23 +334,20 @@ msgstr
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nesmí být prázdný.
 
-msgid Role {role} not found in verify configuration!
-msgstr Role {role} nebyla nalezena v konfiguraci verifikačních skupin!
+msgid Rule named {name} was not found!
+msgstr Pravidlo s názvem {name} nenalezeno!
 
-msgid Message has been set for group {role}.
-msgstr Uvítací zpráva byla nastavena pro roli {role}.
+msgid Message has been set for rule {rule}.
+msgstr Uvítací zpráva byla nastavena pro pravidlo {rule}.
 
-msgid Welcome message has been set do default for group {role}.
-msgstr Uvítací zpráva byla resetována pro roli {role}.
+msgid Welcome message has been set to default for rule {rule}.
+msgstr Uvítací zpráva byla resetována pro pravidlo {rule}.
 
 msgid Server default
 msgstr Výchozí pro server
 
-msgid Role ID
-msgstr ID role
-
-msgid Group name
-msgstr Jméno skupiny
+msgid Rule name
+msgstr Jméno pravidla
 
 msgid Message to send
 msgstr Zpráva k odeslání
@@ -360,33 +360,6 @@ msgstr Tento uživatel není v databázi.
 
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikační status uživatele **{member}** byl aktualizován na **{status}**.
-
-msgid Verification groups
-msgstr Verifikační skupiny
-
-msgid Role
-msgstr Role
-
-msgid Regex
-msgstr Regex
-
-msgid The template file has been exported.
-msgstr Vzorový soubor byl exportován.
-
-msgid **{count}** verification groups have been exported.
-msgstr **{count}** verifikačních skupin bylo exportováno.
-
-msgid I'm expecting one JSON file.
-msgstr Očekávám jeden JSON soubor.
-
-msgid You have to upload a JSON file.
-msgstr Musíš nahrát JSON soubor.
-
-msgid Your JSON file contains errors.
-msgstr Tvůj JSON soubor obsahuje chyby.
-
-msgid I've imported **{count}** verification groups. Old groups have been backed up above.
-msgstr Bylo importováno **{count}** verifikačních skupin. Staré skupiny byly zálohovány výše.
 
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.

@@ -519,13 +519,13 @@ class Verify(commands.Cog):
         await ctx.reply(
             _(
                 ctx,
-                "Message has been set for group {role}.",
+                "Message has been set for rule {rule}.",
             ).format(role=_(ctx, "(Guild)") if not len(rule_name) else rule_name)
         )
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            "Welcome message changed for group {}.".format(
+            "Welcome message changed for rule {}.".format(
                 "(Guild)" if not len(rule_name) else rule_name
             ),
         )
@@ -554,8 +554,8 @@ class Verify(commands.Cog):
             message.delete()
 
         await ctx.reply(
-            _(ctx, "Welcome message has been set do default for {role}.").format(
-                role=_(ctx, "(Guild)") if not rule_name else rule_name
+            _(ctx, "Welcome message has been set to default for rule {rule}.").format(
+                rule=_(ctx, "(Guild)") if not rule_name else rule_name
             )
         )
         await guild_log.info(
