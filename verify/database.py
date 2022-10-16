@@ -114,7 +114,7 @@ class VerifyRule(database.base):
 
         session.commit()
 
-    def remove_groups(self, groups: List[int]):
+    def delete_groups(self, groups: List[int]):
         """Add groups (Discord roles) to the rule. Skips existing groups.
 
         Args:
@@ -426,7 +426,7 @@ class VerifyMember(database.base):
 
         return query.all()
 
-    def remove(self):
+    def delete(self):
         """Remove member from database."""
         session.delete(self)
         session.commit()
@@ -455,6 +455,8 @@ class VerifyMessage(database.base):
     for guild.
 
     IDX is necessary as primary key to allow Null values in rule_id.
+
+    If rule_id is set to None, it means that it's default message for guild.
 
     :param idx: Artificial PK.
     :param rule_id: ID of rule message bellongs to (None if default).
@@ -505,27 +507,39 @@ class VerifyMessage(database.base):
         session.commit()
 
     @staticmethod
-    def get(guild_id: int, rule: VerifyRule = None) -> Optional[VerifyMessage]:
-        """Get rule or global message.
+    def get_default(guild_id: int) -> Optional[VerifyMessage]:
+        """Get guild global message.
 
         Args:
             guild_id: Discord ID of the guild.
-            rule: VerifyRule
 
         Returns:
             VerifyMessage if found, None otherwise.
         """
-        query = session.query(VerifyMessage).filter_by(guild_id=guild_id)
-
-        if rule:
-            query = query.filter_by(rule=rule)
-
+        query = (
+            session.query(VerifyMessage)
+            .filter_by(guild_id=guild_id)
+            .filter_by(rule=None)
+        )
         message = query.one_or_none()
 
-        if not message and rule:
-            return VerifyMessage.get(guild_id)
-        else:
-            return message
+        return message
+
+    def get_all(guild_id: int) -> List[VerifyMessage]:
+        """Get all messages.
+
+        Args:
+            guild_id: Discord ID of the guild.
+
+        Returns:
+            List of VerifyMessage
+        """
+        query = session.query(VerifyMessage).filter_by(guild_id=guild_id)
+        return query.all()
+
+    def delete(self):
+        session.delete(self)
+        session.commit()
 
     def __repr__(self) -> str:
         return (
