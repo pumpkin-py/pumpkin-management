@@ -1,15 +1,11 @@
 import asyncio
 import contextlib
-import datetime
-import json
 import os
 import random
-import re
 import smtplib
 import string
-import tempfile
 import unidecode
-from typing import Dict, List, Union, Optional
+from typing import List, Union, Optional
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -23,7 +19,13 @@ import pie.database.config
 from pie import check, exceptions, i18n, logger, utils
 
 from .enums import VerifyStatus
-from .database import VerifyGroup, VerifyMember, VerifyMessage
+from .database import (
+    VerifyGroup,
+    VerifyMapping,
+    VerifyMember,
+    VerifyMessage,
+    VerifyRule,
+)
 
 
 _ = i18n.Translator("modules/mgmt").translate
@@ -198,8 +200,8 @@ class Verify(commands.Cog):
             )
             return
 
-        db_member = VerifyMember.get_by_member(ctx.guild.id, ctx.author.id)
-        if db_member is None or db_member.code is None:
+        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
+        if not db_member or db_member[0].code is None:
             await ctx.send(
                 _(ctx, "{mention} You have to request the code first.").format(
                     mention=ctx.author.mention
@@ -208,7 +210,9 @@ class Verify(commands.Cog):
             )
             return
 
-        if db_member.status != VerifyStatus.PENDING.value:
+        db_member = db_member[0]
+
+        if db_member.status != VerifyStatus.PENDING:
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
@@ -244,24 +248,35 @@ class Verify(commands.Cog):
             )
             return
 
-        db_member.status = VerifyStatus.VERIFIED.value
+        username, at, domain = db_member.address.rpartition("@")
+        mapping = VerifyMapping.map(
+            guild_id=ctx.guild.id, username=username, domain=domain
+        )
+
+        if not mapping or not mapping.rule or not mapping.rule.groups:
+            await ctx.send(
+                _(ctx, "Could not assign roles. Please contact moderator team.")
+            )
+            await guild_log.error(
+                ctx.author,
+                ctx.channel,
+                "Member could not be verified due to missing mapping, rule or rule groups. Rule name: {name}".format(
+                    name=mapping.rule.name if mapping.rule else "(None)"
+                ),
+            )
+            return
+
+        await self._add_roles(ctx.author, mapping.rule.groups)
+
+        config_message = mapping.rule.message
+
+        db_member.status = VerifyStatus.VERIFIED
         db_member.save()
 
         await guild_log.info(ctx.author, ctx.channel, "Verification successfull.")
 
-        await self._add_roles(ctx.author, db_member)
-
-        config_message = None
-        roles = self._map_address_to_groups(
-            ctx.guild.id, ctx.author.id, db_member.address
-        )
-        for role in roles:
-            # searching for role override
-            config_message = VerifyMessage.get(ctx.guild.id, role.role_id)
-            if config_message is not None:
-                break
         if not config_message:
-            config_message = VerifyMessage.get(ctx.guild.id, 0)
+            config_message = VerifyMessage.get_default(ctx.guild.id)
         if not config_message:
             await utils.discord.send_dm(
                 ctx.author,
@@ -282,12 +297,15 @@ class Verify(commands.Cog):
     @commands.command(name="strip")
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
-        db_member = VerifyMember.get_by_member(ctx.guild.id, ctx.author.id)
-        if db_member is not None and db_member.status < 0:
+        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
+        if db_member:
+            db_member = db_member[0]
+
+        if db_member and db_member.status.value < 0:
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
-                f"Strip attempt blocked, has status {VerifyStatus(db_member.status).value}.",
+                f"Strip attempt blocked, has status {VerifyStatus(db_member.status)}.",
             )
             await ctx.reply(_(ctx, "Something went wrong, contact the moderator team."))
             return
@@ -315,10 +333,10 @@ class Verify(commands.Cog):
 
         with contextlib.suppress(discord.Forbidden):
             await ctx.author.remove_roles(*roles, reason="strip")
-        removed: int = VerifyMember.remove(ctx.guild.id, ctx.author.id)
 
         message: str = "Stripped"
-        if removed:
+        if db_member:
+            db_member.remove()
             message += " and removed from database"
         message += "."
         await guild_log.info(ctx.author, ctx.channel, message)
@@ -372,9 +390,9 @@ class Verify(commands.Cog):
                 else:
                     member_id = member.id
 
-                db_member = VerifyMember.get_by_member(ctx.guild.id, member_id)
+                db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member_id)
                 if db_member:
-                    VerifyMember.remove(ctx.guild.id, member_id)
+                    db_member[0].remove()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.is_assignable()]
@@ -445,9 +463,9 @@ class Verify(commands.Cog):
 
         async with ctx.typing():
             for member in role.members:
-                db_member = VerifyMember.get_by_member(ctx.guild.id, member.id)
+                db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member.id)
                 if db_member:
-                    VerifyMember.remove(ctx.guild.id, member.id)
+                    db_member[0].remove()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [r for r in member.roles if r.is_assignable()]
@@ -479,53 +497,71 @@ class Verify(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="set")
-    async def welcome_message_set(self, ctx, role: Union[discord.Role, int], *, text):
-        """Set post verification message for your guild or a role.
-        Insert role of a verify group, 0 for server default"""
+    async def welcome_message_set(self, ctx, rule_name: str, *, text):
+        """Set post verification message for your guild or a rule.
+
+        Args:
+            rule_name: Name of the rule. Leave empty (`""`) for guild.
+        """
         if text == "":
             ctx.reply(_(ctx, "Argument `text` must not be empty."))
             return
-        if isinstance(role, discord.Role):
-            verify_role = VerifyGroup.get_by_role(ctx.guild.id, role.id)
-            role_id = verify_role.role_id
-            if not role:
+        if len(rule_name):
+            rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+            if not rule:
                 await ctx.reply(
-                    _(ctx, "Role {role} not found in verify configuration!").format(
-                        role=role
-                    )
+                    _(ctx, "Rule named {name} was not found!").format(name=rule_name)
                 )
                 return
         else:
-            role_id = role
-        VerifyMessage.set(ctx.guild.id, role_id, text)
+            rule = None
+        VerifyMessage.set(ctx.guild.id, text, rule)
         await ctx.reply(
             _(
                 ctx,
                 "Message has been set for group {role}.",
-            ).format(role=_(ctx, "(Guild)") if role_id == 0 else role)
+            ).format(role=_(ctx, "(Guild)") if not len(rule_name) else rule_name)
         )
         await guild_log.info(
-            ctx.author, ctx.channel, f"Welcome message changed for group {role}."
+            ctx.author,
+            ctx.channel,
+            "Welcome message changed for group {}.".format(
+                "(Guild)" if not len(rule_name) else rule_name
+            ),
         )
 
     @check.acl2(check.ACLevel.MOD)
     @welcome_message.command(name="unset")
-    async def welcome_message_unset(self, ctx, role: Union[discord.Role, int] = 0):
-        """Set verification message to default for your guild or a role."""
-        if isinstance(role, discord.Role):
-            role_id = role.id
+    async def welcome_message_unset(self, ctx, rule_name: str):
+        """Unset verification message for your guild or a rule.
+
+        Args:
+            rule_name: Name of the rule. Leave empty (`""`) for guild.
+        """
+        if rule_name:
+            rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+            if rule:
+                message = rule.message
+            else:
+                await ctx.reply(
+                    _(ctx, "Rule named {name} was not found!").format(name=rule_name)
+                )
+                return
         else:
-            role_id = role
-        VerifyMessage.unset(ctx.guild.id, role_id)
+            message = VerifyMessage.get_default(ctx.guild.id)
+
+        if message:
+            message.delete()
+
         await ctx.reply(
-            _(ctx, "Welcome message has been set do default for group {role}.").format(
-                role=_(ctx, "(Guild)") if role_id == 0 else role
+            _(ctx, "Welcome message has been set do default for {role}.").format(
+                role=_(ctx, "(Guild)") if not rule_name else rule_name
             )
         )
         await guild_log.info(
             ctx.author,
             ctx.channel,
-            f"Welcome message set to default for group {role}.",
+            f"Welcome message set to default for rule {rule_name}.",
         )
 
     @check.acl2(check.ACLevel.SUBMOD)
@@ -534,32 +570,31 @@ class Verify(commands.Cog):
         """Show verification messages."""
 
         class Item:
-            def __init__(self, group: VerifyGroup):
-                verify_message_obj = VerifyMessage.get(ctx.guild.id, group.role_id)
-                self.role_id = group.role_id
-                self.group_name = group.name
-                self.message = getattr(verify_message_obj, "message", None)
+            def __init__(self, message: VerifyMessage = None):
+                if not message:
+                    return
+                self.rule = message.rule.name
+                self.message = message.text
 
         server_group = Item(VerifyGroup())
-        server_group.group_name = _(ctx, "Server default")
-        server_group.role_id = "-"
+        server_group.rule = _(ctx, "Server default")
         server_group.message = getattr(
-            VerifyMessage.get(ctx.guild.id, 0), "message", None
+            VerifyMessage.get_default(ctx.guild.id),
+            "message",
+            _(ctx, "You have been verified, congratulations!"),
         )
-        if not server_group.message:
-            server_group.message = _(ctx, "You have been verified, congratulations!")
         groups = [server_group]
         configured_groups = [Item(group) for group in VerifyGroup.get_all(ctx.guild.id)]
         configured_groups = filter(
-            lambda x: True if x.role_id > 0 and x.message is not None else False,
+            lambda x: True if x.rule and x.message is not None else False,
             configured_groups,
         )
         groups.extend(configured_groups)
+
         table: List[str] = utils.text.create_table(
             groups,
             header={
-                "role_id": _(ctx, "Role ID"),
-                "group_name": _(ctx, "Group name"),
+                "rule": _(ctx, "Rule name"),
                 "message": _(ctx, "Message to send"),
             },
         )
@@ -587,7 +622,7 @@ class Verify(commands.Cog):
         """Update the user's verification status."""
         status = status.upper()
         try:
-            status_value = VerifyStatus[status].value
+            status_value = VerifyStatus[status]
         except Exception:
             options = ", ".join([vs for vs in VerifyStatus.__members__])
             await ctx.reply(
@@ -598,9 +633,14 @@ class Verify(commands.Cog):
             )
             return
 
-        if not VerifyMember.update(ctx.guild.id, member.id, status_value):
+        verify_member = VerifyMember.get(ctx.guild.id, user_id=member.id)
+
+        if not verify_member:
             await ctx.reply(_(ctx, "That member is not in the database."))
             return
+
+        verify_member[0].status = status_value
+        verify_member[0].save()
 
         await guild_log.info(
             member,
@@ -614,164 +654,48 @@ class Verify(commands.Cog):
             ).format(member=utils.text.sanitise(member.display_name), status=status),
         )
 
-    @check.acl2(check.ACLevel.MOD)
-    @verification.group(name="groups")
-    async def verification_groups(self, ctx):
-        await utils.discord.send_help(ctx)
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification_groups.command(name="list")
-    async def verification_groups_list(self, ctx):
-        """Display list of all verification groups."""
-        embed = utils.discord.create_embed(
-            author=ctx.author,
-            title=_(ctx, "Verification groups"),
-        )
-        for group in VerifyGroup.get_all(ctx.guild.id):
-            role_label: str = _(ctx, "Role")
-            regex_label: str = _(ctx, "Regex")
-            embed.add_field(
-                name=group.name,
-                value=f"{role_label} {group.role_id}\n{regex_label} `{group.regex}`",
-                inline=False,
-            )
-        await ctx.reply(embed=embed)
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification_groups.command(name="template")
-    async def verification_groups_template(self, ctx):
-        """Export template for verification groups."""
-        filename: str = f"verification_{ctx.guild.id}_template.json"
-
-        export = {
-            "allow example.org": {
-                "role_id": 1,
-                "regex": "[a-z]{5}@example\\.org",
-            },
-            "allow example.com": {
-                "role_id": 2,
-                "regex": "[a-z]{7}[0-9]{3}@example\\.com",
-            },
-            "disallow evilcorp.com": {
-                "role_id": -1,
-                "regex": ".*@evilcorp\\.com",
-            },
-            "add to everyone else": {
-                "role_id": 3,
-                "regex": ".*",
-            },
-            "add to every allowed": {
-                "role_id": 4,
-                "regex": "",
-            },
-        }
-
-        file = tempfile.TemporaryFile(mode="w+")
-        json.dump(export, file, indent="\t")
-
-        file.seek(0)
-        await ctx.reply(
-            _(ctx, "The template file has been exported."),
-            file=discord.File(fp=file, filename=filename),
-        )
-        file.close()
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification_groups.command(name="export")
-    async def verification_groups_export(self, ctx):
-        """Export current verification groups."""
-        timestamp: str = datetime.datetime.now().strftime("%Y%m%dT%H%M%S")
-        filename: str = f"verification_{ctx.guild.id}_{timestamp}.json"
-
-        groups: List[VerifyGroup] = VerifyGroup.get_all(ctx.guild.id)
-        export: Dict[str, Union[str, int]] = dict()
-
-        for group in groups:
-            group_dict: dict = group.dump()
-            del group_dict["guild_id"]
-            del group_dict["name"]
-            export[group.name] = group_dict
-
-        file = tempfile.TemporaryFile(mode="w+")
-        json.dump(export, file, indent="\t", ensure_ascii=False)
-
-        file.seek(0)
-        await ctx.reply(
-            _(ctx, "**{count}** verification groups have been exported.").format(
-                count=len(groups)
-            ),
-            file=discord.File(fp=file, filename=filename),
-        )
-        file.close()
-        await guild_log.info(ctx.author, ctx.channel, "Verification groups exported.")
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification_groups.command(name="import")
-    async def verification_groups_import(self, ctx):
-        """Import new verification groups. This fully replaces old data."""
-        if len(ctx.message.attachments) != 1:
-            await ctx.reply(_(ctx, "I'm expecting one JSON file."))
-            return
-        if not ctx.message.attachments[0].filename.lower().endswith(".json"):
-            await ctx.reply(_(ctx, "You have to upload a JSON file."))
-            return
-
-        # download the file
-        data_file = tempfile.TemporaryFile()
-        await ctx.message.attachments[0].save(data_file)
-
-        data_file.seek(0)
-        try:
-            json_data = json.load(data_file)
-        except json.decoder.JSONDecodeError as exc:
-            await ctx.reply(_(ctx, "Your JSON file contains errors.") + f"\n> `{exc}`")
-            data_file.close()
-            return
-
-        # export the groups, just to make sure
-        await self.verification_groups_export(ctx)
-
-        groups = self._replace_verification_groups(ctx.guild.id, json_data)
-        data_file.close()
-
-        await ctx.reply(
-            _(
-                ctx,
-                (
-                    "I've imported **{count}** verification groups. "
-                    "Old groups have been backed up above."
-                ),
-            ).format(count=len(groups))
-        )
-
-    #
-
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""
-        db_member = VerifyMember.get_by_member(member.guild.id, member.id)
-        if db_member is None:
+        db_member = VerifyMember.get(guild_id=member.guild.id, user_id=member.id)
+        if not db_member:
             return
-        if db_member.status != VerifyStatus.VERIFIED.value:
+        if db_member[0].status != VerifyStatus.VERIFIED.value:
             return
 
-        await self._add_roles(member, db_member)
+        username, at, domain = db_member.address.rpartition("@")
+        mapping = VerifyMapping.map(
+            guild_id=member.guild.id, username=username, domain=domain
+        )
+
+        if not mapping or not mapping.rule or not mapping.rule.groups:
+            await guild_log.error(
+                member,
+                None,
+                "Can't skip verification - mapping, rule or groups missing. Rule name: {name}".format(
+                    name=mapping.rule.name if mapping.rule else "(None)"
+                ),
+            )
+            return
+
+        await self._add_roles(member, mapping.rule.groups)
+
         # We need a channel to log the event in the guild log channel.
         # We are just picking the first one.
         await guild_log.info(
             member,
-            member.guild.text_channels[0],
+            None,
             "New member already in database, skipping verification.",
         )
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member: Union[discord.Member, discord.User]):
         """When the member is banned, update the database status."""
-        db_member = VerifyMember.get_by_member(guild.id, member.id)
+        db_member = VerifyMember.get(guild_id=guild.id, user_id=member.id)
 
-        if db_member is not None:
-            db_member.status = VerifyStatus.BANNED.value
-            db_member.save()
+        if db_member:
+            db_member[0].status = VerifyStatus.BANNED.value
+            db_member[0].save()
             await guild_log.info(
                 member,
                 member.guild.text_channels[0],
@@ -807,7 +731,7 @@ class Verify(commands.Cog):
         :param ctx: Command context
         :param address: Supplied e-mail address
         """
-        if VerifyMember.get_by_member(ctx.guild.id, ctx.author.id) is not None:
+        if VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id):
             await guild_log.debug(
                 ctx.author,
                 ctx.channel,
@@ -839,9 +763,9 @@ class Verify(commands.Cog):
         :param ctx: Command context
         :param address: Supplied e-mail address
         """
-        if (
-            db_member := VerifyMember.get_by_address(ctx.guild.id, address)
-        ) is not None:
+        db_member = VerifyMember.get(guild_id=ctx.guild.id, address=address)
+        if db_member:
+            db_member = db_member[0]
             dc_member: Optional[discord.User] = self.bot.get_user(db_member.user_id)
             dc_member_str: str = (
                 f"'{utils.text.sanitise(dc_member.name)}' ({db_member.user_id})"
@@ -874,7 +798,7 @@ class Verify(commands.Cog):
         return False
 
     async def _is_supported_address(self, ctx: commands.Context, address: str):
-        """Check if the address has any verify groups.
+        """Check if the address is allowed to verify.
 
         If the address is not supported, the event is logged and a response is
         sent to the user.
@@ -883,15 +807,13 @@ class Verify(commands.Cog):
         :param address: Supplied e-mail address
         """
         # Make the address domain case insensitive
-        domain_regex: str = r"([^@]+$)"
-        domain = re.search(domain_regex, address)
-        if domain is not None:
-            address = re.sub(domain_regex, domain.group(0).lower(), address)
+        username, at, domain = address.rpartition("@")
 
-        groups: List[VerifyGroup] = self._map_address_to_groups(
-            ctx.guild.id, ctx.author.id, address, include_wildcard=False
+        mapping = VerifyMapping.map(
+            guild_id=ctx.guild.id, username=username, domain=domain
         )
-        if not len(groups):
+
+        if not mapping or not mapping.rule:
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
@@ -906,65 +828,6 @@ class Verify(commands.Cog):
             return False
 
         return True
-
-    def _map_address_to_groups(
-        self,
-        guild_id: int,
-        user_id: int,
-        address: str,
-        *,
-        include_wildcard: bool = True,
-    ) -> List[VerifyGroup]:
-        """Try to get mapping from e-mail to verify groups.
-
-        One or more groups may be returned.
-
-        If a group with ``role_id`` of ``-1`` is found it means that the address
-        shouldn't be accepted. In this case an empty list is returned.
-
-        If the :attr:`VerifyGroup.regex` is empty string (``""``), it will not be
-        included if ``include_wildcard`` is :class:`False`. This is useful when you want
-        to check if there are also other, more strict matches.
-
-        .. warning::
-
-            Only the first group with non-empty regex is returned, and unlimited number
-            of groups with empty regex. This allows you to implement fallback groups:
-            if the e-mail explicitly doesn't match groups A nor B, it will be assigned
-            to the group C.
-
-        .. warning::
-
-            Groups with empty regex MUST be included at the end. Otherwise other groups
-            may never be matched.
-
-        :param guild_id: Guild ID.
-        :param user_id: User ID.
-        :param address: User-submitted e-mail address.
-        :param include_wildcard: If :class:`True`, even groups with empty regex will be
-            matched.
-        :return: List of matching verify groups.
-        """
-        query: List[VerifyGroup] = list()
-
-        for group in VerifyGroup.get_all(guild_id):
-            if group.regex == "" and include_wildcard:
-                query.append(group)
-                continue
-
-            if re.fullmatch(group.regex, address) is None:
-                continue
-
-            if group.role_id == -1:
-                return list()
-
-            if len(query) > 0:
-                # do not add another matching group
-                continue
-
-            query.append(group)
-
-        return query
 
     def _generate_code(self):
         """Generate verification code."""
@@ -1067,36 +930,23 @@ class Verify(commands.Cog):
                 )
                 return False
 
-    async def _add_roles(self, member: discord.Member, db_member: VerifyMember):
+    async def _add_roles(self, member: discord.Member, groups: List[VerifyGroup]):
         """Add roles to the member."""
-        groups: List[VerifyGroup] = self._map_address_to_groups(
-            member.guild.id, member.id, db_member.address
-        )
+
         roles: List[discord.Role] = list()
         for group in groups:
-            roles.append(member.guild.get_role(group.role_id))
+            role = member.guild.get_role(group.group_id)
+            if role:
+                roles.append(role)
+            else:
+                await guild_log.error(
+                    member,
+                    None,
+                    "Role with ID {id} could not be found! Rule: {name}.".format(
+                        id=group.group_id, name=group.rule.name
+                    ),
+                )
         await member.add_roles(*roles)
-
-    def _replace_verification_groups(
-        self, guild_id: int, json_data: dict
-    ) -> List[VerifyGroup]:
-        """Import JSON verification groups."""
-        # TODO Should we be checking if some rules were added or removed?
-        VerifyGroup.remove_all(guild_id)
-
-        # TODO Should we be checking the data?
-
-        groups: List[VerifyGroup] = list()
-        for group_name, group_data in json_data.items():
-            group = VerifyGroup.add(
-                guild_id=guild_id,
-                name=group_name,
-                role_id=group_data["role_id"],
-                regex=group_data["regex"],
-            )
-            groups.append(group)
-
-        return groups
 
     def _check_inbox_for_errors(self):
         """Connect to the IMAP server and fetch unread e-mails.
