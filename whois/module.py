@@ -129,11 +129,12 @@ class Whois(commands.Cog):
 
         db_member: Optional[VerifyMember]
         db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=user_id)
+        db_member = db_member[0] if db_member else None
 
-        if db_member is not None and dc_member is None:
+        if db_member and dc_member is None:
             dc_member = ctx.guild.get_member(db_member.user_id)
 
-        if db_member is None and dc_member is None:
+        if not db_member and dc_member is None:
             await ctx.reply(_(ctx, "No such user."))
             return
 
@@ -146,13 +147,13 @@ class Whois(commands.Cog):
     async def rwhois(self, ctx, address: str):
         db_member = VerifyMember.get(guild_id=ctx.guild.id, address=address)
 
-        if db_member is None:
+        if not db_member:
             await ctx.reply(_(ctx, "Member is not in a database."))
             return
 
-        dc_member = ctx.guild.get_member(db_member.user_id)
+        dc_member = ctx.guild.get_member(db_member[0].user_id)
 
-        await self._whois_reply(ctx, db_member, dc_member)
+        await self._whois_reply(ctx, db_member[0], dc_member)
         await guild_log.info(
             ctx.author, ctx.channel, f"Reverse whois lookup for {address}."
         )
