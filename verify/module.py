@@ -5,6 +5,7 @@ import os
 import random
 import smtplib
 import string
+import tempfile
 import unidecode
 from typing import List, Union, Optional
 
@@ -649,24 +650,24 @@ class Verify(commands.Cog):
                 "Member verification status of **{member}** has been updated to **{status}**.",
             ).format(member=utils.text.sanitise(member.display_name), status=status),
         )
-        
+
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
     @verification.group(name="mapping")
     async def verification_mapping(self, ctx):
         await utils.discord.send_help(ctx)
-    
+
     @check.acl2(check.ACLevel.MOD)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     @verification_mapping.command(name="import")
     async def verification_mapping_import(self, ctx, wipe: bool = False):
         """Import mapping data.
-        
+
         The file must be CSV and must have this format:
         `˙˙username;domain;rule_name```
-        
+
         Where username is the part before @ sign in email and domain is the part after @ sign.
-        
+
         Args:
             wipe: Remove all mapping data and do clean import.
         """
@@ -677,38 +678,48 @@ class Verify(commands.Cog):
             await ctx.reply(_(ctx, "Supported format is only CSV."))
             return
         await ctx.reply(_(ctx, "Processing. Make a coffee, it may take a while."))
-        
+
         if wipe:
             async with ctx.typing():
                 wiped = VerifyMapping.wipe(ctx.guild_id)
-                await ctx.reply(_(ctx, "Wiped {wiped} mappings.").format(wiped=wiped)
-        
+                await ctx.reply(_(ctx, "Wiped {wiped} mappings.").format(wiped=wiped))
+
         async with ctx.typing():
             data_file = tempfile.TemporaryFile()
             await ctx.message.attachments[0].save(data_file)
             data_file.seek(0)
             csv_reader = csv.reader(data_file)
-            
+
             count = 0
-            
+
             for row in csv_reader:
                 count += 1
                 if len(row) != 3:
-                    await ctx.reply(_(ctx, "Row {row} has invalid number of columns!").format(row=count))
+                    await ctx.reply(
+                        _(ctx, "Row {row} has invalid number of columns!").format(
+                            row=count
+                        )
+                    )
                     continue
-                    
+
                 username, domain, rule_name = row
-                
+
                 rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
-                
+
                 if not rule:
-                    await ctx.reply(_(ctx, "Row {row} has invalid rule name {name}!").format(row=count, name=rule_name))
+                    await ctx.reply(
+                        _(ctx, "Row {row} has invalid rule name {name}!").format(
+                            row=count, name=rule_name
+                        )
+                    )
                     continue
-                    
-                VerifyMapping.add(guild_id=ctx.guild.id, username=username, domain=domain)
-            
+
+                VerifyMapping.add(
+                    guild_id=ctx.guild.id, username=username, domain=domain
+                )
+
         data_file.close()
-        
+
         await ctx.reply(_("Imported {count} mappings.").format(count=count))
 
     @commands.guild_only()
@@ -716,29 +727,31 @@ class Verify(commands.Cog):
     @verification.group(name="rule")
     async def verification_rule(self, ctx):
         await utils.discord.send_help(ctx)
-        
+
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="add")
     async def verification_rule_add(self, ctx, name: str, groups: List[discord.Role]):
         """Add new verification rule. Name must be unique.
-        
+
         Assign Discord groups to rule (if provided).
-        
+
         Rule without roles will not work in verification process and must be added later on!
-        
+
         Args:
             name: Name of the rule.
             groups: List of Discord roles (optional)
-        
+
         """
         rule = VerifyRule.add(guild_id=ctx.guild.id, name=name)
-        
+
         if not rule:
-            await ctx.reply(_(ctx, "Rule with name {name} already exists!").format(name=name))
+            await ctx.reply(
+                _(ctx, "Rule with name {name} already exists!").format(name=name)
+            )
         else:
             group_ids = [group.id for group in groups]
             rule.add_groups(group_ids)
-    
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""

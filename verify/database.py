@@ -312,13 +312,12 @@ class VerifyMapping(database.base):
                 return None
 
         return query
-    
+
     @staticmethod
     def wipe(guild_id: int):
         query = session.query(VerifyMapping).filter_by(guild_id=guild_id)
-        
-        return query.delete()        
-        
+
+        return query.delete()
 
     def __repr__(self) -> str:
         return (
