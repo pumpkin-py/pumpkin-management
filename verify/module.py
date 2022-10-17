@@ -709,7 +709,7 @@ class Verify(commands.Cog):
                     rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
                     if not rule:
                         await ctx.reply(
-                            _(ctx, "Row {row} has invalid rule name {name}!").format(
+                            _(ctx, "Row {row} has invalid rule name: {name}!").format(
                                 row=count, name=rule_name
                             )
                         )
@@ -721,7 +721,7 @@ class Verify(commands.Cog):
 
         data_file.close()
 
-        await ctx.reply(_("Imported {count} mappings.").format(count=count))
+        await ctx.reply(_(ctx, "Imported {count} mappings.").format(count=count))
 
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
@@ -731,16 +731,16 @@ class Verify(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="add")
-    async def verification_rule_add(self, ctx, name: str, groups: List[discord.Role]):
+    async def verification_rule_add(self, ctx, name: str, roles: List[discord.Role]):
         """Add new verification rule. Name must be unique.
 
-        Assign Discord groups to rule (if provided).
+        Assign Discord roles to rule (if provided).
 
-        Rule without roles will not work in verification process and must be added later on!
+        Rule without roles will not work in verification process and must be fixed later on!
 
         Args:
             name: Name of the rule.
-            groups: List of Discord roles (optional)
+            roles: List of Discord roles (optional)
 
         """
         rule = VerifyRule.add(guild_id=ctx.guild.id, name=name)
@@ -751,8 +751,8 @@ class Verify(commands.Cog):
             )
             return
 
-        group_ids = [group.id for group in groups]
-        rule.add_groups(group_ids)
+        role_ids = [role.id for role in roles]
+        rule.add_groups(role_ids)
 
         await ctx.reply(_(ctx, "Rule with name {name} added!").format(name=name))
 
@@ -775,7 +775,7 @@ class Verify(commands.Cog):
         dialog = utils.discord.create_embed(
             author=ctx.author,
             title=_(ctx, "Rule remove"),
-            description=_(ctx, "Do you really want to remove rule {name}").format(
+            description=_(ctx, "Do you really want to remove rule {name}?").format(
                 name=name
             ),
         )
@@ -799,7 +799,7 @@ class Verify(commands.Cog):
         class Item:
             def __init__(self, rule):
                 self.name = rule.name
-                self.group_count = len(rule.groups)
+                self.role_count = len(rule.groups)
 
         items = []
 
@@ -810,7 +810,7 @@ class Verify(commands.Cog):
             items,
             header={
                 "rule": _(ctx, "Rule name"),
-                "group_count": _(ctx, "Group count"),
+                "role_count": _(ctx, "Role count"),
             },
         )
 
@@ -853,15 +853,15 @@ class Verify(commands.Cog):
                 groups.append(f"{group.group_id} (DELETED)")
 
         embed.add_field(
-            name=_(ctx, "Assigned groups:"),
+            name=_(ctx, "Assigned roles:"),
             value="\n".join(groups),
         )
 
         await ctx.reply(embed=embed)
 
     @check.acl2(check.ACLevel.MOD)
-    @verification_rule.command(name="addgroups", aliases=["add-groups"])
-    async def verification_rule_addgroups(
+    @verification_rule.command(name="addroles", aliases=["add-roles"])
+    async def verification_rule_addroles(
         self, ctx, name: str, groups: List[discord.Role]
     ):
         rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
@@ -878,8 +878,8 @@ class Verify(commands.Cog):
         await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=name))
 
     @check.acl2(check.ACLevel.MOD)
-    @verification_rule.command(name="removegroups", aliases=["remove-groups"])
-    async def verification_rule_removegroups(
+    @verification_rule.command(name="removeroles", aliases=["remove-roles"])
+    async def verification_rule_removeroles(
         self, ctx, name: str, groups: List[discord.Role]
     ):
         rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
@@ -910,7 +910,7 @@ class Verify(commands.Cog):
             await guild_log.error(
                 member,
                 None,
-                "Can't skip verification - mapping, rule or groups missing. Rule name: {name}".format(
+                "Can't skip verification - mapping, rule or roles missing. Rule name: {name}".format(
                     name=mapping.rule.name if mapping.rule else "(None)"
                 ),
             )

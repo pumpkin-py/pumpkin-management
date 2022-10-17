@@ -361,6 +361,66 @@ msgstr Tento užívateľ nie je v databáze.
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikačný statu užívateľa **{member}** bol aktualizovaný na **{status}**.
 
+msgid I'm expecting one CSV file.
+msgstr
+
+msgid Supported format is only CSV.
+msgstr
+
+msgid Processing. Make a coffee, it may take a while.
+msgstr
+
+msgid Wiped {wiped} mappings.
+msgstr
+
+msgid Row {row} has invalid number of columns!
+msgstr
+
+msgid Row {row} has invalid rule name: {name}!
+msgstr
+
+msgid Imported {count} mappings.
+msgstr
+
+msgid Rule with name {name} already exists!
+msgstr
+
+msgid Rule with name {name} added!
+msgstr
+
+msgid Rule with name {name} not found!
+msgstr
+
+msgid Rule remove
+msgstr
+
+msgid Do you really want to remove rule {name}?
+msgstr
+
+msgid Removing aborted.
+msgstr
+
+msgid Rule {name} successfuly removed.
+msgstr
+
+msgid Role count
+msgstr Počet rolí
+
+msgid Rule information
+msgstr
+
+msgid Has custom message:
+msgstr
+
+msgid Assigned roles:
+msgstr
+
+msgid Roles added to rule {name}!
+msgstr
+
+msgid Roles removed from rule {name}!
+msgstr
+
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
 
@@ -399,9 +459,6 @@ msgstr Mapovanie na ACLevel
 
 msgid You don't have permission to view information about this channel.
 msgstr Nemáš oprávnenia na zobrazenie informácií o tomto kanáli.
-
-msgid Role count
-msgstr Počet rolí
 
 msgid User count
 msgstr Počet užívateľov
