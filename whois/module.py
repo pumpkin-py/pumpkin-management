@@ -13,8 +13,7 @@ try:
     from pie.acl.database import ACLevelMappping
 except Exception:
     ACLevelMappping = None
-from ..verify.database import VerifyMember
-from ..verify.enums import VerifyStatus
+from ..verify.database import VerifyMember, VerifyStatus
 
 
 _ = i18n.Translator("modules/mgmt").translate
@@ -129,7 +128,7 @@ class Whois(commands.Cog):
             user_id = member
 
         db_member: Optional[VerifyMember]
-        db_member = VerifyMember.get_by_member(ctx.guild.id, user_id)
+        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=user_id)
 
         if db_member is not None and dc_member is None:
             dc_member = ctx.guild.get_member(db_member.user_id)
@@ -145,7 +144,7 @@ class Whois(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def rwhois(self, ctx, address: str):
-        db_member = VerifyMember.get_by_address(ctx.guild.id, address)
+        db_member = VerifyMember.get(guild_id=ctx.guild.id, address=address)
 
         if db_member is None:
             await ctx.reply(_(ctx, "Member is not in a database."))
@@ -158,7 +157,7 @@ class Whois(commands.Cog):
             ctx.author, ctx.channel, f"Reverse whois lookup for {address}."
         )
 
-    async def _whois_reply(self, ctx, db_member, dc_member):
+    async def _whois_reply(self, ctx, db_member: VerifyMember, dc_member):
         description: str
         if dc_member is not None:
             description = f"{dc_member.name} ({dc_member.id})"
@@ -183,7 +182,7 @@ class Whois(commands.Cog):
             )
             embed.add_field(
                 name=_(ctx, "Verification status"),
-                value=f"{VerifyStatus(db_member.status).name}",
+                value=f"{db_member.status.name}",
             )
             embed.add_field(
                 name=_(ctx, "Timestamp"),
