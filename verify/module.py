@@ -759,7 +759,10 @@ class Verify(commands.Cog):
                         continue
 
                 VerifyMapping.add(
-                    guild_id=ctx.guild.id, username=username, domain=domain, rule=rule[0]
+                    guild_id=ctx.guild.id,
+                    username=username,
+                    domain=domain,
+                    rule=rule[0],
                 )
 
         data_file.close()
@@ -769,6 +772,15 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_mapping.command(name="remove")
     async def verification_mapping_remove(self, ctx, username: str, domain: str):
+        """Remove verification mapping.
+
+        Leave username empty for domain default mapping.
+        Leave username and domain empty for default guild mapping.
+
+        Args:
+            username: Username. Leave empty (`""`) for domain default mapping.
+            domain: Domain. Leave empty (`""`) for guild default mapping.
+        """
         mapping = VerifyMapping.get(
             guild_id=ctx.guild.id, username=username, domain=domain
         )
@@ -909,7 +921,7 @@ class Verify(commands.Cog):
                 _(ctx, "Rule with name {name} not found!").format(name=name)
             )
             return
-            
+
         rule = rule[0]
 
         embed = utils.discord.create_embed(
@@ -942,38 +954,52 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="addroles", aliases=["add-roles"])
     async def verification_rule_addroles(
-        self, ctx, name: str, roles: List[discord.Role]
+        self, ctx, rule_name: str, roles: List[discord.Role]
     ):
-        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
+        """Add Discord roles to verification rule.
+
+        Args:
+            rule_name: Name of the rule.
+            roles: List of Discord roles to add.
+        """
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
 
         if not rule:
             await ctx.reply(
-                _(ctx, "Rule with name {name} not found!").format(name=name)
+                _(ctx, "Rule with name {name} not found!").format(name=rule_name)
             )
             return
 
         role_ids = [role.id for role in roles]
         rule[0].add_roles(role_ids)
 
-        await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=name))
+        await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=rule_name))
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="removeroles", aliases=["remove-roles"])
     async def verification_rule_removeroles(
-        self, ctx, name: str, roles: List[discord.Role]
+        self, ctx, rule_name: str, roles: List[discord.Role]
     ):
-        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
+        """Remove Discord roles from verification rule.
+
+        Args:
+            rule_name: Name of the rule.
+            roles: List of Discord roles to remove.
+        """
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
 
         if not rule:
             await ctx.reply(
-                _(ctx, "Rule with name {name} not found!").format(name=name)
+                _(ctx, "Rule with name {name} not found!").format(name=rule_name)
             )
             return
 
         role_ids = [role.id for role in roles]
         rule[0].delete_roles(role_ids)
 
-        await ctx.reply(_(ctx, "Roles removed from rule {name}!").format(name=name))
+        await ctx.reply(
+            _(ctx, "Roles removed from rule {name}!").format(name=rule_name)
+        )
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
