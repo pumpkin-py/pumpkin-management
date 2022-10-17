@@ -667,7 +667,7 @@ class Verify(commands.Cog):
         `˙˙username;domain;rule_name```
 
         Where username is the part before @ sign in email and domain is the part after @ sign.
-        
+
         For domain global rule leave username empty.
         For global rule leave username and domain empty.
 
@@ -792,6 +792,32 @@ class Verify(commands.Cog):
         rule.delete()
 
         await ctx.reply(_(ctx, "Rule {name} successfuly removed.").format(name=name))
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="list")
+    async def verification_rule_list(self, ctx):
+        rules = VerifyRule.get(guild_id=ctx.guild.id)
+
+        class Item:
+            def __init__(self, rule):
+                self.name = rule.name
+                self.group_count = len(rule.groups)
+
+        items = []
+
+        for rule in rules:
+            items.append(Item(rule))
+
+        table: List[str] = utils.text.create_table(
+            items,
+            header={
+                "rule": _(ctx, "Rule name"),
+                "group_count": _(ctx, "Group count"),
+            },
+        )
+
+        for page in table:
+            await ctx.send("```" + page + "```")
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="addgroups", aliases=["add-groups"])
