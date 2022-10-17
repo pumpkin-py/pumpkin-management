@@ -361,6 +361,18 @@ msgstr Tento užívateľ nie je v databáze.
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikačný statu užívateľa **{member}** bol aktualizovaný na **{status}**.
 
+msgid Mapping for {username}@{domain}
+msgstr
+
+msgid Applied mapping:
+msgstr
+
+msgid Verification allowed:
+msgstr
+
+msgid Rule name:
+msgstr
+
 msgid I'm expecting one CSV file.
 msgstr
 

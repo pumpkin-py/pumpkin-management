@@ -657,6 +657,39 @@ class Verify(commands.Cog):
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
+    @verification_mapping.command(name="info")
+    async def verification_mapping_get(self, ctx, username: str, domain: str):
+        await utils.discord.delete_message(ctx.message)
+
+        mapping = VerifyMapping.map(
+            guild_id=ctx.guild.id, username=username, domain=domain
+        )
+
+        embed = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Mapping for {username}@{domain}").format(
+                username=username, domain=domain
+            ),
+        )
+
+        embed.add_field(
+            name=_(ctx, "Applied mapping:"),
+            value=mapping.username + "@" + mapping.domain if mapping else "-",
+        )
+
+        embed.add_field(
+            name=_(ctx, "Verification allowed:"),
+            value=_(ctx, "True") if mapping and mapping.rule else _(ctx, "False"),
+        )
+
+        embed.add_field(
+            name=_(ctx, "Rule name:"),
+            value=mapping.rule.name if mapping and mapping.rule else "-",
+        )
+
+        await ctx.send(embed=embed)
+
+    @check.acl2(check.ACLevel.MOD)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     @verification_mapping.command(name="import")
     async def verification_mapping_import(self, ctx, wipe: bool = False):
