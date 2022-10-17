@@ -748,9 +748,52 @@ class Verify(commands.Cog):
             await ctx.reply(
                 _(ctx, "Rule with name {name} already exists!").format(name=name)
             )
-        else:
-            group_ids = [group.id for group in groups]
-            rule.add_groups(group_ids)
+            return
+
+        group_ids = [group.id for group in groups]
+        rule.add_groups(group_ids)
+
+        await ctx.reply(_(ctx, "Rule with name {name} added!").format(name=name))
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="remove")
+    async def verification_rule_remove(self, ctx, name: str):
+        """Add new verification rule. Name must be unique.
+
+        Assign Discord groups to rule (if provided).
+
+        Rule without roles will not work in verification process and must be added later on!
+
+        Args:
+            name: Name of the rule.
+            groups: List of Discord roles (optional)
+
+        """
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
+
+        if not rule:
+            await ctx.reply(
+                _(ctx, "Rule with name {name} not found!").format(name=name)
+            )
+            return
+
+        dialog = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Rule remove"),
+            description=_(ctx, "Do you really want to remove rule {name}").format(
+                name=name
+            ),
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        if answer is not True:
+            await ctx.reply(_(ctx, "Removing aborted."))
+            return
+
+        rule.delete()
+
+        await ctx.reply(_(ctx, "Rule {name} successfuly removed.").format(name=name))
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
