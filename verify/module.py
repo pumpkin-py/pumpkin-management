@@ -57,14 +57,9 @@ test_dotenv()
 MAIL_HEADER_PREFIX = "X-pumpkin.py-"
 
 
-# TODO: confirm dialog for groupstrip and grouprolestrip
-
-
 class Verify(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
-    #
 
     @commands.guild_only()
     @check.acl2(check.ACLevel.EVERYONE)
@@ -138,7 +133,7 @@ class Verify(commands.Cog):
 
         :param address: User's e-mail address.
         """
-        # TODO Use embeds when we support them.
+        # TODO Use embeds
         await asyncio.sleep(20)
         unread_messages = self._check_inbox_for_errors()
         for message in unread_messages:
@@ -301,7 +296,7 @@ class Verify(commands.Cog):
         if db_member:
             db_member = db_member[0]
 
-        if db_member and db_member.status.value < 0:
+        if db_member and db_member.status.value < VerifyStatus.NONE.value:
             await guild_log.info(
                 ctx.author,
                 ctx.channel,
