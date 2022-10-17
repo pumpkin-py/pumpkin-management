@@ -330,6 +330,10 @@ class VerifyMapping(database.base):
 
         return query.delete()
 
+    def delete(self):
+        session.delete(self)
+        session.commit()
+
     def __repr__(self) -> str:
         return (
             f'<VerifyMapping guild_id="{self.guild_id}" rule_id="{self.rule_id}" '

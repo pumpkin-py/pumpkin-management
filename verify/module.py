@@ -660,11 +660,11 @@ class Verify(commands.Cog):
     @verification_mapping.command(name="info")
     async def verification_mapping_get(self, ctx, username: str, domain: str):
         """Get mapping information by username and domain.
-        
+
         Args:
             username: Username. Leave empty (`""`) for domain default mapping.
             domain: Domain. Leave empty (`""`) for guild default mapping.
-            
+
         """
         await utils.discord.delete_message(ctx.message)
 
@@ -764,6 +764,41 @@ class Verify(commands.Cog):
         data_file.close()
 
         await ctx.reply(_(ctx, "Imported {count} mappings.").format(count=count))
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_mapping.command(name="remove")
+    async def verification_mapping_remove(self, ctx, username: str, domain: str):
+        mapping = VerifyMapping.get(
+            guild_id=ctx.guild.id, username=username, domain=domain
+        )
+
+        if not mapping:
+            await ctx.reply(
+                _(ctx, "Mapping for {name}@{domain} not found!").format(
+                    name=username, domain=domain
+                )
+            )
+            return
+
+        dialog = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Mapping remove"),
+            description=_(
+                ctx, "Do you really want to remove mapping for {name}@{domain}?"
+            ).format(
+                name=username,
+                domain=domain,
+            ),
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        if answer is not True:
+            await ctx.reply(_(ctx, "Removing aborted."))
+            return
+
+        mapping.delete()
+        await ctx.reply(_(ctx, "Mapping successfuly removed."))
 
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)

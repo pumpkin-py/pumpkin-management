@@ -394,6 +394,21 @@ msgstr Řádek {row} má špatný název pravidla: {name}!
 msgid Imported {count} mappings.
 msgstr Importováno {count} mapování.
 
+msgid Mapping for {name}@{domain} not found!
+msgstr Mapování pro {name}@{domain} nenalezeno!
+
+msgid Mapping remove
+msgstr Mapování odstraněno.
+
+msgid Do you really want to remove mapping for {name}@{domain}?
+msgstr Opravdu chcete odstranit mapování pro {name}@{domain}?
+
+msgid Removing aborted.
+msgstr Odstranění zrušeno.
+
+msgid Mapping successfuly removed.
+msgstr Mapování úspěšně odstraněno.
+
 msgid Rule with name {name} already exists!
 msgstr Pravidlo jménem {name} již existuje!
 
@@ -408,9 +423,6 @@ msgstr Odstranění pravidla
 
 msgid Do you really want to remove rule {name}?
 msgstr Opravdu chcete odstranit pravidlo {name}?
-
-msgid Removing aborted.
-msgstr Odstranění zrušeno.
 
 msgid Rule {name} successfuly removed.
 msgstr Pravidlo jménem {name} úspěšně odstraněno.

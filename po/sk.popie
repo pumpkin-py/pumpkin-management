@@ -394,6 +394,21 @@ msgstr
 msgid Imported {count} mappings.
 msgstr
 
+msgid Mapping for {name}@{domain} not found!
+msgstr
+
+msgid Mapping remove
+msgstr
+
+msgid Do you really want to remove mapping for {name}@{domain}?
+msgstr
+
+msgid Removing aborted.
+msgstr
+
+msgid Mapping successfuly removed.
+msgstr
+
 msgid Rule with name {name} already exists!
 msgstr
 
@@ -407,9 +422,6 @@ msgid Rule remove
 msgstr
 
 msgid Do you really want to remove rule {name}?
-msgstr
-
-msgid Removing aborted.
 msgstr
 
 msgid Rule {name} successfuly removed.
