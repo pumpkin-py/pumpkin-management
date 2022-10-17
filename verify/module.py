@@ -731,7 +731,7 @@ class Verify(commands.Cog):
             data_file = tempfile.TemporaryFile()
             await ctx.message.attachments[0].save(data_file)
             data_file.seek(0)
-            csv_reader = csv.reader(data_file)
+            csv_reader = csv.reader(data_file, delimiter=";")
 
             count = 0
 
