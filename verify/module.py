@@ -789,6 +789,42 @@ class Verify(commands.Cog):
 
         await ctx.reply(_(ctx, "Rule {name} successfuly removed.").format(name=name))
 
+    @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="addgroups", aliases=["add-groups"])
+    async def verification_rule_addgroups(
+        self, ctx, name: str, groups: List[discord.Role]
+    ):
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
+
+        if not rule:
+            await ctx.reply(
+                _(ctx, "Rule with name {name} not found!").format(name=name)
+            )
+            return
+
+        group_ids = [group.id for group in groups]
+        rule.add_groups(group_ids)
+
+        await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=name))
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="removegroups", aliases=["remove-groups"])
+    async def verification_rule_removegroups(
+        self, ctx, name: str, groups: List[discord.Role]
+    ):
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
+
+        if not rule:
+            await ctx.reply(
+                _(ctx, "Rule with name {name} not found!").format(name=name)
+            )
+            return
+
+        group_ids = [group.id for group in groups]
+        rule.delete_groups(group_ids)
+
+        await ctx.reply(_(ctx, "Roles removed from rule {name}!").format(name=name))
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""
