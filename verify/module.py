@@ -520,6 +520,7 @@ class Verify(commands.Cog):
                     _(ctx, "Rule named {name} was not found!").format(name=rule_name)
                 )
                 return
+            rule = rule[0]
         else:
             rule = None
         VerifyMessage.set(ctx.guild.id, text, rule)
@@ -548,7 +549,7 @@ class Verify(commands.Cog):
         if rule_name:
             rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
             if rule:
-                message = rule.message
+                message = rule[0].message
             else:
                 await ctx.reply(
                     _(ctx, "Rule named {name} was not found!").format(name=rule_name)
@@ -758,7 +759,7 @@ class Verify(commands.Cog):
                         continue
 
                 VerifyMapping.add(
-                    guild_id=ctx.guild.id, username=username, domain=domain, rule=rule
+                    guild_id=ctx.guild.id, username=username, domain=domain, rule=rule[0]
                 )
 
         data_file.close()
@@ -797,7 +798,7 @@ class Verify(commands.Cog):
             await ctx.reply(_(ctx, "Removing aborted."))
             return
 
-        mapping.delete()
+        mapping[0].delete()
         await ctx.reply(_(ctx, "Mapping successfuly removed."))
 
     @commands.guild_only()
@@ -829,7 +830,7 @@ class Verify(commands.Cog):
             return
 
         role_ids = [role.id for role in roles]
-        rule.add_roles(role_ids)
+        rule[0].add_roles(role_ids)
 
         await ctx.reply(_(ctx, "Rule with name {name} added!").format(name=name))
 
@@ -863,7 +864,7 @@ class Verify(commands.Cog):
             await ctx.reply(_(ctx, "Removing aborted."))
             return
 
-        rule.delete()
+        rule[0].delete()
 
         await ctx.reply(_(ctx, "Rule {name} successfuly removed.").format(name=name))
 
@@ -908,6 +909,8 @@ class Verify(commands.Cog):
                 _(ctx, "Rule with name {name} not found!").format(name=name)
             )
             return
+            
+        rule = rule[0]
 
         embed = utils.discord.create_embed(
             author=ctx.author,
@@ -950,7 +953,7 @@ class Verify(commands.Cog):
             return
 
         role_ids = [role.id for role in roles]
-        rule.add_roles(role_ids)
+        rule[0].add_roles(role_ids)
 
         await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=name))
 
@@ -968,7 +971,7 @@ class Verify(commands.Cog):
             return
 
         role_ids = [role.id for role in roles]
-        rule.delete_roles(role_ids)
+        rule[0].delete_roles(role_ids)
 
         await ctx.reply(_(ctx, "Roles removed from rule {name}!").format(name=name))
 
