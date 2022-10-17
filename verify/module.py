@@ -245,10 +245,7 @@ class Verify(commands.Cog):
             )
             return
 
-        username, at, domain = db_member.address.rpartition("@")
-        mapping = VerifyMapping.map(
-            guild_id=ctx.guild.id, username=username, domain=domain
-        )
+        mapping = VerifyMapping.map(guild_id=ctx.guild.id, address=db_member.address)
 
         if not mapping or not mapping.rule or not mapping.rule.groups:
             await ctx.send(
@@ -827,7 +824,7 @@ class Verify(commands.Cog):
 
         Args:
             name: Rule name"""
-        rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
 
         if not rule:
             await ctx.reply(
@@ -907,10 +904,7 @@ class Verify(commands.Cog):
         if db_member[0].status != VerifyStatus.VERIFIED.value:
             return
 
-        username, at, domain = db_member.address.rpartition("@")
-        mapping = VerifyMapping.map(
-            guild_id=member.guild.id, username=username, domain=domain
-        )
+        mapping = VerifyMapping.map(guild_id=member.guild.id, email=db_member.address)
 
         if not mapping or not mapping.rule or not mapping.rule.groups:
             await guild_log.error(
@@ -1050,12 +1044,7 @@ class Verify(commands.Cog):
         :param ctx: Command context
         :param address: Supplied e-mail address
         """
-        # Make the address domain case insensitive
-        username, at, domain = address.rpartition("@")
-
-        mapping = VerifyMapping.map(
-            guild_id=ctx.guild.id, username=username, domain=domain
-        )
+        mapping = VerifyMapping.map(guild_id=ctx.guild.id, email=address)
 
         if not mapping or not mapping.rule:
             await guild_log.info(
