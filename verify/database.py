@@ -279,7 +279,9 @@ class VerifyMapping(database.base):
         return query.all()
 
     @staticmethod
-    def map(guild_id: int, username: str, domain: str) -> Optional[VerifyMapping]:
+    def map(
+        guild_id: int, username: str, domain: str, email: str
+    ) -> Optional[VerifyMapping]:
         """Maps the given username and domain to the guild rule.
 
         First it searches for exact username and domain.
@@ -289,13 +291,17 @@ class VerifyMapping(database.base):
 
         Args:
             guild_id: Discord ID of the guild.
-            username: Username to search for (empty string for guild / global rule)
-            domain: Domain to search for (empty string for global rule)
+            username: Username to search for (empty string for guild / global rule).
+            domain: Domain to search for (empty string for global rule).
+            email: Can be used instead of username and domain.
 
         Returns:
             VerifyMapping if user is mapped, None otherwise
 
         """
+
+        if email:
+            username, at, domain = email.lower().rpartition("@")
 
         query = (
             session.query(VerifyMapping)
