@@ -667,6 +667,9 @@ class Verify(commands.Cog):
         `˙˙username;domain;rule_name```
 
         Where username is the part before @ sign in email and domain is the part after @ sign.
+        
+        For domain global rule leave username empty.
+        For global rule leave username and domain empty.
 
         Args:
             wipe: Remove all mapping data and do clean import.
