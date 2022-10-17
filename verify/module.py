@@ -659,6 +659,13 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_mapping.command(name="info")
     async def verification_mapping_get(self, ctx, username: str, domain: str):
+        """Get mapping information by username and domain.
+        
+        Args:
+            username: Username. Leave empty (`""`) for domain default mapping.
+            domain: Domain. Leave empty (`""`) for guild default mapping.
+            
+        """
         await utils.discord.delete_message(ctx.message)
 
         mapping = VerifyMapping.map(
