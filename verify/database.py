@@ -27,7 +27,7 @@ class VerifyStatus(enum.Enum):
 
 
 class VerifyRule(database.base):
-    """Verify rules for assigning rules to groups and sending correct
+    """Verify rules for assigning roles to rules and sending correct
     message.
 
     The name must be unique per guild, as it's used to assign the right
@@ -36,7 +36,7 @@ class VerifyRule(database.base):
     :param idx: Unique ID used as foreign key.
     :param name: Name of the rule.
     :param guild_id: Guild ID.
-    :param groups: List of groups assigned to user.
+    :param roles: List of roles to assing to user.
     :param message: Message sent to the user.
     """
 
@@ -53,7 +53,7 @@ class VerifyRule(database.base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     guild_id = Column(BigInteger)
-    groups = relationship(lambda: VerifyGroup, back_populates="rule")
+    roles = relationship(lambda: VerifyRole, back_populates="rule")
     message = relationship(lambda: VerifyMessage, back_populates="rule")
 
     @staticmethod
@@ -99,30 +99,30 @@ class VerifyRule(database.base):
         session.add(rule)
         session.commit()
 
-    def add_groups(self, groups: List[int]):
-        """Add groups (Discord roles) to the rule. Skips existing groups.
+    def add_roles(self, roles: List[int]):
+        """Add Discord roles to the rule. Skips existing roles.
 
         Args:
-            groups: List of Discord role IDs.
+            roles: List of Discord role IDs.
         """
-        for group in self.groups:
-            if group.group_id in groups:
-                groups.remove(group.group_id)
+        for role in self.roles:
+            if role.role_id in roles:
+                roles.remove(role.role_id)
 
-        for group in groups:
-            groups.append(VerifyGroup(group_id=group, guild_id=self.guild_id))
+        for role in roles:
+            roles.append(VerifyRole(role_id=role, guild_id=self.guild_id))
 
         session.commit()
 
-    def delete_groups(self, groups: List[int]):
-        """Add groups (Discord roles) to the rule. Skips existing groups.
+    def delete_roles(self, roles: List[int]):
+        """Add Discord roles to the rule. Skips existing roles.
 
         Args:
-            groups: List of Discord role IDs.
+            roles: List of Discord role IDs.
         """
-        for group in self.groups:
-            if group.group_id in groups:
-                self.groups.remove(group.group_id)
+        for role in self.roles:
+            if role.role_id in roles:
+                self.roles.remove(role.role_id)
 
         session.commit()
 
@@ -136,7 +136,7 @@ class VerifyRule(database.base):
     def __repr__(self) -> str:
         return (
             f'<VerifyRule idx="{self.idx}" name="{self.name}" '
-            f'guild_id="{self.guild_id}" groups="{self.groups}" '
+            f'guild_id="{self.guild_id}" roles="{self.roles}" '
             f'message="{self.message}">'
         )
 
@@ -145,30 +145,30 @@ class VerifyRule(database.base):
             "idx": self.idx,
             "name": self.name,
             "guild_id": self.guild_id,
-            "groups": self.groups,
+            "roles": self.roles,
             "message": self.message,
         }
 
 
-class VerifyGroup(database.base):
+class VerifyRole(database.base):
     """Acts as discord role list for VerifyRule.
 
     :param rule_id: ID of the rule.
-    :param group_id: ID of Discord role to assign.
+    :param role_id: ID of Discord role to assign.
     :param guild_id: Guild ID.
     :param rule: Back reference to VerifyRule.
     """
 
-    __tablename__ = "mgmt_verify_groups"
+    __tablename__ = "mgmt_verify_roles"
 
     rule_id = Column(
         Integer,
         ForeignKey("mgmt_verify_rules.idx", cascade="all, delete-orphan"),
         primary_key=True,
     )
-    group_id = Column(BigInteger, primary_key=True)
+    role_id = Column(BigInteger, primary_key=True)
     guild_id = Column(BigInteger)
-    rule = relationship(lambda: VerifyRule, back_populates="groups")
+    rule = relationship(lambda: VerifyRule, back_populates="roles")
 
     def delete(self):
         session.delete(self)
@@ -176,15 +176,15 @@ class VerifyGroup(database.base):
 
     def __repr__(self) -> str:
         return (
-            f'<VerifyGroup rule_id="{self.rule_id}" '
-            f'group_id="{self.group_id}" guild_id="{self.guild_id}" '
+            f'<VerifyRole rule_id="{self.rule_id}" '
+            f'role_id="{self.role_id}" guild_id="{self.guild_id}" '
             f'rule="{self.rule}">'
         )
 
     def dump(self) -> dict:
         return {
             "rule_id": self.rule_id,
-            "group_id": self.group_id,
+            "role_id": self.role_id,
             "guild_id": self.guild_id,
             "rule": self.rule,
         }
@@ -207,7 +207,7 @@ class VerifyMapping(database.base):
     When imported, this DB is wiped.
 
     :param guild_id: ID of guild that owns the mapping.
-    :param rule_id: ID of rule to assign groups and send message.
+    :param rule_id: ID of rule to assign roles and send message.
     :param username: Part of email before @ (empty string to act as default value).
     :param domain: Part of email after @ (empty string to act as default value).
     :param rule: Relationship with :class:`VerifyRule` based on rule_id.

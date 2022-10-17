@@ -13,7 +13,7 @@ try:
     from pie.acl.database import ACLevelMappping
 except Exception:
     ACLevelMappping = None
-from ..verify.database import VerifyMember, VerifyStatus
+from ..verify.database import VerifyMember
 
 
 _ = i18n.Translator("modules/mgmt").translate

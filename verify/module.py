@@ -22,7 +22,7 @@ from pie import check, exceptions, i18n, logger, utils
 
 from .enums import VerifyStatus
 from .database import (
-    VerifyGroup,
+    VerifyRole,
     VerifyMapping,
     VerifyMember,
     VerifyMessage,
@@ -254,7 +254,7 @@ class Verify(commands.Cog):
             await guild_log.error(
                 ctx.author,
                 ctx.channel,
-                "Member could not be verified due to missing mapping, rule or rule groups. Rule name: {name}".format(
+                "Member could not be verified due to missing mapping, rule or roles. Rule name: {name}".format(
                     name=mapping.rule.name if mapping.rule else "(None)"
                 ),
             )
@@ -578,28 +578,30 @@ class Verify(commands.Cog):
 
         class Item:
             def __init__(self, message: VerifyMessage = None):
-                if not message:
+                if not message or not message.rule:
                     return
                 self.rule = message.rule.name
                 self.message = message.text
 
-        server_group = Item(VerifyGroup())
-        server_group.rule = _(ctx, "Server default")
-        server_group.message = getattr(
+        default_message = Item()
+        default_message.rule = _(ctx, "Server default")
+        default_message.message = getattr(
             VerifyMessage.get_default(ctx.guild.id),
             "message",
             _(ctx, "You have been verified, congratulations!"),
         )
-        groups = [server_group]
-        configured_groups = [Item(group) for group in VerifyGroup.get_all(ctx.guild.id)]
-        configured_groups = filter(
+        messages = [default_message]
+        configured_messages = [
+            Item(message) for message in VerifyMessage.get_all(ctx.guild.id)
+        ]
+        configured_messages = filter(
             lambda x: True if x.rule and x.message is not None else False,
-            configured_groups,
+            configured_messages,
         )
-        groups.extend(configured_groups)
+        messages.extend(configured_messages)
 
         table: List[str] = utils.text.create_table(
-            groups,
+            messages,
             header={
                 "rule": _(ctx, "Rule name"),
                 "message": _(ctx, "Message to send"),
@@ -752,7 +754,7 @@ class Verify(commands.Cog):
             return
 
         role_ids = [role.id for role in roles]
-        rule.add_groups(role_ids)
+        rule.add_roles(role_ids)
 
         await ctx.reply(_(ctx, "Rule with name {name} added!").format(name=name))
 
@@ -799,7 +801,7 @@ class Verify(commands.Cog):
         class Item:
             def __init__(self, rule):
                 self.name = rule.name
-                self.role_count = len(rule.groups)
+                self.role_count = len(rule.roles)
 
         items = []
 
@@ -843,18 +845,18 @@ class Verify(commands.Cog):
             value=_(ctx, "True") if rule.message else _(ctx, "False"),
         )
 
-        groups = []
+        roles = []
 
-        for group in rule.groups:
-            role = ctx.guild.get_role(group.group_id)
+        for db_role in rule.roles:
+            role = ctx.guild.get_role(db_role.role_id)
             if role:
-                groups.append(role.mention)
+                roles.append(role.mention)
             else:
-                groups.append(f"{group.group_id} (DELETED)")
+                roles.append(f"{db_role.role_id} (DELETED)")
 
         embed.add_field(
             name=_(ctx, "Assigned roles:"),
-            value="\n".join(groups),
+            value="\n".join(roles),
         )
 
         await ctx.reply(embed=embed)
@@ -862,7 +864,7 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="addroles", aliases=["add-roles"])
     async def verification_rule_addroles(
-        self, ctx, name: str, groups: List[discord.Role]
+        self, ctx, name: str, roles: List[discord.Role]
     ):
         rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
 
@@ -872,15 +874,15 @@ class Verify(commands.Cog):
             )
             return
 
-        group_ids = [group.id for group in groups]
-        rule.add_groups(group_ids)
+        role_ids = [role.id for role in roles]
+        rule.add_roles(role_ids)
 
         await ctx.reply(_(ctx, "Roles added to rule {name}!").format(name=name))
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="removeroles", aliases=["remove-roles"])
     async def verification_rule_removeroles(
-        self, ctx, name: str, groups: List[discord.Role]
+        self, ctx, name: str, roles: List[discord.Role]
     ):
         rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
 
@@ -890,8 +892,8 @@ class Verify(commands.Cog):
             )
             return
 
-        group_ids = [group.id for group in groups]
-        rule.delete_groups(group_ids)
+        role_ids = [role.id for role in roles]
+        rule.delete_roles(role_ids)
 
         await ctx.reply(_(ctx, "Roles removed from rule {name}!").format(name=name))
 
@@ -906,7 +908,7 @@ class Verify(commands.Cog):
 
         mapping = VerifyMapping.map(guild_id=member.guild.id, email=db_member.address)
 
-        if not mapping or not mapping.rule or not mapping.rule.groups:
+        if not mapping or not mapping.rule or not mapping.rule.roles:
             await guild_log.error(
                 member,
                 None,
@@ -916,7 +918,7 @@ class Verify(commands.Cog):
             )
             return
 
-        await self._add_roles(member, mapping.rule.groups)
+        await self._add_roles(member, mapping.rule.roles)
 
         # We need a channel to log the event in the guild log channel.
         # We are just picking the first one.
@@ -1163,12 +1165,12 @@ class Verify(commands.Cog):
                 )
                 return False
 
-    async def _add_roles(self, member: discord.Member, groups: List[VerifyGroup]):
+    async def _add_roles(self, member: discord.Member, db_roles: List[VerifyRole]):
         """Add roles to the member."""
 
         roles: List[discord.Role] = list()
-        for group in groups:
-            role = member.guild.get_role(group.group_id)
+        for db_role in db_roles:
+            role = member.guild.get_role(db_role.role_id)
             if role:
                 roles.append(role)
             else:
@@ -1176,7 +1178,7 @@ class Verify(commands.Cog):
                     member,
                     None,
                     "Role with ID {id} could not be found! Rule: {name}.".format(
-                        id=group.group_id, name=group.rule.name
+                        id=db_role.role_id, name=db_role.rule.name
                     ),
                 )
         await member.add_roles(*roles)
