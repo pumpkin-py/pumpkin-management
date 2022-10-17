@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+import csv
 import os
 import random
 import smtplib
@@ -648,6 +649,67 @@ class Verify(commands.Cog):
                 "Member verification status of **{member}** has been updated to **{status}**.",
             ).format(member=utils.text.sanitise(member.display_name), status=status),
         )
+        
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
+    @verification.group(name="mapping")
+    async def verification_mapping(self, ctx):
+        await utils.discord.send_help(ctx)
+    
+    @check.acl2(check.ACLevel.MOD)
+    @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
+    @mapping.command(name="import")
+    async def verification_mapping_import(self, ctx, wipe: bool = False):
+        """Import mapping data.
+        
+        The file must be CSV and must have this format:
+        `˙˙username;domain;rule_name```
+        
+        Where username is the part before @ sign in email and domain is the part after @ sign.
+        
+        Args:
+            wipe: Remove all mapping data and do clean import.
+        """
+        if len(ctx.message.attachments) != 1:
+            await ctx.reply(_(ctx, "I'm expecting one CSV file."))
+            return
+        if not ctx.message.attachments[0].filename.lower().endswith("json"):
+            await ctx.reply(_(ctx, "Supported format is only CSV."))
+            return
+        await ctx.reply(_(ctx, "Processing. Make a coffee, it may take a while."))
+        
+        if wipe:
+            async with ctx.typing():
+                wiped = VerifyMapping.wipe(ctx.guild_id)
+                await ctx.reply(_(ctx, "Wiped {wiped} mappings.").format(wiped=wiped)
+        
+        async with ctx.typing():
+            data_file = tempfile.TemporaryFile()
+            await ctx.message.attachments[0].save(data_file)
+            data_file.seek(0)
+            csv_reader = csv.reader(data_file)
+            
+            count = 0
+            
+            for row in csv_reader:
+                count += 1
+                if len(row) != 3:
+                    await ctx.reply(_(ctx, "Row {row} has invalid number of columns!").format(row=count))
+                    continue
+                    
+                username, domain, rule_name = row
+                
+                rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+                
+                if not rule:
+                    await ctx.reply(_(ctx, "Row {row} has invalid rule name {name}!").format(row=count, name=rule_name))
+                    continue
+                    
+                VerifyMapping.add(guild_id=ctx.guild.id, username=username, domain=domain)
+            
+        data_file.close()
+        
+        await ctx.reply(_("Imported {count} mappings.").format(count=count))
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
