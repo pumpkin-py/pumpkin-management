@@ -658,7 +658,7 @@ class Verify(commands.Cog):
     
     @check.acl2(check.ACLevel.MOD)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
-    @mapping.command(name="import")
+    @verification_mapping.command(name="import")
     async def verification_mapping_import(self, ctx, wipe: bool = False):
         """Import mapping data.
         
@@ -711,6 +711,34 @@ class Verify(commands.Cog):
         
         await ctx.reply(_("Imported {count} mappings.").format(count=count))
 
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
+    @verification.group(name="rule")
+    async def verification_rule(self, ctx):
+        await utils.discord.send_help(ctx)
+        
+    @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="add")
+    async def verification_rule_add(self, ctx, name: str, groups: List[discord.Role]):
+        """Add new verification rule. Name must be unique.
+        
+        Assign Discord groups to rule (if provided).
+        
+        Rule without roles will not work in verification process and must be added later on!
+        
+        Args:
+            name: Name of the rule.
+            groups: List of Discord roles (optional)
+        
+        """
+        rule = VerifyRule.add(guild_id=ctx.guild.id, name=name)
+        
+        if not rule:
+            await ctx.reply(_(ctx, "Rule with name {name} already exists!").format(name=name))
+        else:
+            group_ids = [group.id for group in groups]
+            rule.add_groups(group_ids)
+    
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""
