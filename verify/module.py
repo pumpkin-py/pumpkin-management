@@ -796,6 +796,7 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="list")
     async def verification_rule_list(self, ctx):
+        """List all rules."""
         rules = VerifyRule.get(guild_id=ctx.guild.id)
 
         class Item:
