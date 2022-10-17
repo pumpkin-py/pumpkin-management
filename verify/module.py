@@ -487,14 +487,27 @@ class Verify(commands.Cog):
         )
 
     @commands.guild_only()
-    @check.acl2(check.ACLevel.SUBMOD)
-    @commands.group(name="welcome-message")
-    async def welcome_message(self, ctx):
+    @check.acl2(check.ACLevel.MOD)
+    @commands.group(name="verification")
+    async def verification(self, ctx):
         await utils.discord.send_help(ctx)
 
     @check.acl2(check.ACLevel.MOD)
-    @welcome_message.command(name="set")
-    async def welcome_message_set(self, ctx, rule_name: str, *, text):
+    @verification.command(name="statistics", aliases=["stats"])
+    async def verification_statistics(self, ctx):
+        """Filter the data by verify status."""
+        # TODO
+        pass
+
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.SUBMOD)
+    @verification.group(name="message")
+    async def verification_message(self, ctx):
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_message.command(name="set")
+    async def verification_message_set(self, ctx, rule_name: str, *, text):
         """Set post verification message for your guild or a rule.
 
         Args:
@@ -528,8 +541,8 @@ class Verify(commands.Cog):
         )
 
     @check.acl2(check.ACLevel.MOD)
-    @welcome_message.command(name="unset")
-    async def welcome_message_unset(self, ctx, rule_name: str):
+    @verification_message.command(name="unset")
+    async def verification_message_unset(self, ctx, rule_name: str):
         """Unset verification message for your guild or a rule.
 
         Args:
@@ -562,8 +575,8 @@ class Verify(commands.Cog):
         )
 
     @check.acl2(check.ACLevel.SUBMOD)
-    @welcome_message.command(name="list")
-    async def welcome_message_list(self, ctx):
+    @verification_message.command(name="list")
+    async def verification_message_list(self, ctx):
         """Show verification messages."""
 
         class Item:
@@ -597,19 +610,6 @@ class Verify(commands.Cog):
         )
         for page in table:
             await ctx.send("```" + page + "```")
-
-    @commands.guild_only()
-    @check.acl2(check.ACLevel.MOD)
-    @commands.group(name="verification")
-    async def verification(self, ctx):
-        await utils.discord.send_help(ctx)
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification.command(name="statistics", aliases=["stats"])
-    async def verification_statistics(self, ctx):
-        """Filter the data by verify status."""
-        # TODO
-        pass
 
     @check.acl2(check.ACLevel.MOD)
     @verification.command(name="update")
@@ -703,19 +703,20 @@ class Verify(commands.Cog):
                     continue
 
                 username, domain, rule_name = row
+                rule = None
 
-                rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
-
-                if not rule:
-                    await ctx.reply(
-                        _(ctx, "Row {row} has invalid rule name {name}!").format(
-                            row=count, name=rule_name
+                if len(rule_name):
+                    rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+                    if not rule:
+                        await ctx.reply(
+                            _(ctx, "Row {row} has invalid rule name {name}!").format(
+                                row=count, name=rule_name
+                            )
                         )
-                    )
-                    continue
+                        continue
 
                 VerifyMapping.add(
-                    guild_id=ctx.guild.id, username=username, domain=domain
+                    guild_id=ctx.guild.id, username=username, domain=domain, rule=rule
                 )
 
         data_file.close()
