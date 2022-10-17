@@ -20,13 +20,13 @@ from discord.ext import commands
 import pie.database.config
 from pie import check, exceptions, i18n, logger, utils
 
-from .enums import VerifyStatus
 from .database import (
     VerifyRole,
     VerifyMapping,
     VerifyMember,
     VerifyMessage,
     VerifyRule,
+    VerifyStatus,
 )
 
 
