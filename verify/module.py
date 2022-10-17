@@ -673,19 +673,18 @@ class Verify(commands.Cog):
             guild_id=ctx.guild.id, username=username, domain=domain
         )
 
-        embed = utils.discord.create_embed(
-            author=ctx.author,
-            title=_(ctx, "Mapping for {username}@{domain}").format(
+        if username or domain:
+            title = _(ctx, "Default mapping")
+            mapping_name = _(ctx, "Default")
+        else:
+            title = _(ctx, "Mapping for {username}@{domain}").format(
                 username=username, domain=domain
             )
-            if username or domain
-            else _(ctx, "Default mapping"),
-        )
+            mapping_name = mapping.username + "@" + mapping.domain
 
-        embed.add_field(
-            name=_(ctx, "Applied mapping:"),
-            value=(mapping.username + "@" + mapping.domain) if mapping else "-",
-        )
+        embed = utils.discord.create_embed(author=ctx.author, title=title)
+
+        embed.add_field(name=_(ctx, "Applied mapping:"), value=mapping_name)
 
         embed.add_field(
             name=_(ctx, "Verification allowed:"),
@@ -726,7 +725,7 @@ class Verify(commands.Cog):
 
         if wipe:
             async with ctx.typing():
-                wiped = VerifyMapping.wipe(ctx.guild_id)
+                wiped = VerifyMapping.wipe(ctx.guild.id)
                 await ctx.reply(_(ctx, "Wiped {wiped} mappings.").format(wiped=wiped))
 
         async with ctx.typing():

@@ -361,6 +361,12 @@ msgstr Tento užívateľ nie je v databáze.
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikačný statu užívateľa **{member}** bol aktualizovaný na **{status}**.
 
+msgid Default mapping
+msgstr
+
+msgid Default
+msgstr
+
 msgid Mapping for {username}@{domain}
 msgstr
 
