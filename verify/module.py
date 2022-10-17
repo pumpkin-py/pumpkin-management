@@ -352,9 +352,22 @@ class Verify(commands.Cog):
         await utils.discord.delete_message(ctx.message)
 
     @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
+    @commands.group(name="verification")
+    async def verification(self, ctx):
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification.command(name="statistics", aliases=["stats"])
+    async def verification_statistics(self, ctx):
+        """Filter the data by verify status."""
+        # TODO
+        pass
+
+    @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
-    @commands.command()
-    async def groupstrip(self, ctx, *members: Union[discord.Member, int]):
+    @verification.command(name="groupstrip")
+    async def verification_groupstrip(self, ctx, *members: Union[discord.Member, int]):
         """Remove all roles and reset verification status to None
         from multiple users. Users are not notified about this."""
         removed_db: int = 0
@@ -429,8 +442,8 @@ class Verify(commands.Cog):
 
     @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
-    @commands.command()
-    async def grouprolestrip(self, ctx, role: discord.Role):
+    @verification.command(name="grouprolestrip")
+    async def verification_grouprolestrip(self, ctx, role: discord.Role):
         """Remove all roles and reset verification status to None
         from all the users that have given role. Users are not notified
         about this.
@@ -485,19 +498,6 @@ class Verify(commands.Cog):
             f"Removed {removed_db} database entries and "
             f"stripped {removed_dc} members with group role strip on {role.name}.",
         )
-
-    @commands.guild_only()
-    @check.acl2(check.ACLevel.MOD)
-    @commands.group(name="verification")
-    async def verification(self, ctx):
-        await utils.discord.send_help(ctx)
-
-    @check.acl2(check.ACLevel.MOD)
-    @verification.command(name="statistics", aliases=["stats"])
-    async def verification_statistics(self, ctx):
-        """Filter the data by verify status."""
-        # TODO
-        pass
 
     @commands.guild_only()
     @check.acl2(check.ACLevel.SUBMOD)
