@@ -821,6 +821,48 @@ class Verify(commands.Cog):
             await ctx.send("```" + page + "```")
 
     @check.acl2(check.ACLevel.MOD)
+    @verification_rule.command(name="list")
+    async def verification_rule_info(self, ctx, name):
+        """Show information about rule.
+
+        Args:
+            name: Rule name"""
+        rule = VerifyRule.get(guild_id=ctx.guild.id, name=rule_name)
+
+        if not rule:
+            await ctx.reply(
+                _(ctx, "Rule with name {name} not found!").format(name=name)
+            )
+            return
+
+        embed = utils.discord.create_embed(
+            author=ctx.author,
+            title=_(ctx, "Rule information"),
+            description=rule.name,
+        )
+
+        embed.add_field(
+            name=_(ctx, "Has custom message:"),
+            value=_(ctx, "True") if rule.message else _(ctx, "False"),
+        )
+
+        groups = []
+
+        for group in rule.groups:
+            role = ctx.guild.get_role(group.group_id)
+            if role:
+                groups.append(role.mention)
+            else:
+                groups.append(f"{group.group_id} (DELETED)")
+
+        embed.add_field(
+            name=_(ctx, "Assigned groups:"),
+            value="\n".join(groups),
+        )
+
+        await ctx.reply(embed=embed)
+
+    @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="addgroups", aliases=["add-groups"])
     async def verification_rule_addgroups(
         self, ctx, name: str, groups: List[discord.Role]
