@@ -13,6 +13,7 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import relationship
 
@@ -69,7 +70,7 @@ class VerifyRule(database.base):
         query = session.query(VerifyRule).filter_by(guild_id=guild_id)
 
         if name:
-            query = query.filter(VerifyRule.name.ilike(name))
+            query = query.filter(func.lower(VerifyRule.name) == func.lower(name))
 
         return query.all()
 
@@ -87,7 +88,7 @@ class VerifyRule(database.base):
         query = (
             session.query(VerifyRule)
             .filter_by(guild_id=guild_id)
-            .filter(VerifyRule.name.ilike(name))
+            .filter(func.lower(VerifyRule.name) == func.lower(name))
             .one_or_none()
         )
 
@@ -272,9 +273,11 @@ class VerifyMapping(database.base):
         if rule:
             query = query.filter_by(rule=rule)
         if username:
-            query = query.filter(VerifyMapping.username.ilike(username))
+            query = query.filter(
+                func.lower(VerifyMapping.username) == func.lower(username)
+            )
         if domain:
-            query = query.filter(VerifyMapping.domain.ilike(domain))
+            query = query.filter(func.lower(VerifyMapping.domain) == func.lower(domain))
 
         return query.all()
 
@@ -306,6 +309,8 @@ class VerifyMapping(database.base):
         query = (
             session.query(VerifyMapping)
             .filter_by(guild_id=guild_id, username=username, domain=domain)
+            .filter(func.lower(VerifyMapping.username) == func.lower(username))
+            .filter(func.lower(VerifyMapping.domain) == func.lower(domain))
             .one_or_none()
         )
 
@@ -434,7 +439,9 @@ class VerifyMember(database.base):
         if user_id:
             query = query.filter_by(user_id=user_id)
         if address:
-            query = query.filter(VerifyMember.address.ilike(address))
+            query = query.filter(
+                func.lower(VerifyMember.address) == func.lower(address)
+            )
 
         return query.all()
 
