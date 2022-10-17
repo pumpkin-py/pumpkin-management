@@ -519,15 +519,15 @@ class VerifyMessage(database.base):
         """
         rule_id = rule.idx if rule else None
         db_message = session.query(VerifyMessage).filter_by(
-            quild_id=guild_id, rule_id=rule_id
-        )
+            guild_id=guild_id, rule_id=rule_id
+        ).one_or_none()
 
         if not db_message:
-            message = VerifyMessage(guild_id=guild_id, rule_id=rule_id)
+            db_message = VerifyMessage(guild_id=guild_id, rule_id=rule_id)
 
         db_message.message = message
 
-        session.merge(message)
+        session.merge(db_message)
         session.commit()
 
     @staticmethod

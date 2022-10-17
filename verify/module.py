@@ -528,7 +528,7 @@ class Verify(commands.Cog):
             _(
                 ctx,
                 "Message has been set for rule {rule}.",
-            ).format(role=_(ctx, "(Guild)") if not len(rule_name) else rule_name)
+            ).format(rule=_(ctx, "(Guild)") if not len(rule_name) else rule_name)
         )
         await guild_log.info(
             ctx.author,
@@ -579,10 +579,8 @@ class Verify(commands.Cog):
 
         class Item:
             def __init__(self, message: VerifyMessage = None):
-                if not message or not message.rule:
-                    return
-                self.rule = message.rule.name
-                self.message = message.text
+                self.rule = message.rule.name if message and message.rule else None
+                self.message = message.message if message else None
 
         default_message = Item()
         default_message.rule = _(ctx, "Server default")
