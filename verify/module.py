@@ -21,10 +21,10 @@ import pie.database.config
 from pie import check, exceptions, i18n, logger, utils
 
 from .database import (
-    VerifyRole,
     VerifyMapping,
     VerifyMember,
     VerifyMessage,
+    VerifyRole,
     VerifyRule,
     VerifyStatus,
 )
@@ -682,7 +682,7 @@ class Verify(commands.Cog):
 
         embed.add_field(
             name=_(ctx, "Applied mapping:"),
-            value=mapping.username + "@" + mapping.domain if mapping else "-",
+            value=(mapping.username + "@" + mapping.domain) if mapping else "-",
         )
 
         embed.add_field(
@@ -717,7 +717,7 @@ class Verify(commands.Cog):
         if len(ctx.message.attachments) != 1:
             await ctx.reply(_(ctx, "I'm expecting one CSV file."))
             return
-        if not ctx.message.attachments[0].filename.lower().endswith("json"):
+        if not ctx.message.attachments[0].filename.lower().endswith("csv"):
             await ctx.reply(_(ctx, "Supported format is only CSV."))
             return
         await ctx.reply(_(ctx, "Processing. Make a coffee, it may take a while."))
@@ -908,7 +908,7 @@ class Verify(commands.Cog):
             await ctx.send("```" + page + "```")
 
     @check.acl2(check.ACLevel.MOD)
-    @verification_rule.command(name="list")
+    @verification_rule.command(name="info")
     async def verification_rule_info(self, ctx, name):
         """Show information about rule.
 

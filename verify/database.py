@@ -54,7 +54,9 @@ class VerifyRule(database.base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     guild_id = Column(BigInteger)
-    roles = relationship(lambda: VerifyRole, back_populates="rule", cascade="all, delete-orphan")
+    roles = relationship(
+        lambda: VerifyRole, back_populates="rule", cascade="all, delete-orphan"
+    )
     message = relationship(lambda: VerifyMessage, back_populates="rule")
 
     @staticmethod
@@ -111,7 +113,7 @@ class VerifyRule(database.base):
                 roles.remove(role.role_id)
 
         for role in roles:
-            roles.append(VerifyRole(role_id=role, guild_id=self.guild_id))
+            self.roles.append(VerifyRole(role_id=role, guild_id=self.guild_id))
 
         session.commit()
 
@@ -129,9 +131,6 @@ class VerifyRule(database.base):
 
     def delete(self):
         session.delete(self)
-        session.commit()
-
-    def save(self):
         session.commit()
 
     def __repr__(self) -> str:
@@ -304,7 +303,7 @@ class VerifyMapping(database.base):
         """
 
         if email:
-            username, at, domain = email.lower().rpartition("@")
+            username, domain = email.lower().rsplit("@", 1)
 
         query = (
             session.query(VerifyMapping)
@@ -517,14 +516,14 @@ class VerifyMessage(database.base):
             rule: VerifyRule the message is assigned to.
         """
         rule_id = rule.idx if rule else None
-        message = session.query(VerifyMessage).filter_by(
+        db_message = session.query(VerifyMessage).filter_by(
             quild_id=guild_id, rule_id=rule_id
         )
 
-        if not message:
+        if not db_message:
             message = VerifyMessage(guild_id=guild_id, rule_id=rule_id)
 
-        message.message = message
+        db_message.message = message
 
         session.merge(message)
         session.commit()
