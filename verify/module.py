@@ -758,16 +758,10 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="remove")
     async def verification_rule_remove(self, ctx, name: str):
-        """Add new verification rule. Name must be unique.
-
-        Assign Discord groups to rule (if provided).
-
-        Rule without roles will not work in verification process and must be added later on!
+        """Remove verification rule.
 
         Args:
             name: Name of the rule.
-            groups: List of Discord roles (optional)
-
         """
         rule = VerifyRule.get(guild_id=ctx.guild.id, name=name)
 
