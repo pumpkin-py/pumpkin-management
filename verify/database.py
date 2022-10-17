@@ -54,7 +54,7 @@ class VerifyRule(database.base):
     idx = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     guild_id = Column(BigInteger)
-    roles = relationship(lambda: VerifyRole, back_populates="rule")
+    roles = relationship(lambda: VerifyRole, back_populates="rule", cascade="all, delete-orphan")
     message = relationship(lambda: VerifyMessage, back_populates="rule")
 
     @staticmethod
@@ -164,7 +164,7 @@ class VerifyRole(database.base):
 
     rule_id = Column(
         Integer,
-        ForeignKey("mgmt_verify_rules.idx", cascade="all, delete-orphan"),
+        ForeignKey("mgmt_verify_rules.idx", ondelete="CASCADE"),
         primary_key=True,
     )
     role_id = Column(BigInteger, primary_key=True)
