@@ -245,9 +245,9 @@ class Verify(commands.Cog):
             )
             return
 
-        mapping = VerifyMapping.map(guild_id=ctx.guild.id, address=db_member.address)
+        mapping = VerifyMapping.map(guild_id=ctx.guild.id, email=db_member.address)
 
-        if not mapping or not mapping.rule or not mapping.rule.groups:
+        if not mapping or not mapping.rule or not mapping.rule.roles:
             await ctx.send(
                 _(ctx, "Could not assign roles. Please contact moderator team.")
             )
@@ -260,7 +260,7 @@ class Verify(commands.Cog):
             )
             return
 
-        await self._add_roles(ctx.author, mapping.rule.groups)
+        await self._add_roles(ctx.author, mapping.rule.roles)
 
         config_message = mapping.rule.message
 
@@ -330,7 +330,7 @@ class Verify(commands.Cog):
 
         message: str = "Stripped"
         if db_member:
-            db_member.remove()
+            db_member.delete()
             message += " and removed from database"
         message += "."
         await guild_log.info(ctx.author, ctx.channel, message)
@@ -399,7 +399,7 @@ class Verify(commands.Cog):
 
                 db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member_id)
                 if db_member:
-                    db_member[0].remove()
+                    db_member[0].delete()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.is_assignable()]
@@ -472,7 +472,7 @@ class Verify(commands.Cog):
             for member in role.members:
                 db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member.id)
                 if db_member:
-                    db_member[0].remove()
+                    db_member[0].delete()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [r for r in member.roles if r.is_assignable()]
@@ -659,7 +659,7 @@ class Verify(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @verification_mapping.command(name="info")
-    async def verification_mapping_get(self, ctx, username: str, domain: str):
+    async def verification_mapping_info(self, ctx, username: str, domain: str):
         """Get mapping information by username and domain.
 
         Args:
@@ -677,7 +677,9 @@ class Verify(commands.Cog):
             author=ctx.author,
             title=_(ctx, "Mapping for {username}@{domain}").format(
                 username=username, domain=domain
-            ),
+            )
+            if username or domain
+            else _(ctx, "Default mapping"),
         )
 
         embed.add_field(
@@ -704,7 +706,7 @@ class Verify(commands.Cog):
         """Import mapping data.
 
         The file must be CSV and must have this format:
-        `˙˙username;domain;rule_name```
+        ```username;domain;rule_name```
 
         Where username is the part before @ sign in email and domain is the part after @ sign.
 
@@ -728,10 +730,11 @@ class Verify(commands.Cog):
                 await ctx.reply(_(ctx, "Wiped {wiped} mappings.").format(wiped=wiped))
 
         async with ctx.typing():
-            data_file = tempfile.TemporaryFile()
-            await ctx.message.attachments[0].save(data_file)
-            data_file.seek(0)
-            csv_reader = csv.reader(data_file, delimiter=";")
+            data_file = tempfile.NamedTemporaryFile()
+            await ctx.message.attachments[0].save(data_file.name)
+            file = open(data_file.name, "rt")
+
+            csv_reader = csv.reader(file, delimiter=";")
 
             count = 0
 
@@ -757,14 +760,16 @@ class Verify(commands.Cog):
                             )
                         )
                         continue
+                    rule = rule[0]
 
                 VerifyMapping.add(
                     guild_id=ctx.guild.id,
                     username=username,
                     domain=domain,
-                    rule=rule[0],
+                    rule=rule,
                 )
 
+        file.close()
         data_file.close()
 
         await ctx.reply(_(ctx, "Imported {count} mappings.").format(count=count))
@@ -821,7 +826,7 @@ class Verify(commands.Cog):
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="add")
-    async def verification_rule_add(self, ctx, name: str, roles: List[discord.Role]):
+    async def verification_rule_add(self, ctx, name: str, *roles: discord.Role):
         """Add new verification rule. Name must be unique.
 
         Assign Discord roles to rule (if provided).
@@ -946,15 +951,15 @@ class Verify(commands.Cog):
 
         embed.add_field(
             name=_(ctx, "Assigned roles:"),
-            value="\n".join(roles),
+            value=", ".join(roles) if roles else "-",
+            inline=False,
         )
-
         await ctx.reply(embed=embed)
 
     @check.acl2(check.ACLevel.MOD)
     @verification_rule.command(name="addroles", aliases=["add-roles"])
     async def verification_rule_addroles(
-        self, ctx, rule_name: str, roles: List[discord.Role]
+        self, ctx, rule_name: str, *roles: discord.Role
     ):
         """Add Discord roles to verification rule.
 

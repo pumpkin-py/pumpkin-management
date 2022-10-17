@@ -77,7 +77,7 @@ class VerifyRule(database.base):
         return query.all()
 
     @staticmethod
-    def add(guild_id: int, name: str) -> VerifyRule:
+    def add(guild_id: int, name: str) -> Optional[VerifyRule]:
         """Add VerifyRule to DB. Name must be unique for each guild.
 
         Args:
@@ -282,7 +282,7 @@ class VerifyMapping(database.base):
 
     @staticmethod
     def map(
-        guild_id: int, username: str, domain: str, email: str
+        guild_id: int, username: str = None, domain: str = None, email: str = None
     ) -> Optional[VerifyMapping]:
         """Maps the given username and domain to the guild rule.
 
@@ -301,15 +301,17 @@ class VerifyMapping(database.base):
             VerifyMapping if user is mapped, None otherwise
 
         """
-
         if email:
-            username, domain = email.lower().rsplit("@", 1)
+            username, domain = email.rsplit("@", 1)
+
+        if username is None and domain is None:
+            raise ValueError("Username and domain can't be empty!")
 
         query = (
             session.query(VerifyMapping)
             .filter_by(guild_id=guild_id, username=username, domain=domain)
-            .filter(func.lower(VerifyMapping.username) == func.lower(username))
-            .filter(func.lower(VerifyMapping.domain) == func.lower(domain))
+            .filter(func.lower(VerifyMapping.username) == username.lower())
+            .filter(func.lower(VerifyMapping.domain) == domain.lower())
             .one_or_none()
         )
 
