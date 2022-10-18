@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import discord
 from discord.ext import commands
@@ -127,9 +127,10 @@ class Whois(commands.Cog):
         elif type(member) == int:
             user_id = member
 
+        db_members: List[VerifyMember]
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=user_id)
         db_member: Optional[VerifyMember]
-        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=user_id)
-        db_member = db_member[0] if db_member else None
+        db_member = db_members[0] if db_members else None
 
         if db_member and dc_member is None:
             dc_member = ctx.guild.get_member(db_member.user_id)
@@ -145,15 +146,17 @@ class Whois(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def rwhois(self, ctx, address: str):
-        db_member = VerifyMember.get(guild_id=ctx.guild.id, address=address)
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, address=address)
 
-        if not db_member:
+        if not db_members:
             await ctx.reply(_(ctx, "Member is not in a database."))
             return
 
-        dc_member = ctx.guild.get_member(db_member[0].user_id)
+        db_member = db_members[0]
 
-        await self._whois_reply(ctx, db_member[0], dc_member)
+        dc_member = ctx.guild.get_member(db_member.user_id)
+
+        await self._whois_reply(ctx, db_member, dc_member)
         await guild_log.info(
             ctx.author, ctx.channel, f"Reverse whois lookup for {address}."
         )

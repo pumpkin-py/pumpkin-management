@@ -498,9 +498,11 @@ class VerifyMessage(database.base):
         :param rule: VerifyRule the message is assigned to.
         """
         rule_id = rule.idx if rule else None
-        db_message = session.query(VerifyMessage).filter_by(
-            guild_id=guild_id, rule_id=rule_id
-        ).one_or_none()
+        db_message = (
+            session.query(VerifyMessage)
+            .filter_by(guild_id=guild_id, rule_id=rule_id)
+            .one_or_none()
+        )
 
         if not db_message:
             db_message = VerifyMessage(guild_id=guild_id, rule_id=rule_id)

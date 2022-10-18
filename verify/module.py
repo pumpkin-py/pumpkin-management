@@ -197,8 +197,8 @@ class Verify(commands.Cog):
             )
             return
 
-        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
-        if not db_member or db_member[0].code is None:
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
+        if not db_members or db_members[0].code is None:
             await ctx.send(
                 _(ctx, "{mention} You have to request the code first.").format(
                     mention=ctx.author.mention
@@ -207,7 +207,7 @@ class Verify(commands.Cog):
             )
             return
 
-        db_member = db_member[0]
+        db_member = db_members[0]
 
         if db_member.status != VerifyStatus.PENDING:
             await guild_log.info(
@@ -291,9 +291,9 @@ class Verify(commands.Cog):
     @commands.command(name="strip")
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
-        db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
-        if db_member:
-            db_member = db_member[0]
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
+        if db_members:
+            db_member = db_members[0]
 
         if db_member and db_member.status.value < VerifyStatus.NONE.value:
             await guild_log.info(
@@ -397,9 +397,10 @@ class Verify(commands.Cog):
                 else:
                     member_id = member.id
 
-                db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member_id)
-                if db_member:
-                    db_member[0].delete()
+                db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=member_id)
+                if db_members:
+                    db_member = db_members[0]
+                    db_member.delete()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [role for role in member.roles if role.is_assignable()]
@@ -470,9 +471,10 @@ class Verify(commands.Cog):
 
         async with ctx.typing():
             for member in role.members:
-                db_member = VerifyMember.get(guild_id=ctx.guild.id, user_id=member.id)
-                if db_member:
-                    db_member[0].delete()
+                db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=member.id)
+                if db_members:
+                    db_member = db_members[0]
+                    db_member.delete()
                     removed_db += 1
                 if len(getattr(member, "roles", [])) > 1:
                     roles = [r for r in member.roles if r.is_assignable()]
@@ -1006,10 +1008,13 @@ class Verify(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""
-        db_member = VerifyMember.get(guild_id=member.guild.id, user_id=member.id)
-        if not db_member:
+        db_members = VerifyMember.get(guild_id=member.guild.id, user_id=member.id)
+        if not db_members:
             return
-        if db_member[0].status != VerifyStatus.VERIFIED.value:
+
+        db_member = db_members[0]
+
+        if db_member.status != VerifyStatus.VERIFIED.value:
             return
 
         mapping = VerifyMapping.map(guild_id=member.guild.id, email=db_member.address)
@@ -1037,11 +1042,12 @@ class Verify(commands.Cog):
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member: Union[discord.Member, discord.User]):
         """When the member is banned, update the database status."""
-        db_member = VerifyMember.get(guild_id=guild.id, user_id=member.id)
+        db_members = VerifyMember.get(guild_id=guild.id, user_id=member.id)
 
-        if db_member:
-            db_member[0].status = VerifyStatus.BANNED.value
-            db_member[0].save()
+        if db_members:
+            db_member = db_members[0]
+            db_member.status = VerifyStatus.BANNED.value
+            db_member.save()
             await guild_log.info(
                 member,
                 member.guild.text_channels[0],
@@ -1109,9 +1115,9 @@ class Verify(commands.Cog):
         :param ctx: Command context
         :param address: Supplied e-mail address
         """
-        db_member = VerifyMember.get(guild_id=ctx.guild.id, address=address)
-        if db_member:
-            db_member = db_member[0]
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, address=address)
+        if db_members:
+            db_member = db_members[0]
             dc_member: Optional[discord.User] = self.bot.get_user(db_member.user_id)
             dc_member_str: str = (
                 f"'{utils.text.sanitise(dc_member.name)}' ({db_member.user_id})"
