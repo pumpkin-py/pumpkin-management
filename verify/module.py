@@ -701,7 +701,9 @@ class Verify(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @commands.max_concurrency(1, per=commands.BucketType.default, wait=False)
     @verification_mapping.command(name="import")
-    async def verification_mapping_import(self, ctx, wipe: bool = False):
+    async def verification_mapping_import(
+        self, ctx, attachment: discord.Attachment, wipe: bool = False
+    ):
         """Import mapping data.
 
         The file must be CSV and must have this format:
@@ -713,12 +715,10 @@ class Verify(commands.Cog):
         For global rule leave username and domain empty.
 
         Args:
+            attachment: CSV file with mapping data
             wipe: Remove all mapping data and do clean import.
         """
-        if len(ctx.message.attachments) != 1:
-            await ctx.reply(_(ctx, "I'm expecting one CSV file."))
-            return
-        if not ctx.message.attachments[0].filename.lower().endswith("csv"):
+        if not attachment.filename.lower().endswith("csv"):
             await ctx.reply(_(ctx, "Supported format is only CSV."))
             return
         await ctx.reply(_(ctx, "Processing. Make a coffee, it may take a while."))
@@ -730,7 +730,7 @@ class Verify(commands.Cog):
 
         async with ctx.typing():
             data_file = tempfile.NamedTemporaryFile()
-            await ctx.message.attachments[0].save(data_file.name)
+            await attachment.save(data_file.name)
             file = open(data_file.name, "rt")
 
             csv_reader = csv.reader(file, delimiter=";")
