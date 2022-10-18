@@ -63,11 +63,9 @@ class VerifyRule(database.base):
     def get(guild_id: int, name: str = None) -> List[VerifyRule]:
         """Get guild rules.
 
-        Args:
-            guild_id: ID of the guild
-            name: Search name (optional)
-        Returns:
-            List of VerifyRule
+        :param guild_id: ID of the guild
+        :param name: Search name (optional)
+        :return: List of VerifyRule
         """
         query = session.query(VerifyRule).filter_by(guild_id=guild_id)
 
@@ -80,11 +78,9 @@ class VerifyRule(database.base):
     def add(guild_id: int, name: str) -> Optional[VerifyRule]:
         """Add VerifyRule to DB. Name must be unique for each guild.
 
-        Args:
-            guild_id: ID of the guild
-            name: Name of the rule
-        Returns:
-            None if same record exists, VerifyRule otherwise.
+        :param guild_id: ID of the guild
+        :param name: Name of the rule
+        :return: None if same record exists, VerifyRule otherwise.
 
         """
         query = (
@@ -105,8 +101,7 @@ class VerifyRule(database.base):
     def add_roles(self, roles: List[int]):
         """Add Discord roles to the rule. Skips existing roles.
 
-        Args:
-            roles: List of Discord role IDs.
+        :param roles: List of Discord role IDs.
         """
         for role in self.roles:
             if role.role_id in roles:
@@ -120,8 +115,7 @@ class VerifyRule(database.base):
     def delete_roles(self, roles: List[int]):
         """Add Discord roles to the rule. Skips existing roles.
 
-        Args:
-            roles: List of Discord role IDs.
+        :param roles: List of Discord role IDs.
         """
         for role in self.roles:
             if role.role_id in roles:
@@ -232,11 +226,10 @@ class VerifyMapping(database.base):
 
         If Rule is None, verification is blocked.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            username: Username (part of the email before @)
-            domain: Domain (part of the email after @)
-            rule: VerifyRule applied to the user
+        :param guild_id: Discord ID of the guild.
+        :param username: Username (part of the email before @)
+        :param domain: Domain (part of the email after @)
+        :param rule: VerifyRule applied to the user
         """
         mapping = (
             session.query(VerifyMapping)
@@ -258,14 +251,11 @@ class VerifyMapping(database.base):
     ) -> List[VerifyMapping]:
         """Get VerifyMapping.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            rule: Applied rule.
-            username: Username (part of the email before @)
-            domain: Domain (part of the email after @)
-
-        Returns:
-            List of VerifyMapping
+        :param guild_id: Discord ID of the guild.
+        :param rule: Applied rule.
+        :param username: Username (part of the email before @)
+        :param domain: Domain (part of the email after @)
+        :return: List of VerifyMapping
         """
         query = session.query(VerifyMapping).filter_by(guild_id=guild_id)
 
@@ -291,14 +281,11 @@ class VerifyMapping(database.base):
         If the result is not found, it searches for global rule.
         If the result is not found, returns None.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            username: Username to search for (empty string for guild / global rule).
-            domain: Domain to search for (empty string for global rule).
-            email: Can be used instead of username and domain.
-
-        Returns:
-            VerifyMapping if user is mapped, None otherwise
+        :param guild_id: Discord ID of the guild.
+        :param username: Username to search for (empty string for guild / global rule).
+        :param domain: Domain to search for (empty string for global rule).
+        :param email: Can be used instead of username and domain.
+        :return: VerifyMapping if user is mapped, None otherwise
 
         """
         if email:
@@ -396,15 +383,12 @@ class VerifyMember(database.base):
     ) -> Optional[VerifyMember]:
         """Add new member.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            user_id: Discord ID of the user.
-            address: Email address of the user.
-            code: Verify code.
-            Status: VerifyStatus
-
-        Returns:
-            Null if already exists, otherwise VerifyMember
+        :param guild_id: Discord ID of the guild.
+        :param user_id: Discord ID of the user.
+        :param address: Email address of the user.
+        :param code: Verify code.
+        :param Status: VerifyStatus
+        :return: Null if already exists, otherwise VerifyMember
         """
         if VerifyMember.get(guild_id, user_id=user_id):
             return None
@@ -431,13 +415,10 @@ class VerifyMember(database.base):
     ) -> List[VerifyMember]:
         """Get member.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            user_id: Discord user ID (optional)
-            address: Email address of the user (optional)
-
-        Returns:
-            List of VerifyMembers
+        :param guild_id: Discord ID of the guild.
+        :param user_id: Discord user ID (optional)
+        :param address: Email address of the user (optional)
+        :return: List of VerifyMembers
         """
         query = session.query(VerifyMember).filter_by(guild_id=guild_id)
 
@@ -512,10 +493,9 @@ class VerifyMessage(database.base):
 
         If rule is None, the message is considered as default.
 
-        Args:
-            guild_id: Discord ID of the guild.
-            message: Text of the message.
-            rule: VerifyRule the message is assigned to.
+        :param guild_id: Discord ID of the guild.
+        :param message: Text of the message.
+        :param rule: VerifyRule the message is assigned to.
         """
         rule_id = rule.idx if rule else None
         db_message = session.query(VerifyMessage).filter_by(
@@ -534,11 +514,8 @@ class VerifyMessage(database.base):
     def get_default(guild_id: int) -> Optional[VerifyMessage]:
         """Get guild global message.
 
-        Args:
-            guild_id: Discord ID of the guild.
-
-        Returns:
-            VerifyMessage if found, None otherwise.
+        :param guild_id: Discord ID of the guild.
+        :return: VerifyMessage if found, None otherwise.
         """
         query = (
             session.query(VerifyMessage)
@@ -552,11 +529,8 @@ class VerifyMessage(database.base):
     def get_all(guild_id: int) -> List[VerifyMessage]:
         """Get all messages.
 
-        Args:
-            guild_id: Discord ID of the guild.
-
-        Returns:
-            List of VerifyMessage
+        :param guild_id: Discord ID of the guild.
+        :return: List of VerifyMessage
         """
         query = session.query(VerifyMessage).filter_by(guild_id=guild_id)
         return query.all()
