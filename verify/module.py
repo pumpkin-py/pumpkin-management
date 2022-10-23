@@ -673,7 +673,7 @@ class Verify(commands.Cog):
             guild_id=ctx.guild.id, username=username, domain=domain
         )
 
-        if username or domain:
+        if not username and not domain:
             title = _(ctx, "Default mapping")
             mapping_name = _(ctx, "Default")
         else:
