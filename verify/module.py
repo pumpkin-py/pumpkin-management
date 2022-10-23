@@ -892,7 +892,7 @@ class Verify(commands.Cog):
 
         class Item:
             def __init__(self, rule):
-                self.name = rule.name
+                self.rule = rule.name
                 self.role_count = len(rule.roles)
 
         items = []
