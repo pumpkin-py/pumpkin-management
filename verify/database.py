@@ -98,6 +98,8 @@ class VerifyRule(database.base):
         session.add(rule)
         session.commit()
 
+        return rule
+
     def add_roles(self, roles: List[int]):
         """Add Discord roles to the rule. Skips existing roles.
 
