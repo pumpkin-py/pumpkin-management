@@ -846,7 +846,7 @@ class Verify(commands.Cog):
             return
 
         role_ids = [role.id for role in roles]
-        rule[0].add_roles(role_ids)
+        rule.add_roles(role_ids)
 
         await ctx.reply(_(ctx, "Rule with name {name} added!").format(name=name))
 
