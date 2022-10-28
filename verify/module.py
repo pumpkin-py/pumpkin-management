@@ -1046,7 +1046,7 @@ class Verify(commands.Cog):
 
         if db_members:
             db_member = db_members[0]
-            db_member.status = VerifyStatus.BANNED.value
+            db_member.status = VerifyStatus.BANNED
             db_member.save()
             await guild_log.info(
                 member,
