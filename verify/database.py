@@ -57,7 +57,7 @@ class VerifyRule(database.base):
     roles = relationship(
         lambda: VerifyRole, back_populates="rule", cascade="all, delete-orphan"
     )
-    message = relationship(lambda: VerifyMessage, back_populates="rule")
+    message = relationship(lambda: VerifyMessage, back_populates="rule", uselist=False)
 
     @staticmethod
     def get(guild_id: int, name: str = None) -> List[VerifyRule]:
