@@ -78,6 +78,7 @@ class Verify(commands.Cog):
                 delete_after=120,
             )
             return
+        address = address.lower()
 
         # Check if user is in database
         if await self._member_exists(ctx, address):
