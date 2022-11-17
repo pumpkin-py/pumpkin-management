@@ -298,7 +298,7 @@ class VerifyMapping(database.base):
 
         query = (
             session.query(VerifyMapping)
-            .filter_by(guild_id=guild_id, username=username, domain=domain)
+            .filter_by(guild_id=guild_id)
             .filter(func.lower(VerifyMapping.username) == username.lower())
             .filter(func.lower(VerifyMapping.domain) == domain.lower())
             .one_or_none()
