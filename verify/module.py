@@ -292,8 +292,8 @@ class Verify(commands.Cog):
     async def strip(self, ctx):
         """Remove all roles and reset verification status to None."""
         db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=ctx.author.id)
-        if db_members:
-            db_member = db_members[0]
+
+        db_member = db_members[0] if db_members else None
 
         if db_member and db_member.status.value < VerifyStatus.NONE.value:
             await guild_log.info(
