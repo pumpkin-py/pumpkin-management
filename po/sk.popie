@@ -286,6 +286,9 @@ msgstr {mention} Nie si vo verifikačnej fáze. Kontaktuj moderátorov.
 msgid {mention} That is not your verification code.
 msgstr {mention} Toto nie je tvoj verifikačný kód.
 
+msgid Could not assign roles. Please contact moderator team.
+msgstr Nie je možné priradiť role. Prosím kontaktuj moderátorov.
+
 msgid You have been verified, congratulations!
 msgstr Verifikácia prebehla úspešne, gratulujem!
 
@@ -331,23 +334,20 @@ msgstr
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nemôže byť prázdny.
 
-msgid Role {role} not found in verify configuration!
-msgstr
+msgid Rule named {name} was not found!
+msgstr Pravidlo s názvom {name} nenájdené!
 
-msgid Message has been set for group {role}.
-msgstr
+msgid Message has been set for rule {rule}.
+msgstr Uvítacia správa bola nastavená pre pravidlo {rule}.
 
-msgid Welcome message has been set do default for group {role}.
-msgstr
+msgid Welcome message has been set to default for rule {rule}.
+msgstr Uvítacia správa bola resetovaná pre pravidlo {rule}.
 
 msgid Server default
-msgstr
+msgstr Východzia pre server
 
-msgid Role ID
-msgstr
-
-msgid Group name
-msgstr
+msgid Rule name
+msgstr Meno pravidla
 
 msgid Message to send
 msgstr Správa k odoslaniu
@@ -361,32 +361,92 @@ msgstr Tento užívateľ nie je v databáze.
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikačný statu užívateľa **{member}** bol aktualizovaný na **{status}**.
 
-msgid Verification groups
-msgstr Verifikačné skupiny
+msgid Default mapping
+msgstr
 
-msgid Role
-msgstr Rola
+msgid Default
+msgstr
 
-msgid Regex
-msgstr Regex
+msgid Mapping for {username}@{domain}
+msgstr
 
-msgid The template file has been exported.
-msgstr Vzorový súbor bol exportovaný.
+msgid Applied mapping:
+msgstr
 
-msgid **{count}** verification groups have been exported.
-msgstr **{count}** verifikačných skupín bolo exportovaných.
+msgid Verification allowed:
+msgstr
 
-msgid I'm expecting one JSON file.
-msgstr Očakávam jeden JSON súbor.
+msgid Rule name:
+msgstr
 
-msgid You have to upload a JSON file.
-msgstr Musíš nahrať JSON súbor.
+msgid Supported format is only CSV.
+msgstr
 
-msgid Your JSON file contains errors.
-msgstr Tvoj JSON súbor obsahuje chyby.
+msgid Processing. Make a coffee, it may take a while.
+msgstr
 
-msgid I've imported **{count}** verification groups. Old groups have been backed up above.
-msgstr Bolo importovaných **{count}** verifikačných skupín. Staré skupiny boli zálohované vyššie.
+msgid Wiped {wiped} mappings.
+msgstr
+
+msgid Row {row} has invalid number of columns!
+msgstr
+
+msgid Row {row} has invalid rule name: {name}!
+msgstr
+
+msgid Imported {count} mappings.
+msgstr
+
+msgid Mapping for {name}@{domain} not found!
+msgstr
+
+msgid Mapping remove
+msgstr
+
+msgid Do you really want to remove mapping for {name}@{domain}?
+msgstr
+
+msgid Removing aborted.
+msgstr
+
+msgid Mapping successfuly removed.
+msgstr
+
+msgid Rule with name {name} already exists!
+msgstr
+
+msgid Rule with name {name} added!
+msgstr
+
+msgid Rule with name {name} not found!
+msgstr
+
+msgid Rule remove
+msgstr
+
+msgid Do you really want to remove rule {name}?
+msgstr
+
+msgid Rule {name} successfuly removed.
+msgstr
+
+msgid Role count
+msgstr Počet rolí
+
+msgid Rule information
+msgstr
+
+msgid Has custom message:
+msgstr
+
+msgid Assigned roles:
+msgstr
+
+msgid Roles added to rule {name}!
+msgstr
+
+msgid Roles removed from rule {name}!
+msgstr
 
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
@@ -426,9 +486,6 @@ msgstr Mapovanie na ACLevel
 
 msgid You don't have permission to view information about this channel.
 msgstr Nemáš oprávnenia na zobrazenie informácií o tomto kanáli.
-
-msgid Role count
-msgstr Počet rolí
 
 msgid User count
 msgstr Počet užívateľov

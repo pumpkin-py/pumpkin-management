@@ -286,6 +286,9 @@ msgstr {mention} Nejsi ve verifikační fázi. Kontaktuj moderátory.
 msgid {mention} That is not your verification code.
 msgstr {mention} To není tvůj verifikační kód.
 
+msgid Could not assign roles. Please contact moderator team.
+msgstr Nelze přiřadit role. Prosím kontaktuj moderátory.
+
 msgid You have been verified, congratulations!
 msgstr Verifikace proběhla úspěšně, gratuluji!
 
@@ -331,23 +334,20 @@ msgstr
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nesmí být prázdný.
 
-msgid Role {role} not found in verify configuration!
-msgstr Role {role} nebyla nalezena v konfiguraci verifikačních skupin!
+msgid Rule named {name} was not found!
+msgstr Pravidlo s názvem {name} nenalezeno!
 
-msgid Message has been set for group {role}.
-msgstr Uvítací zpráva byla nastavena pro roli {role}.
+msgid Message has been set for rule {rule}.
+msgstr Uvítací zpráva byla nastavena pro pravidlo {rule}.
 
-msgid Welcome message has been set do default for group {role}.
-msgstr Uvítací zpráva byla resetována pro roli {role}.
+msgid Welcome message has been set to default for rule {rule}.
+msgstr Uvítací zpráva byla resetována pro pravidlo {rule}.
 
 msgid Server default
 msgstr Výchozí pro server
 
-msgid Role ID
-msgstr ID role
-
-msgid Group name
-msgstr Jméno skupiny
+msgid Rule name
+msgstr Jméno pravidla
 
 msgid Message to send
 msgstr Zpráva k odeslání
@@ -361,32 +361,92 @@ msgstr Tento uživatel není v databázi.
 msgid Member verification status of **{member}** has been updated to **{status}**.
 msgstr Verifikační status uživatele **{member}** byl aktualizován na **{status}**.
 
-msgid Verification groups
-msgstr Verifikační skupiny
+msgid Default mapping
+msgstr Výchozí mapování
 
-msgid Role
-msgstr Role
+msgid Default
+msgstr Výchozí
 
-msgid Regex
-msgstr Regex
+msgid Mapping for {username}@{domain}
+msgstr Mapování pro {username}@{domain}
 
-msgid The template file has been exported.
-msgstr Vzorový soubor byl exportován.
+msgid Applied mapping:
+msgstr Použité mapování:
 
-msgid **{count}** verification groups have been exported.
-msgstr **{count}** verifikačních skupin bylo exportováno.
+msgid Verification allowed:
+msgstr Verifikace povolena:
 
-msgid I'm expecting one JSON file.
-msgstr Očekávám jeden JSON soubor.
+msgid Rule name:
+msgstr Jméno pravidla:
 
-msgid You have to upload a JSON file.
-msgstr Musíš nahrát JSON soubor.
+msgid Supported format is only CSV.
+msgstr Podporovaný formát je pouze CSV.
 
-msgid Your JSON file contains errors.
-msgstr Tvůj JSON soubor obsahuje chyby.
+msgid Processing. Make a coffee, it may take a while.
+msgstr Zpracovávám. Uvař si kafe, bude to chvíli trvat.
 
-msgid I've imported **{count}** verification groups. Old groups have been backed up above.
-msgstr Bylo importováno **{count}** verifikačních skupin. Staré skupiny byly zálohovány výše.
+msgid Wiped {wiped} mappings.
+msgstr Smazáno {wiped} mapování.
+
+msgid Row {row} has invalid number of columns!
+msgstr Řádek {row} má špatný počet sloupců!
+
+msgid Row {row} has invalid rule name: {name}!
+msgstr Řádek {row} má špatný název pravidla: {name}!
+
+msgid Imported {count} mappings.
+msgstr Importováno {count} mapování.
+
+msgid Mapping for {name}@{domain} not found!
+msgstr Mapování pro {name}@{domain} nenalezeno!
+
+msgid Mapping remove
+msgstr Mapování odstraněno.
+
+msgid Do you really want to remove mapping for {name}@{domain}?
+msgstr Opravdu chcete odstranit mapování pro {name}@{domain}?
+
+msgid Removing aborted.
+msgstr Odstranění zrušeno.
+
+msgid Mapping successfuly removed.
+msgstr Mapování úspěšně odstraněno.
+
+msgid Rule with name {name} already exists!
+msgstr Pravidlo jménem {name} již existuje!
+
+msgid Rule with name {name} added!
+msgstr Pravidlo jménem {name} přidáno!
+
+msgid Rule with name {name} not found!
+msgstr Pravidlo jménem {name} nenalezeno!
+
+msgid Rule remove
+msgstr Odstranění pravidla
+
+msgid Do you really want to remove rule {name}?
+msgstr Opravdu chcete odstranit pravidlo {name}?
+
+msgid Rule {name} successfuly removed.
+msgstr Pravidlo jménem {name} úspěšně odstraněno.
+
+msgid Role count
+msgstr Počet rolí
+
+msgid Rule information
+msgstr Informace o pravidle
+
+msgid Has custom message:
+msgstr Má vlastní zprávu:
+
+msgid Assigned roles:
+msgstr Přiřazené role:
+
+msgid Roles added to rule {name}!
+msgstr Role přidány k pravidlu {name}!
+
+msgid Roles removed from rule {name}!
+msgstr Role odstraněny z pravidla {name}!
 
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.
@@ -426,9 +486,6 @@ msgstr Mapování na ACLevel
 
 msgid You don't have permission to view information about this channel.
 msgstr Nemáš právo zobrazit informace o tomto kanálu.
-
-msgid Role count
-msgstr Počet rolí
 
 msgid User count
 msgstr Počet uživatelů
