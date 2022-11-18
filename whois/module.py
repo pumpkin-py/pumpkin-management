@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import List, Optional, Union
 
 import discord
 from discord.ext import commands
@@ -14,7 +14,6 @@ try:
 except Exception:
     ACLevelMappping = None
 from ..verify.database import VerifyMember
-from ..verify.enums import VerifyStatus
 
 
 _ = i18n.Translator("modules/mgmt").translate
@@ -128,13 +127,15 @@ class Whois(commands.Cog):
         elif type(member) == int:
             user_id = member
 
+        db_members: List[VerifyMember]
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, user_id=user_id)
         db_member: Optional[VerifyMember]
-        db_member = VerifyMember.get_by_member(ctx.guild.id, user_id)
+        db_member = db_members[0] if db_members else None
 
-        if db_member is not None and dc_member is None:
+        if db_member and dc_member is None:
             dc_member = ctx.guild.get_member(db_member.user_id)
 
-        if db_member is None and dc_member is None:
+        if not db_member and dc_member is None:
             await ctx.reply(_(ctx, "No such user."))
             return
 
@@ -145,11 +146,13 @@ class Whois(commands.Cog):
     @check.acl2(check.ACLevel.MOD)
     @commands.command()
     async def rwhois(self, ctx, address: str):
-        db_member = VerifyMember.get_by_address(ctx.guild.id, address)
+        db_members = VerifyMember.get(guild_id=ctx.guild.id, address=address)
 
-        if db_member is None:
+        if not db_members:
             await ctx.reply(_(ctx, "Member is not in a database."))
             return
+
+        db_member = db_members[0]
 
         dc_member = ctx.guild.get_member(db_member.user_id)
 
@@ -158,7 +161,7 @@ class Whois(commands.Cog):
             ctx.author, ctx.channel, f"Reverse whois lookup for {address}."
         )
 
-    async def _whois_reply(self, ctx, db_member, dc_member):
+    async def _whois_reply(self, ctx, db_member: VerifyMember, dc_member):
         description: str
         if dc_member is not None:
             description = f"{dc_member.name} ({dc_member.id})"
@@ -183,7 +186,7 @@ class Whois(commands.Cog):
             )
             embed.add_field(
                 name=_(ctx, "Verification status"),
-                value=f"{VerifyStatus(db_member.status).name}",
+                value=f"{db_member.status.name}",
             )
             embed.add_field(
                 name=_(ctx, "Timestamp"),
