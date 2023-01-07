@@ -289,6 +289,7 @@ class VerifyMapping(database.base):
         :param email: Can be used instead of username and domain.
         :return: VerifyMapping if user is mapped, None otherwise
 
+        :raises ValueError: Email is not valid (missing parts)
         """
         if email:
             username, domain = email.rsplit("@", 1)
