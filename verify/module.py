@@ -1158,7 +1158,10 @@ class Verify(commands.Cog):
         :param ctx: Command context
         :param address: Supplied e-mail address
         """
-        mapping = VerifyMapping.map(guild_id=ctx.guild.id, email=address)
+        try:
+            mapping = VerifyMapping.map(guild_id=ctx.guild.id, email=address)
+        except ValueError:
+            mapping = None
 
         if not mapping or not mapping.rule:
             await guild_log.info(
