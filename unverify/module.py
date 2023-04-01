@@ -611,7 +611,10 @@ class Unverify(commands.Cog):
             roles = []
             for role_id in item.roles_to_return:
                 role = discord.utils.get(guild.roles, id=role_id)
+                if role.name is None:
+                    role.name = "Unknown"
                 roles.append(role)
+                
             channels = []
             for channel_id in item.channels_to_return:
                 channel = discord.utils.get(guild.channels, id=channel_id)
