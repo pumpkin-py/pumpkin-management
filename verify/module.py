@@ -1005,6 +1005,216 @@ class Verify(commands.Cog):
             _(ctx, "Roles removed from rule {name}!").format(name=rule_name)
         )
 
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.MOD)
+    @verification.group(name="reverify")
+    async def verification_reverify(self, ctx):
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_reverify.command(name="preview")
+    async def verification_reverify_preview(self, ctx):
+        """Show changes that would be made by reverification.
+
+        The process will fail if Discord role assigned to verification rule was deleted!
+
+        **BEWARE** In case of many users, this command can hit rate limit!"""
+        confirm = await self._reverify_confirm(
+            ctx,
+            _(
+                ctx,
+                (
+                    "Do you really want to preview reverify results? "
+                    "This operation might take a while and the bot might hit rate limit!"
+                ),
+            ),
+        )
+        if not confirm:
+            await ctx.reply(_(ctx, "Reverify preview aborted."))
+            return
+
+        await self._process_reverify(ctx, preview=True)
+
+    @check.acl2(check.ACLevel.MOD)
+    @verification_reverify.command(name="execute")
+    async def verification_reverify_execute(self, ctx):
+        """**THIS COMMAND IS IRREVERSIBLE!**
+
+        Process the reverification based on current mapping and rules.
+
+        The process will fail if Discord role assigned to verification rule was deleted!
+
+        **BEWARE** In case of many users, this command can hit rate limit!"""
+        confirm = await self._reverify_confirm(
+            ctx,
+            _(
+                ctx,
+                (
+                    "Do you really want to execute reverify? "
+                    "The operation is **irreversible**! "
+                    "This operation might take a while and the bot might hit rate limit!"
+                ),
+            ),
+        )
+        if not confirm:
+            await ctx.reply(_(ctx, "Reverify execution aborted."))
+            return
+
+        await self._process_reverify(ctx, preview=False)
+
+    async def _process_reverify(self, ctx, preview: bool = True):
+        """Helper function to process the reverify.
+
+        In preview mode, this function only sends messages to chat instead of updating users.
+
+        :param ctx: Command context
+        :param preview: If True, no changes to users, roles and DB are made.
+        """
+        managed_roles: List[int] = list(
+            set([db_role.role_id for db_role in VerifyRole.get(ctx.guild.id)])
+        )
+
+        if not await self._check_managed_roles(ctx, managed_roles):
+            return
+
+        verify_members: List[VerifyMember] = VerifyMember.get(guild_id=ctx.guild.id)
+
+        stripped_count = 0
+        updated_count = 0
+
+        for verify_member in verify_members:
+            dc_member: discord.Member = ctx.guild.get_member(verify_member.user_id)
+
+            if not dc_member:
+                continue
+
+            dc_member_roles: List[int] = [role.id for role in dc_member.roles]
+
+            member_managed_roles: List[int] = [
+                role for role in managed_roles if role in dc_member_roles
+            ]
+
+            mapping = VerifyMapping.map(
+                guild_id=ctx.guild.id, email=verify_member.address
+            )
+
+            # Mapping or rule not found = strip
+            if not mapping or not mapping.rule:
+                stripped_count += 1
+                if preview:
+                    await ctx.send(
+                        _(
+                            ctx,
+                            "[Preview] Member {member} stripped - no mapping found or verification blocked!",
+                        ).format(member=dc_member.mention)
+                    )
+                else:
+                    roles = [role for role in dc_member.roles if role.is_assignable()]
+                    with contextlib.suppress(discord.Forbidden):
+                        await dc_member.remove_roles(*roles, reason="Reverify strip")
+                    verify_member.delete()
+                continue
+
+            mapped_roles = [role.role_id for role in mapping.rule.roles]
+            add_roles = [
+                role for role in mapped_roles if role not in member_managed_roles
+            ]
+            remove_roles = [
+                role for role in member_managed_roles if role not in mapped_roles
+            ]
+
+            if not add_roles and not remove_roles:
+                continue
+
+            updated_count += 1
+
+            if preview:
+                await self._preview_update(ctx, add_roles, remove_roles, dc_member)
+            else:
+                add_roles = [ctx.guild.get_role(role) for role in add_roles]
+                dc_member.add_roles(add_roles, "reverify")
+
+                remove_roles = [ctx.guild.get_role(role) for role in remove_roles]
+                dc_member.remove_roles(remove_roles, "reverify")
+
+        await ctx.send(
+            _(
+                ctx,
+                "Updated {updated} and stripped {stripped} out of {total} verify members.",
+            ).format(
+                updated=str(updated_count),
+                stripped=str(stripped_count),
+                total=str(len(verify_members)),
+            )
+        )
+
+    async def _check_managed_roles(self, ctx, managed_roles: List[int]) -> bool:
+        """Helper function to check if every managed role exists.
+
+        :param ctx: Command context
+        :param managed_roles: List of managed role IDs
+        :return: True if everything is OK, False if role does not exist
+        """
+        for managed_role in managed_roles:
+            role = ctx.guild.get_role(managed_role)
+            if not role:
+                await ctx.send(
+                    _(
+                        ctx,
+                        "Role with ID {role_id} was not found! Please fix your verify rules and try again!",
+                    ).format(role_id=managed_role)
+                )
+                return False
+        return True
+
+    async def _preview_update(
+        self,
+        ctx,
+        add_roles: List[int],
+        remove_roles: List[int],
+        dc_member: discord.Member,
+    ):
+        """Helper function to format the reverify preview message.
+
+        :param ctx: Command context
+        :param add_roles: List of role IDs to add
+        :param remove_roles: List of role IDs to remove
+        :param dc_member: Member that would be affected by reverify
+        """
+        removed_roles = (
+            ", ".join(["<@&{role}>".format(role=role) for role in remove_roles])
+            if remove_roles
+            else "-"
+        )
+        added_roles = (
+            ", ".join(["<@&{role}>".format(role=role) for role in add_roles])
+            if add_roles
+            else "-"
+        )
+        await ctx.send(
+            _(
+                ctx,
+                "[Preview] Removed roles {removed_roles} and added roles {added_roles} for {member}.",
+            ).format(
+                removed_roles=removed_roles,
+                added_roles=added_roles,
+                member=dc_member.mention,
+            )
+        )
+
+    async def _reverify_confirm(self, ctx, text: str) -> bool:
+        """Helper functions to show reverify execute and preview confirm dialog.
+
+        :param ctx: Command context
+        :param text: Text of the confirm dialog"""
+        dialog = utils.discord.create_embed(
+            author=ctx.author, title=_(ctx, "Reverify confirm"), description=text
+        )
+        view = utils.objects.ConfirmView(ctx, dialog)
+        view.timeout = 90
+        answer = await view.send()
+        return answer
+
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
         """Add the roles back if they have been verified before."""

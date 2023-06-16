@@ -448,6 +448,33 @@ msgstr Role přidány k pravidlu {name}!
 msgid Roles removed from rule {name}!
 msgstr Role odstraněny z pravidla {name}!
 
+msgid Do you really want to preview reverify results? This operation might take a while and the bot might hit rate limit!
+msgstr Opravdu chcete zobrazit ukázku reverify? Tato operace může chvíli trvat a bot může narazit na rate limit!
+
+msgid Reverify preview aborted.
+msgstr Ukázka reverify zrušena.
+
+msgid Do you really want to execute reverify? The operation is **irreversible**! This operation might take a while and the bot might hit rate limit!
+msgstr Opravdu chcete spustit reverifikaci? Opreace je **nevratná**! Tato operace může chvíli trvat a bot může narazit na rate limit!
+
+msgid Reverify execution aborted.
+msgstr Provedení reverifikace zrušeno.
+
+msgid [Preview] Member {member} stripped - no mapping found or verification blocked!
+msgstr [Preview] Členovi {member} byla zrušena verifikace - žádné mapování nenalezeno nebo má zablokovanou verifikaci!
+
+msgid Updated {updated} and stripped {stripped} out of {total} verify members.
+msgstr Aktualizováno {updated} a zrušeno {stripped} z celkových {total} verifikovaných uživatelů.
+
+msgid Role with ID {role_id} was not found! Please fix your verify rules and try again!
+msgstr Role s ID {role_id} nebyla nalezena! Prosím opravte si verifikační pravidla a zkuste to znovu!
+
+msgid [Preview] Removed roles {removed_roles} and added roles {added_roles} for {member}.
+msgstr [Preview] Odstraněny role {removed_roles} a přidány role {added_roles} pro uživatele {member}.
+
+msgid Reverify confirm
+msgstr Potvrzení reverifikace
+
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj uživatelský účet už v databázi existuje. Zkontroluj inbox e-mailu nebo kontaktuj moderátory.
 

@@ -448,6 +448,33 @@ msgstr
 msgid Roles removed from rule {name}!
 msgstr
 
+msgid Do you really want to preview reverify results? This operation might take a while and the bot might hit rate limit!
+msgstr
+
+msgid Reverify preview aborted.
+msgstr
+
+msgid Do you really want to execute reverify? The operation is **irreversible**! This operation might take a while and the bot might hit rate limit!
+msgstr
+
+msgid Reverify execution aborted.
+msgstr
+
+msgid [Preview] Member {member} stripped - no mapping found or verification blocked!
+msgstr
+
+msgid Updated {updated} and stripped {stripped} out of {total} verify members.
+msgstr
+
+msgid Role with ID {role_id} was not found! Please fix your verify rules and try again!
+msgstr
+
+msgid [Preview] Removed roles {removed_roles} and added roles {added_roles} for {member}.
+msgstr
+
+msgid Reverify confirm
+msgstr
+
 msgid {mention} Your user account is already in the database. Check the e-mail inbox or contact the moderator team.
 msgstr {mention} Tvůj užívateľský účet už v databázi existuje. Skontroluj e-mailovú schránku alebo kontaktuj moderátorov.
 
