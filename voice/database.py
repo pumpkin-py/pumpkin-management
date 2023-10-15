@@ -14,6 +14,12 @@ class VoiceSettings(database.base):
     category_id = Column(BigInteger, unique=True)
     high_res_bitrate = Column(Integer)
 
+    def __repr__(self):
+        return (
+            f"<VoiceSettings: guild_id={self.guild_id}, "
+            f"category_id={self.category_id}, high_res_bitrate={self.high_res_bitrate}>"
+        )
+
     @staticmethod
     def set_category(
         guild: discord.Guild, category: discord.CategoryChannel
@@ -74,16 +80,12 @@ class LockedChannels(database.base):
     channel_id = Column(BigInteger, primary_key=True, autoincrement=False)
     locked = Column(Boolean)
 
-    @staticmethod
-    def lock(guild: discord.Guild, channel: discord.VoiceChannel):
-        query = LockedChannels(guild_id=guild.id, channel_id=channel.id, locked=True)
-        session.merge(query)
-        session.commit()
-        return query
+    def __repr__(self):
+        return f"<LockedChannels: guild_id={self.guild_id}, channel_id={self.channel_id}, locked={self.locked}>"
 
     @staticmethod
-    def unlock(guild: discord.Guild, channel: discord.VoiceChannel):
-        query = LockedChannels(guild_id=guild.id, channel_id=channel.id, locked=False)
+    def set_lock(guild: discord.Guild, channel: discord.VoiceChannel, locked: bool):
+        query = LockedChannels(guild_id=guild.id, channel_id=channel.id, locked=locked)
         session.merge(query)
         session.commit()
         return query
