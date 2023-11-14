@@ -412,6 +412,60 @@ msgstr do kanála #{channel}.
 msgid {mention} An error has occured while sending the code. Contact the moderator team.
 msgstr {mention} Pri posielaní kódu nastala chyba. Kontaktuj moderátorov.
 
+msgid Could not delete empty voicechannel id {id}.
+msgstr
+
+msgid Welcome. Voice channel can become invisible by calling the command `lock` (with this bot's prefix).
+msgstr
+
+msgid Non-existent category for Voice Settings!
+msgstr
+
+msgid Channel is already locked.
+msgstr
+
+msgid Voice channel locked.
+msgstr
+
+msgid Channel locked.
+msgstr
+
+msgid Channel is already unlocked.
+msgstr
+
+msgid Voice channel unlocked.
+msgstr
+
+msgid Channel unlocked.
+msgstr
+
+msgid Category for dynamic voice channels set.
+msgstr
+
+msgid Invalid bitrate for this server.
+msgstr
+
+msgid Bitrate for dynamic voice channels set to {bitrate}.
+msgstr
+
+msgid Bitrate for dynamic voice channels set.
+msgstr
+
+msgid Voice Channel Settings disabled.
+msgstr
+
+msgid Dynamic VoiceChannels are disabled.
+msgstr
+
+msgid VoiceChannel configuration
+msgstr
+
+msgid Used category
+msgstr
+
+msgid High bitrate
+msgstr
+
 msgid Member count
 msgstr Počet užívateľov
 

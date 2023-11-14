@@ -308,10 +308,10 @@ msgid You've been deleted from the database and your roles have been removed. Yo
 msgstr Byli jste vymazáni z databáze a byly vám odebrány role. Pro návrat musíte znovu projít verifikací.
 
 msgid Group strip
-msgstr
+msgstr Hromadný reset rolí
 
 msgid **{count}** mentioned users will lose all their roles and their verification will be revoked. They will not be notified about this. Do you want to continue?
-msgstr
+msgstr **{count}** zmíněných uživatelů ztratí své role a jejich verifikace bude zrušena. Nebudou o tomto kroku informováni. Pokračovat?
 
 msgid Member **{member_id}** (<@{member_id}>) has no roles.
 msgstr Člen **{member_id}** (<@{member_id}>) nemá žádné role.
@@ -323,10 +323,10 @@ msgid **{db}** database entries have been removed, **{dc}** users have been stri
 msgstr **{db}** záznamů bylo odstraněno z databáze, **{dc}** uživatelům byly odebrány role.
 
 msgid Role based strip
-msgstr
+msgstr Reset verifikace podle rolí
 
 msgid **{count}** members with role **{role}** will lose all their roles and their verification will be revoked. They will not be notified about this. Do you want to continue?
-msgstr
+msgstr **{count}** uživatelů s rolí **{role}** ztratí své role a jejich verifikace bude zrušena. Nebudou o tomto kroku informováni. Pokračovat?
 
 msgid Argument `text` must not be empty.
 msgstr Argument `text` nesmí být prázdný.
@@ -411,6 +411,60 @@ msgstr do kanálu #{channel}.
 
 msgid {mention} An error has occured while sending the code. Contact the moderator team.
 msgstr {mention} Při posílání kódu nastala chyba. Kontaktuj moderátory.
+
+msgid Could not delete empty voicechannel id {id}.
+msgstr Prázdná hlasový kanál s id {id} nemohl být smazán.
+
+msgid Welcome. Voice channel can become invisible by calling the command `lock` (with this bot's prefix).
+msgstr Vítej. Hlasový kanál jde skrýt před ostatními pomocí příkazu `lock` (nezapomeň na prefix).
+
+msgid Non-existent category for Voice Settings!
+msgstr Neexistující kategorie pro nastavení hlasových kanálů.
+
+msgid Channel is already locked.
+msgstr Kanál už je zamčen.
+
+msgid Voice channel locked.
+msgstr Hlasový kanál zamčen.
+
+msgid Channel locked.
+msgstr Kanál zamčen.
+
+msgid Channel is already unlocked.
+msgstr Kanál už je odemčen.
+
+msgid Voice channel unlocked.
+msgstr Hlasový kanál odemčen.
+
+msgid Channel unlocked.
+msgstr Kanál odemčen.
+
+msgid Category for dynamic voice channels set.
+msgstr Kategorie hlasových kanálů nastavena.
+
+msgid Invalid bitrate for this server.
+msgstr Neplatná bitová rychlost pro tento server.
+
+msgid Bitrate for dynamic voice channels set to {bitrate}.
+msgstr Bitová rychlost pro dynamické kanály s vyšší kvalitou nastavena na {bitrate}.
+
+msgid Bitrate for dynamic voice channels set.
+msgstr Bitová rychlost pro hlasové kanály nastavena.
+
+msgid Voice Channel Settings disabled.
+msgstr Dynamické hlasové kanály jsou vypnuty.
+
+msgid Dynamic VoiceChannels are disabled.
+msgstr Dynamické hlasové kanály jsou vypnuty.
+
+msgid VoiceChannel configuration
+msgstr Nastavení hlasových kanálů
+
+msgid Used category
+msgstr Použitá kategorie
+
+msgid High bitrate
+msgstr Vyšší bitová rychlost
 
 msgid Member count
 msgstr Počet členů
