@@ -93,7 +93,11 @@ class Voice(commands.Cog):
         category: discord.CategoryChannel, bitrate: Optional[int] = None
     ):
         """Create a VoiceChannel in a specified category."""
-        options = {"bitrate": bitrate} if bitrate else dict()
+        options = (
+            {"bitrate": min(bitrate, int(category.guild.bitrate_limit))}
+            if bitrate
+            else dict()
+        )
         name = f"{choice(ADJECTIVES)} {choice(NOUNS)}"
         if bitrate:
             name = HIGH_RES_CHANNEL_PREFIX + name
@@ -323,6 +327,9 @@ class Voice(commands.Cog):
     async def voice_list(self, ctx):
         """List the current settings."""
         settings = VoiceSettings.get(ctx.guild)
+        if settings is None:
+            await ctx.reply(_(ctx, "Dynamic VoiceChannels are disabled."))
+            return
         category = Voice._get_category(ctx.guild, settings.category_id)
 
         embed = utils.discord.create_embed(

@@ -93,19 +93,14 @@ class LockedChannels(database.base):
     @staticmethod
     def remove(channel: Union[discord.VoiceChannel, int]) -> bool:
         if isinstance(channel, discord.VoiceChannel):
-            query = (
-                session.query(LockedChannels)
-                .filter_by(channel_id=channel.id)
-                .one_or_none()
-            )
+            channel_id = channel.id
         elif isinstance(channel, int):
-            query = (
-                session.query(LockedChannels)
-                .filter_by(channel_id=channel)
-                .one_or_none()
-            )
+            channel_id = channel
         else:
             raise TypeError()
+        query = (
+            session.query(LockedChannels).filter_by(channel_id=channel_id).one_or_none()
+        )
         if query:
             session.delete(query)
             session.commit()

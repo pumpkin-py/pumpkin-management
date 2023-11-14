@@ -454,6 +454,9 @@ msgstr Bitová rychlost pro hlasové kanály nastavena.
 msgid Voice Channel Settings disabled.
 msgstr Dynamické hlasové kanály jsou vypnuty.
 
+msgid Dynamic VoiceChannels are disabled.
+msgstr Dynamické hlasové kanály jsou vypnuty.
+
 msgid VoiceChannel configuration
 msgstr Nastavení hlasových kanálů
 
