@@ -1132,10 +1132,10 @@ class Verify(commands.Cog):
                 await self._preview_update(ctx, add_roles, remove_roles, dc_member)
             else:
                 add_roles = [ctx.guild.get_role(role) for role in add_roles]
-                dc_member.add_roles(add_roles, "reverify")
+                await dc_member.add_roles(*add_roles, reason="reverify")
 
                 remove_roles = [ctx.guild.get_role(role) for role in remove_roles]
-                dc_member.remove_roles(remove_roles, "reverify")
+                await dc_member.remove_roles(*remove_roles, reason="reverify")
 
         await ctx.send(
             _(
