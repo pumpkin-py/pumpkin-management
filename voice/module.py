@@ -81,7 +81,10 @@ class Voice(commands.Cog):
         category = ctx.channel.category
         if not category:
             return False
-        return category.id == VoiceSettings.get(ctx.guild).category_id
+        settings = VoiceSettings.get(ctx.guild)
+        if not settings:
+            return False
+        return category.id == settings.category_id
 
     @staticmethod
     def _get_category(guild: discord.Guild, category_id: int):
