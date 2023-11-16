@@ -35,7 +35,7 @@ class VoiceSettings(database.base):
 
     @staticmethod
     def set_high_bitrate(guild: discord.Guild, bitrate: int):
-        if bitrate and not (64000 < bitrate < 384000):
+        if bitrate and not (64000 < bitrate <= 384000):
             raise ValueError(f"Higher bit rate cannot be set to {bitrate}!")
         query = VoiceSettings.get(guild)
         if not query:
