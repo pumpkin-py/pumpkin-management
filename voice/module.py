@@ -226,12 +226,12 @@ class Voice(commands.Cog):
                     LockedChannels.remove(before)
                     await Voice._remove_channel(before)
 
-    @commands.guild_only()
     @check.acl2(check.ACLevel.MEMBER)
     @commands.cooldown(1, 10, commands.BucketType.channel)
     @commands.check(_check_is_in_voice)
     @commands.check(_check_active_settings)
     @commands.check(_check_category)
+    @commands.guild_only()
     @commands.command(name="lock")
     async def lock(self, ctx):
         """Lock the channel. Members outside the channel will not see it afterward."""
@@ -253,11 +253,11 @@ class Voice(commands.Cog):
         await guild_log.debug(ctx.author, ctx.channel, _(ctx, "Voice channel locked."))
         await ctx.reply(_(ctx, "Channel locked."))
 
-    @commands.guild_only()
     @check.acl2(check.ACLevel.MEMBER)
     @commands.check(_check_is_in_voice)
     @commands.check(_check_active_settings)
     @commands.check(_check_category)
+    @commands.guild_only()
     @commands.command(name="unlock")
     async def unlock(self, ctx):
         """Make the VoiceChannel visible again."""
@@ -276,13 +276,14 @@ class Voice(commands.Cog):
         )
         await ctx.reply(_(ctx, "Channel unlocked."))
 
-    @commands.guild_only()
     @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
     @commands.group(name="voice")
     async def voice(self, ctx):
         """VoiceChannel settings."""
         await utils.discord.send_help(ctx)
 
+    @commands.guild_only()
     @voice.command(
         name="category",
         aliases=["set_category", "set-category"],
@@ -296,6 +297,7 @@ class Voice(commands.Cog):
         await ctx.reply(_(ctx, "Category for dynamic voice channels set."))
         await self._check_and_sync(ctx.guild)
 
+    @commands.guild_only()
     @voice.command(
         name="bitrate",
         aliases=["set_bitrate", "set-bitrate"],
@@ -317,6 +319,7 @@ class Voice(commands.Cog):
         await ctx.reply(_(ctx, "Bitrate for dynamic voice channels set."))
         await self._check_and_sync(ctx.guild)
 
+    @commands.guild_only()
     @voice.command(name="disable", aliases=["stop", "unset", "delete", "remove"])
     async def voice_disable(self, ctx):
         """Stop dynamic VoiceChannels on this server."""
@@ -326,6 +329,7 @@ class Voice(commands.Cog):
         )
         await ctx.reply(_(ctx, "Voice Channel Settings disabled."))
 
+    @commands.guild_only()
     @voice.command(name="list", aliases=["get", "show"])
     async def voice_list(self, ctx):
         """List the current settings."""
