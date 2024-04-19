@@ -397,8 +397,8 @@ msgstr {mention} Tento e-mail je už registrovaný jiným uživatelským účtem
 msgid {mention} This e-mail cannot be used.
 msgstr {mention} Tento e-mail nejde použít.
 
-msgid Your verification e-mail for Discord server {guild_name} is {code}.
-msgstr Tvůj verifikační e-mail pro Discord server {guild_name} je {code}.
+msgid Your verification code for Discord server {guild_name} is {code}.
+msgstr Tvůj verifikační kód pro Discord server {guild_name} je {code}.
 
 msgid You can use it by sending the following message:
 msgstr Můžeš ho použít posláním následující zprávy:
