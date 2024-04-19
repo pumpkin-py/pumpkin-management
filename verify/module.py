@@ -996,7 +996,7 @@ class Verify(commands.Cog):
         clear_list: List[str] = [
             _(
                 utx,
-                "Your verification e-mail for Discord server {guild_name} is {code}.",
+                "Your verification code for Discord server {guild_name} is {code}.",
             ).format(guild_name=member.guild.name, code=code),
             _(utx, "You can use it by sending the following message:"),
             "  "
