@@ -55,7 +55,8 @@ def generate_header(
             width=line_thickness,
         )
 
-    w, h = draw.textsize(text, font=font)
+    w = draw.textlength(text, font)
+    h = fontsize
     draw.text(
         ((width - w) / 2, (height - h) / 2 - 10),
         text,
