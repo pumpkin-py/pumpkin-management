@@ -1,9 +1,20 @@
 from __future__ import annotations
 
 import datetime
+import re
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Column, DateTime, Integer, String
+import discord
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    DateTime,
+    Integer,
+    String,
+    Boolean,
+    ForeignKey,
+)
+from sqlalchemy.orm import relationship
 
 from pie.database import database, session
 
@@ -133,7 +144,7 @@ class VerifyMember(database.base):
 
     :param guild_id: Member's guild ID.
     :param user_id: Member ID.
-    :param address: E-mail address.
+    :param address: E-mail address or identifier.
     :param code: Verification code.
     :param status: Numeric representation of :class:`VerifyStatus`.
     :param timestamp: Creation timestamp.
@@ -148,6 +159,7 @@ class VerifyMember(database.base):
     code = Column(String)
     status = Column(Integer)
     timestamp = Column(DateTime)
+    via_api = Column(Boolean)
 
     @staticmethod
     def add(
@@ -156,6 +168,7 @@ class VerifyMember(database.base):
         address: Optional[str],
         code: Optional[str],
         status: VerifyStatus,
+        via_api: bool = False,
     ) -> Optional[VerifyMember]:
         """Add new member."""
         if VerifyMember.get_by_member(guild_id, user_id) is not None:
@@ -170,6 +183,7 @@ class VerifyMember(database.base):
             code=code,
             status=status.value,
             timestamp=datetime.datetime.now(),
+            via_api=via_api,
         )
 
         session.add(member)
@@ -219,6 +233,7 @@ class VerifyMember(database.base):
             )
             .delete()
         )
+        session.commit()
         return query
 
     @staticmethod
@@ -229,6 +244,7 @@ class VerifyMember(database.base):
             return None
 
         query.status = status
+        session.add(query)
         session.commit()
         return query
 
@@ -306,3 +322,138 @@ class VerifyMessage(database.base):
             "guild_id": self.guild_id,
             "message": self.message,
         }
+
+
+class DBAPI(database.base):
+    __tablename__ = "mgmt_verify_apis"
+
+    guild_id = Column(BigInteger, primary_key=True)
+    server = Column(String)
+    token = Column(String)
+    mail_endpoint = Column(String)
+    mail_jmespath = Column(String)
+    id_regex = Column(String)
+    id_guide = Column(String)
+
+    role_endpoints: list[APIRoleEndpoint] = relationship("APIRoleEndpoint")
+    role_mappings: list[APIRoleMapping] = relationship("APIRoleMapping")
+
+    @staticmethod
+    def get(guild: discord.Guild) -> DBAPI:
+        settings = session.query(DBAPI).filter_by(guild_id=guild.id).one_or_none()
+        if not settings:
+            settings = DBAPI(guild_id=guild.id)
+        return settings
+
+    @staticmethod
+    def set_url(guild: discord.Guild, url: str):
+        settings = DBAPI.get(guild)
+
+        settings.server = url
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def set_token(guild: discord.Guild, token: str):
+        settings = DBAPI.get(guild)
+
+        settings.token = token
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def set_mail_endpoint(guild: discord.Guild, mail_endpoint: str, mail_jmespath: str):
+        settings = DBAPI.get(guild)
+
+        settings.mail_endpoint = mail_endpoint
+        settings.mail_jmespath = mail_jmespath
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def set_id_regex(guild: discord.Guild, regex: re.Pattern):
+        settings = DBAPI.get(guild)
+        settings.id_regex = regex.pattern
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def set_validation_guide(guild: discord.Guild, text: str):
+        settings = DBAPI.get(guild)
+        settings.id_guide = text
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def add_role_endpoint(guild: discord.Guild, role_endpoint: str, jmespath: str):
+        settings = DBAPI.get(guild)
+
+        endpoint = APIRoleEndpoint(
+            guild_id=guild.id, role_endpoint=role_endpoint, role_jmespath=jmespath
+        )
+        settings.role_endpoints.append(endpoint)
+        session.add(endpoint)
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def delete_role_endpoint(guild: discord.Guild, idx: int) -> bool:
+        settings = DBAPI.get(guild)
+        item_list = [e for e in settings.role_endpoints if e.idx == idx]
+        if item_list:
+            session.delete(item_list[0])
+            session.commit()
+            return True
+        return False
+
+    @staticmethod
+    def add_role_mapping(guild: discord.Guild, role: discord.Role, api_data: str):
+        settings = DBAPI.get(guild)
+        mapping = APIRoleMapping(
+            guild_id=settings.guild_id, role_id=role.id, api_data=api_data
+        )
+        settings.role_mappings.append(mapping)
+        session.add(mapping)
+        session.add(settings)
+        session.commit()
+
+    @staticmethod
+    def delete_role_mapping(guild: discord.Guild, idx: int) -> bool:
+        settings = DBAPI.get(guild)
+        item_list = [m for m in settings.role_mappings if m.idx == idx]
+        if item_list:
+            session.delete(item_list[0])
+            session.commit()
+            return True
+        return False
+
+    @property
+    def is_valid(self) -> bool:
+        return bool(
+            self.server
+            and self.mail_endpoint
+            and self.mail_jmespath
+            and self.role_endpoints
+            and self.role_mappings
+        )
+
+
+class APIRoleEndpoint(database.base):
+    __tablename__ = "mgmt_verify_api_role"
+
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    guild_id = Column(
+        BigInteger, ForeignKey("mgmt_verify_apis.guild_id", ondelete="CASCADE")
+    )
+    role_endpoint = Column(String)
+    role_jmespath = Column(String)
+
+
+class APIRoleMapping(database.base):
+    __tablename__ = "mgmt_verify_api_role_mappings"
+    idx = Column(Integer, primary_key=True, autoincrement=True)
+    guild_id = Column(
+        BigInteger, ForeignKey("mgmt_verify_apis.guild_id", ondelete="CASCADE")
+    )
+    role_id = Column(BigInteger)
+    api_data = Column(String)

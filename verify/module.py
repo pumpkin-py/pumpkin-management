@@ -18,13 +18,14 @@ import imap_tools
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import Context
 
 import pie.database.config
 from pie import check, exceptions, i18n, logger, utils
+from .api_client import APIClient
 
 from .enums import VerifyStatus
-from .database import VerifyGroup, VerifyMember, VerifyMessage
-
+from .database import VerifyGroup, VerifyMember, VerifyMessage, DBAPI
 
 _ = i18n.Translator("modules/mgmt").translate
 bot_log = logger.Bot.logger()
@@ -69,7 +70,6 @@ class Verify(commands.Cog):
     @commands.command()
     async def verify(self, ctx, address: Optional[str] = None):
         """Ask for a verification code."""
-        await utils.discord.delete_message(ctx.message)
         if not address:
             await ctx.send(
                 _(ctx, "{mention} You have to include your e-mail.").format(
@@ -78,6 +78,16 @@ class Verify(commands.Cog):
                 delete_after=120,
             )
             return
+        # Check if address is supported
+        if not await self._is_supported_address(ctx, address):
+            return
+        return await self.verify_common(ctx, address)
+
+    async def verify_common(
+        self, ctx: Context, address: str, pref_identifier: str = None
+    ):
+        await utils.discord.delete_message(ctx.message)
+
         address = address.lower()
 
         # Check if user is in database
@@ -88,17 +98,14 @@ class Verify(commands.Cog):
         if await self._address_exists(ctx, address):
             return
 
-        # Check if address is supported
-        if not await self._is_supported_address(ctx, address):
-            return
-
         code: str = self._generate_code()
         VerifyMember.add(
             guild_id=ctx.guild.id,
             user_id=ctx.author.id,
-            address=address,
+            address=pref_identifier or address,
             code=code,
             status=VerifyStatus.PENDING,
+            via_api=(pref_identifier is not None),
         )
 
         message: MIMEMultipart = self._get_message(
@@ -132,7 +139,7 @@ class Verify(commands.Cog):
     async def post_verify(self, ctx, address: str):
         """Wait some time after the user requested verification code.
 
-        Then connect to IMAP server and check for possilibity that they used
+        Then connect to IMAP server and check for possibility that they used
         wrong, invalid e-mail. If such e-mails are found, they will be logged.
 
         :param address: User's e-mail address.
@@ -248,7 +255,7 @@ class Verify(commands.Cog):
         db_member.status = VerifyStatus.VERIFIED.value
         db_member.save()
 
-        await guild_log.info(ctx.author, ctx.channel, "Verification successfull.")
+        await guild_log.info(ctx.author, ctx.channel, "Verification successful.")
 
         await self._add_roles(ctx.author, db_member)
 
@@ -331,7 +338,7 @@ class Verify(commands.Cog):
                 (
                     "You've been deleted from the database "
                     "and your roles have been removed. "
-                    "You have to go through verfication in order to get back."
+                    "You have to go through verification in order to get back."
                 ),
             ),
         )
@@ -1070,12 +1077,18 @@ class Verify(commands.Cog):
 
     async def _add_roles(self, member: discord.Member, db_member: VerifyMember):
         """Add roles to the member."""
-        groups: List[VerifyGroup] = self._map_address_to_groups(
-            member.guild.id, member.id, db_member.address
-        )
-        roles: List[discord.Role] = list()
-        for group in groups:
-            roles.append(member.guild.get_role(group.role_id))
+        if db_member.via_api:
+            api_settings = DBAPI.get(member.guild)
+            api_client = APIClient(api_settings)
+            role_ids = await api_client.get_role_ids(db_member)
+            roles = [member.guild.get_role(role_id) for role_id in role_ids]
+        else:
+            groups: List[VerifyGroup] = self._map_address_to_groups(
+                member.guild.id, member.id, db_member.address
+            )
+            roles: List[discord.Role] = list()
+            for group in groups:
+                roles.append(member.guild.get_role(group.role_id))
         await member.add_roles(*roles)
 
     def _replace_verification_groups(
@@ -1153,5 +1166,119 @@ class Verify(commands.Cog):
         return unread_messages
 
 
+def _check_valid_api_settings(ctx: Context):
+    settings = DBAPI.get(ctx.guild)
+    return settings.is_valid
+
+
+class APIVerify(Verify):
+    def __init__(self, bot):
+        super().__init__(bot)
+
+    @commands.check(_check_valid_api_settings)
+    @commands.guild_only()
+    @check.acl2(check.ACLevel.EVERYONE)
+    @commands.command(name="verify-api")
+    async def verify_api(self, ctx: Context, user_id: str):
+        settings = DBAPI.get(ctx.guild)
+        regex = settings.id_regex
+        if regex and not re.match(regex, user_id):
+            if settings.id_guide:
+                await ctx.reply(settings.id_guide)
+            else:
+                await ctx.reply(_(ctx, "Invalid identifier."))
+            return
+        api_client = APIClient(settings)
+        email = await api_client.get_mail(user_id)
+        return await self.verify_common(ctx, email, user_id)
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @commands.group(name="api")
+    async def api(self, ctx: Context):
+        await utils.discord.send_help(ctx)
+
+    @check.acl2(check.ACLevel.SUBMOD)
+    @commands.guild_only()
+    @api.command(name="list", aliases=["info"])
+    async def api_list(self, ctx: Context):
+        settings = DBAPI.get(ctx.guild)
+        embed = discord.Embed(title=_(ctx, "API settings"))
+        embed.add_field(name=_(ctx, "Server"), value=f"`{settings.server}`")
+        embed.add_field(
+            name=_(ctx, "Mail endpoint"), value=f"`{settings.mail_endpoint}`"
+        )
+        embed.add_field(name=_(ctx, "Mail jmespath"), value=settings.mail_jmespath)
+        embed.add_field(
+            name=_(ctx, "Validation regex"), value=settings.id_regex or _(ctx, "Unset")
+        )
+        embed.add_field(
+            name=_(ctx, "Validation guide"), value=settings.id_guide or _(ctx, "Unset")
+        )
+        for role_endpoint in settings.role_endpoints:
+            embed.add_field(
+                name=_(ctx, "Role endpoint")
+                + f" {role_endpoint.idx} `{role_endpoint.role_endpoint}`",
+                value=_(ctx, "Jmespath") + f" `{role_endpoint.role_jmespath}`",
+            )
+        for mapping in settings.role_mappings:
+            embed.add_field(
+                name=_(ctx, "Role") + f" {mapping.idx} `{mapping.api_data}`",
+                value=ctx.guild.get_role(mapping.role_id),
+            )
+        await ctx.reply(embeds=[embed])
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="set-server")
+    async def api_set_server(self, ctx: Context, url: str):
+        DBAPI.set_url(ctx.guild, url)
+        await ctx.reply(_(ctx, "URL for API set."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="set-token")
+    async def set_token(self, ctx: Context, token: str):
+        DBAPI.set_token(ctx.guild, token)
+        await ctx.reply(_(ctx, "Token for API set."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="set-mail")
+    async def set_mail(self, ctx: Context, mail_endpoint: str, mail_jmespath: str):
+        DBAPI.set_mail_endpoint(ctx.guild, mail_endpoint, mail_jmespath)
+        await ctx.reply(_(ctx, "API mail settings set."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="set-validation")
+    async def set_validation(self, ctx: Context, validation: str):
+        pattern = re.compile(validation)
+        DBAPI.set_id_regex(ctx.guild, pattern)
+        await ctx.reply(_(ctx, "Regex for ID validation set."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="set-validation-guide")
+    async def set_validation_guide(self, ctx: Context, *, guide: str):
+        DBAPI.set_validation_guide(ctx.guild, guide)
+        await ctx.reply(_(ctx, "Validation guide set."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="add-role-endpoint")
+    async def add_role_endpoint(self, ctx: Context, role_endpoint: str, jmespath: str):
+        DBAPI.add_role_endpoint(ctx.guild, role_endpoint, jmespath)
+        await ctx.reply(_(ctx, "Role endpoint added."))
+
+    @check.acl2(check.ACLevel.MOD)
+    @commands.guild_only()
+    @api.command(name="add-role-mapping")
+    async def add_role_mapping(self, ctx: Context, role: discord.Role, api_data: str):
+        DBAPI.add_role_mapping(ctx.guild, role, api_data)
+        await ctx.reply(_(ctx, "Role mapping added."))
+
+
 async def setup(bot) -> None:
-    await bot.add_cog(Verify(bot))
+    # await bot.add_cog(Verify(bot))
+    await bot.add_cog(APIVerify(bot))

@@ -304,7 +304,7 @@ msgstr Kliknutím na potvrzovací tlačítko ti budou odebrány všechny role a 
 msgid Stripping aborted.
 msgstr Akce nebyla dokončena.
 
-msgid You've been deleted from the database and your roles have been removed. You have to go through verfication in order to get back.
+msgid You've been deleted from the database and your roles have been removed. You have to go through verification in order to get back.
 msgstr Byli jste vymazáni z databáze a byly vám odebrány role. Pro návrat musíte znovu projít verifikací.
 
 msgid Group strip
@@ -411,6 +411,54 @@ msgstr do kanálu #{channel}.
 
 msgid {mention} An error has occured while sending the code. Contact the moderator team.
 msgstr {mention} Při posílání kódu nastala chyba. Kontaktuj moderátory.
+
+msgid Invalid identifier.
+msgstr Špatný identifikátor.
+
+msgid API settings
+msgstr Nastavení API.
+
+msgid Server
+msgstr Server
+
+msgid Mail endpoint
+msgstr Endpoint pro mail
+
+msgid Mail jmespath
+msgstr Jmespath pro mail
+
+msgid Validation regex
+msgstr Validační regex
+
+msgid Validation guide
+msgstr Návod k validaci
+
+msgid Role endpoint
+msgstr Endpoint pro role
+
+msgid Jmespath
+msgstr Jmespath
+
+msgid URL for API set.
+msgstr URL pro api nastavena.
+
+msgid Token for API set.
+msgstr Token pro API nastaven.
+
+msgid API mail settings set.
+msgstr Nastavení API pro e-mail změněno.
+
+msgid Regex for ID validation set.
+msgstr Regex pro validaci ID nastaven.
+
+msgid Validation guide set.
+msgstr Návod pro validaci nastaven.
+
+msgid Role endpoint added.
+msgstr Endpoint pro role přidán.
+
+msgid Role mapping added.
+msgstr Mapování pro role přidáno.
 
 msgid Could not delete empty voicechannel id {id}.
 msgstr Prázdná hlasový kanál s id {id} nemohl být smazán.
