@@ -1,0 +1,14 @@
+---
+apis:
+  - name: vut
+    token: <placeholder>
+    server: https://www.vut.cz
+    mail:
+      endpoint: /api/person/v1/{id}/hlavicka
+      jmespath: kontakt.email
+    roles:
+      - endpoint: /api/person/v1/{id}/hlavicka
+        jmespath: kontakt.pozice
+    roleMappings:
+      - apiData: FEKT - student
+        roleName: FEKT
