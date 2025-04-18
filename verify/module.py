@@ -1,20 +1,25 @@
 import asyncio
+import base64
 import contextlib
 import datetime
+import email
 import json
 import os
 import random
 import re
 import smtplib
+import ssl
 import string
 import tempfile
+import urllib
+
 import unidecode
 from typing import Dict, List, Union, Optional
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-import imap_tools
+import imaplib
 
 import discord
 from discord.ext import commands
@@ -35,7 +40,10 @@ config = pie.database.config.Config.get()
 SMTP_SERVER: str = os.getenv("SMTP_SERVER")
 IMAP_SERVER: str = os.getenv("IMAP_SERVER")
 SMTP_ADDRESS: str = os.getenv("SMTP_ADDRESS")
-SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD")
+
+CLIENT_ID: str = os.getenv("CLIENT_ID")
+CLIENT_SECRET: str = os.getenv("CLIENT_SECRET")
+CLIENT_REFRESH_TOKEN: str = os.getenv("CLIENT_REFRESH_TOKEN")
 
 
 def test_dotenv() -> None:
@@ -43,10 +51,14 @@ def test_dotenv() -> None:
         raise exceptions.DotEnvException("SMTP_SERVER is not set.")
     if type(SMTP_ADDRESS) != str:
         raise exceptions.DotEnvException("SMTP_ADDRESS is not set.")
-    if type(SMTP_PASSWORD) != str:
-        raise exceptions.DotEnvException("SMTP_PASSWORD is not set.")
+    if type(CLIENT_ID) != str:
+        raise exceptions.DotEnvException("CLIENT_ID is not set.")
     if type(IMAP_SERVER) != str:
         raise exceptions.DotEnvException("IMAP_SERVER is not set.")
+    if type(CLIENT_SECRET) != str:
+        raise exceptions.DotEnvException("CLIENT_SECRET is not set.")
+    if type(CLIENT_REFRESH_TOKEN) != str:
+        raise exceptions.DotEnvException("CLIENT_REFRESH_TOKEN is not set.")
 
 
 test_dotenv()
@@ -1036,8 +1048,10 @@ class Verify(commands.Cog):
         """Send the verification e-mail."""
         try:
             with smtplib.SMTP_SSL(SMTP_SERVER) as server:
+                _auth_string = self._refresh_token(CLIENT_ID, CLIENT_SECRET, CLIENT_REFRESH_TOKEN)["access_token"]
+                _auth_string = self._generate_oauth_2_string(SMTP_ADDRESS, _auth_string, base64_encode=False)
                 server.ehlo()
-                server.login(SMTP_ADDRESS, SMTP_PASSWORD)
+                server.docmd('AUTH', 'XOAUTH2 ' + base64.b64encode(_auth_string.encode('utf-8')).decode('utf-8'))
                 server.send_message(message)
                 return True
         except smtplib.SMTPException as exc:
@@ -1107,50 +1121,98 @@ class Verify(commands.Cog):
         """
         unread_messages = []
 
-        with imap_tools.MailBox(IMAP_SERVER).login(
-            SMTP_ADDRESS, SMTP_PASSWORD
-        ) as mailbox:
-            messages = [
-                m
-                for m in mailbox.fetch(
-                    imap_tools.AND(seen=False),
-                    mark_seen=False,
-                )
-            ]
-            mark_as_read: List = []
+        with imaplib.IMAP4_SSL(IMAP_SERVER, ssl_context=ssl.create_default_context()) as mailbox:
+            _auth_string = self._refresh_token(CLIENT_ID, CLIENT_SECRET, CLIENT_REFRESH_TOKEN)["access_token"]
+            _auth_string = self._generate_oauth_2_string(SMTP_ADDRESS, _auth_string, base64_encode=False)
+            mailbox.authenticate('XOAUTH2', lambda x: _auth_string)
+            mailbox.select("INBOX", readonly=False)
+            status, data = mailbox.search(None, 'UNSEEN')
+            message_ids = data[0].split()
+            print("haloooooooo")
+            for msg_id in message_ids:
+                status, msg_data = mailbox.fetch(msg_id, '(RFC822)')
+                if status != 'OK':
+                    continue
 
-            for m in messages:
-                has_delivery_status: bool = False
+                msg = email.message_from_bytes(msg_data[0][1])
+                has_delivery_status = False
 
-                for part in m.obj.walk():
-                    if part.get_content_type() == "message/delivery-status":
+                # Procházení částí zprávy
+                if msg.is_multipart():
+                    for part in msg.walk():
+                        if part.get_content_type() == 'message/delivery-status':
+                            has_delivery_status = True
+                            break
+                else:
+                    # Pokud zpráva není multipart, kontrolujeme přímo
+                    if msg.get_content_type() == 'message/delivery-status':
                         has_delivery_status = True
-                        break
 
                 if not has_delivery_status:
                     continue
 
-                rfc_message = m.obj.as_string()
+                # Převedení celé zprávy na string kvůli hledání hlaviček
+                rfc_message = msg.as_string()
                 info: dict = {}
 
-                for line in rfc_message.split("\n"):
+                for line in rfc_message.split('\n'):
                     if line.startswith(MAIL_HEADER_PREFIX):
-                        key, value = line.split(":", 1)
-                        info[key.replace(MAIL_HEADER_PREFIX, "")] = value.strip()
+                        if ':' in line:
+                            key, value = line.split(':', 1)
+                            info[key.replace(MAIL_HEADER_PREFIX, '')] = value.strip()
+
                 if not info:
                     continue
 
-                mark_as_read.append(m)
-                info["subject"] = m.subject
+                # Přidání předmětu a uložení do výsledného listu
+                info['subject'] = msg['Subject']
                 unread_messages.append(info)
 
-            mailbox.flag(
-                [m.uid for m in mark_as_read],
-                (imap_tools.MailMessageFlags.SEEN,),
-                True,
-            )
+            # Odhlášení
+            mailbox.logout()
 
         return unread_messages
+
+    def _generate_oauth_2_string(self, username, access_token, base64_encode=True):
+        """Generates an IMAP OAuth2 authentication string.
+
+          See https://developers.google.com/google-apps/gmail/oauth2_overview
+
+          Args:
+            username: the username (email address) of the account to authenticate
+            access_token: An OAuth2 access token.
+            base64_encode: Whether to base64-encode the output.
+
+          Returns:
+            The SASL argument for the OAuth2 mechanism.
+          """
+        auth_string = 'user=%s\1auth=Bearer %s\1\1' % (username, access_token)
+        if base64_encode:
+            auth_string = base64.b64encode(auth_string.encode('utf-8'))
+        return auth_string
+
+    def _refresh_token(self, client_id, client_secret, refresh_token):
+        """Obtains a new token given a refresh token.
+
+          See https://developers.google.com/accounts/docs/OAuth2InstalledApp#refresh
+
+          Args:
+            client_id: Client ID obtained by registering your app.
+            client_secret: Client secret obtained by registering your app.
+            refresh_token: A previously-obtained refresh token.
+          Returns:
+            The decoded response from the Google Accounts server, as a dict. Expected
+            fields include 'access_token', 'expires_in', and 'refresh_token'.
+          """
+        params = {}
+        params['client_id'] = client_id
+        params['client_secret'] = client_secret
+        params['refresh_token'] = refresh_token
+        params['grant_type'] = 'refresh_token'
+        request_url = "https://accounts.google.com/o/oauth2/token"
+
+        response = urllib.request.urlopen(request_url, urllib.parse.urlencode(params).encode('utf-8')).read()
+        return json.loads(response)
 
 
 async def setup(bot) -> None:
