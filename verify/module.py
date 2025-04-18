@@ -1176,6 +1176,8 @@ class Verify(commands.Cog):
     def _generate_oauth_2_string(self, username, access_token, base64_encode=True):
         """Generates an IMAP OAuth2 authentication string.
 
+          CODE FROM: https://github.com/google/gmail-oauth2-tools/tree/master
+          
           See https://developers.google.com/google-apps/gmail/oauth2_overview
 
           Args:
@@ -1193,6 +1195,8 @@ class Verify(commands.Cog):
 
     def _refresh_token(self, client_id, client_secret, refresh_token):
         """Obtains a new token given a refresh token.
+
+          CODE FROM: https://github.com/google/gmail-oauth2-tools/tree/master
 
           See https://developers.google.com/accounts/docs/OAuth2InstalledApp#refresh
 
